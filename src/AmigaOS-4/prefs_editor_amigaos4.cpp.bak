@@ -1,0 +1,1222 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void init_win_disks(int win_nr);
+
+/*
+ *  prefs_editor_AmigaOS4.cpp - Preferences editor, AmigaOS4 implementation
+ *
+ * Basilisk II Reaction GUI (C) 2007 Kjetil Hvalstrand
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+
+#include <dos/filehandler.h>
+#include <libraries/asl.h>
+#include <libraries/gadtools.h>
+#include <libraries/iffparse.h>
+
+#include <proto/dos.h>
+#include <proto/exec.h>
+
+#define ALL_REACTION_CLASSES
+#include <reaction/reaction.h>
+#include <reaction/reaction_macros.h>
+#include <proto/intuition.h>
+#include <proto/icon.h>
+
+struct List list_files;
+
+#define CATCOMP_NUMBERS
+#define CATCOMP_STRINGS
+#define CATCOMP_ARRAY
+
+#include "locale/locale.c"
+#include "../include/prefs.h"
+
+// Some dummy stuff!
+char *dummy_txt = "";
+
+#include "cdrom.h"
+
+struct MsgPort *appport;
+
+
+enum
+{
+	win_null,
+	win_prefs,
+	win_disks,
+	win_end
+};
+
+struct Window *	win[win_end];
+Object *			layout[win_end];
+Object *			refresh[win_end];
+Object *			obj[ID_END];
+
+char *_L(unsigned int num) 
+{
+	unsigned int n;
+	char ret = 0;
+
+	for (n=0;n< ( sizeof(CatCompArray) / sizeof( struct CatCompArrayType ) );n++)
+	{
+		if (CatCompArray[n].cca_ID == num) { ret = n; break; }
+	}
+
+	return (char *) CatCompArray[ret].cca_Str ;
+}
+
+// define SetListBrowserNodeAttrsA(node, tags) IListBrowser->SetListBrowserNodeAttrsA(node, tags) 
+
+#define MakeSlider(n,a,b) obj[n] = (Object*) SliderObject, \
+	GA_ID, n,				\
+	GA_RelVerify, TRUE,		\
+	SLIDER_Min, a,			\
+	SLIDER_Max, b,		\
+	SLIDER_Orientation,SLIDER_HORIZONTAL, \
+	SliderEnd
+
+#define MakeRect(n)  obj[n] = (Object*) ButtonObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	ButtonEnd
+
+#define MakeButton(n)  obj[n] = (Object*) ButtonObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	ButtonEnd
+
+#define MakeCheck(n,v)	obj[n] = (Object*) CheckBoxObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_Selected, v,		\
+	CheckBoxEnd
+
+#define MakeString(n) obj[n] =  (Object*) StringObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	StringEnd
+
+#define MakeHexString(n) obj[n] =  (Object*) StringObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	STRINGA_HookType, SHK_HEXIDECIMAL, \
+	StringEnd
+
+
+
+// 	STRINGA_TextVal, _L(n)	
+
+#define MakeLabel(n)  LabelObject, \
+	GA_ID, n,				\
+	LABEL_Text, _L(n),		\
+	LabelEnd
+
+#define MakePopFile(n,l,v)  obj[n] = (Object*) StringObject, \
+	GA_ID, n, 				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	STRINGA_TextVal, v,	\
+	StringEnd
+
+#define MakeInteger(n,v)  obj[n] = (Object*) IntegerObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	INTEGER_Number, v,	\
+	IntegerEnd
+
+#define MakeCycle(n,v)  obj[n] = (Object*) ChooserObject, \
+	GA_ID, n,				\
+	GA_Text, _L(n),		\
+	GA_RelVerify, TRUE,		\
+	CHOOSER_LabelArray, v, \
+	ChooserEnd 
+
+#define MakeList(n,ci,list) StartMember, obj[n] =(Object*) ListBrowserObject, \
+	GA_ID, n,							\
+	GA_RelVerify, TRUE,					\
+	LISTBROWSER_Labels, list,			\
+	LISTBROWSER_ColumnInfo, ci,			\
+	LISTBROWSER_ColumnTitles, TRUE,		\
+	LISTBROWSER_ShowSelected, TRUE,	\
+	EndMember,  
+
+//	ListBrowserEnd
+
+//	LISTBROWSER_MultiSelect, FALSE,	
+//	LISTBROWSER_Separators, TRUE,	
+//	LISTBROWSER_ShowSelected, TRUE,
+//	LISTBROWSER_Editable, FALSE,	
+
+#define GFrame(txt) \
+	LAYOUT_SpaceOuter, TRUE,		\
+	LAYOUT_DeferLayout, TRUE,		\
+	LAYOUT_BevelStyle, GroupFrame,	\
+	LAYOUT_Label, txt
+
+#define RSetAttrO( win_nr, index , opt, value ) \
+	if ( win[win_nr])	 SetGadgetAttrs( (struct Gadget *) obj[index], \
+	win[win_nr],  NULL,  opt, value, TAG_DONE); 
+
+#define RSetAttr( win_nr, obj , opt, value ) \
+	if ( win[win_nr])	 SetGadgetAttrs( (struct Gadget *) obj, \
+	win[win_nr],  NULL,  opt, value, TAG_DONE); 
+
+
+ULONG getv( Object *obj, ULONG arg ) 
+{
+	ULONG ret;
+
+	GetAttr( arg, obj, &ret );
+	return ret; 
+}
+
+
+/*
+void stccpy(char *dest,char *source,int length) 
+{
+	int n;
+	for ( n = 0; n < length; n++ ) 	dest[n] = source[n];
+	dest[length] = 0;	// NULL TERM.
+}
+*/
+
+/*
+ *  ReturnIDs
+ */
+
+#define MAX_STRING_LENGTH 256
+
+/*
+ *  External variables
+ */
+
+extern Object *app;
+
+/*
+ *
+ */
+
+/*
+STATIC CONST_STRPTR PrefPages[] =
+{
+	(CONST_STRPTR) _L(ID_PAGE_VOLUMES),
+	(CONST_STRPTR) _L(ID_PAGE_SCSI),
+	(CONST_STRPTR) _L(ID_PAGE_COMMUNICATION),
+	(CONST_STRPTR) _L(ID_PAGE_EMULATION),
+	NULL
+};
+*/
+
+
+STATIC CONST CONST_STRPTR ModeNames[] = { "Window","Overlay","Screen",NULL };
+
+STATIC CONST CONST_STRPTR CPUNames[] = {"68000","68010","68020","68030","68040", NULL};
+
+STATIC CONST CONST_STRPTR RamNames[] =
+{
+	"8Mb",
+	"16Mb",
+	"32Mb",
+	"64Mb",
+	"128Mb",
+	"256Mb",
+	"512Mb",
+	NULL
+};
+
+STATIC CONST CONST_STRPTR ModelNames[] =
+{
+	"Mac IIci (MacOS 7.x)",
+	"Quadra 900 (MacOS 8.x)",
+	NULL
+};
+
+STATIC CONST_STRPTR VolumeTypes[] =
+{
+	(CONST_STRPTR) _L(ID_PREFS_VOLUMETYPE_FILE_GAD),
+	(CONST_STRPTR) _L(ID_PREFS_VOLUMETYPE_DEVICE_GAD),
+	NULL
+};
+
+static void read_volumes_settings( void )
+{
+	char *str;
+
+	str = (char *) getv( obj[ ID_PREFS_CD_DEVICE_GAD], STRINGA_TextVal);
+
+	if (*str)
+	{
+		char buf[MAX_STRING_LENGTH + 128];
+		sprintf(buf, "/dev/%s/%ld/%d/%d/%d/%d", str, getv(obj[ ID_PREFS_CD_UNIT_GAD ], INTEGER_Number), 0, 0, 0, 2048);
+		PrefsReplaceString("cdrom", buf);
+	}
+	else
+	{
+		PrefsRemoveItem("cdrom");
+	}
+
+	PrefsReplaceInt32("bootdriver", getv(obj[ ID_PREFS_CD_BOOT_GAD ], GA_Selected ) ? CDROMRefNum : 0 ); 
+
+	PrefsReplaceBool("nocdrom", getv(obj[ ID_PREFS_CD_DISABLE_DRIVER_GAD ], GA_Selected));
+
+	str = (char *) getv( obj[ID_PREFS_AMIGAOS4_ROOT_GAD], STRINGA_TextVal);
+
+	if (*str)
+	{
+		PrefsReplaceString("extfs", str);
+	}
+}
+
+static void read_scsi_settings( void )
+{
+	for (int i=0; i<7; i++)
+	{
+		CONST_STRPTR scsi_dev;
+		char prefs_name[16];
+
+		sprintf(prefs_name, "scsi%d", i);
+		scsi_dev = (CONST_STRPTR) getv(obj[i + ID_PREFS_ID_0_DEVICE_GAD], STRINGA_TextVal);
+
+		if (*scsi_dev)
+		{
+			char str[MAX_STRING_LENGTH + 32];
+			sprintf(str, "%s/%ld", scsi_dev, getv(obj[i + ID_PREFS_ID_0_UNIT_GAD], INTEGER_Number));
+			PrefsReplaceString(prefs_name, str);
+		}
+		else
+		{
+			PrefsRemoveItem(prefs_name);
+		}
+	}
+}
+
+static void make_serial_prefs(char *prefs, Object *str_name, Object *str_unit, Object *ch_ispar)
+{
+	CONST_STRPTR dev;
+
+	dev = (CONST_STRPTR)getv(str_name, STRINGA_TextVal);
+
+	if (*dev)
+	{
+		char str[MAX_STRING_LENGTH + 32];
+		sprintf(str, "%s%s/%ld", getv(ch_ispar, CHOOSER_Selected) ? "*" : "", dev, getv(str_unit, INTEGER_Number));
+		PrefsReplaceString(prefs, str);
+	}
+	else
+	{
+		PrefsRemoveItem(prefs);
+	}
+}
+
+static void read_serial_settings( void )
+{
+	CONST_STRPTR ether_dev;
+
+	make_serial_prefs("seriala", 
+		obj[ ID_PREFS_MODEM_DEVICE_GAD ], 
+		obj[ ID_PREFS_MODEM_UNIT_GAD ],
+		obj[ ID_PREFS_MODEM_PARALLEL_GAD ] );
+
+	make_serial_prefs("serialb", 
+		obj[ ID_PREFS_PRINTER_DEVICE_GAD ], 
+		obj[ ID_PREFS_PRINTER_UNIT_GAD ],
+		obj[ ID_PREFS_PRINTER_PARALLEL_GAD ] );
+
+	ether_dev = (CONST_STRPTR)getv( obj[ID_PREFS_ETHERNET_DEVICE_GAD], STRINGA_TextVal );
+
+	if (*ether_dev)
+	{
+		char str[MAX_STRING_LENGTH + 32];
+
+		sprintf(str, "%s/%ld", ether_dev, getv( obj[ID_PREFS_ETHERNET_UNIT_GAD], INTEGER_Number));
+		PrefsReplaceString("ether", str);
+	}
+	else
+	{
+		PrefsRemoveItem("ether");
+	}
+}
+
+static void read_emulation_settings( void )
+{
+	char *str;
+	char buf[128];
+	char *opt[]={"win","pip","scr"};
+	int mode;
+	int value;
+
+	mode = getv( obj[ID_PREFS_GFX_MODE_GAD], CHOOSER_Selected);
+
+	switch (mode)
+	{
+		case 0:	// win
+		case 1:	// pip
+				sprintf(buf, "%s/%ld/%ld", 
+					opt[mode], 
+					getv( obj[ID_PREFS_GFX_WIDTH_GAD], INTEGER_Number), 
+					getv( obj[ID_PREFS_GFX_HEIGHT_GAD], INTEGER_Number));
+				break;
+		case 2:	// src
+				sprintf(buf, "scr/%s", (char *) getv( obj[ID_PREFS_GFX_MODE_ID_GAD], STRINGA_TextVal));
+				break;
+	}
+
+	PrefsReplaceString("screen", buf);
+/*	PrefsReplaceBool("fullscreen",		getv( obj[ID_PREFS_GFX_FULLSCREEN_GAD], GA_Selected)); */
+	PrefsReplaceBool("8bitgfx",		getv( obj[ID_PREFS_GFX_8BIT_GAD], GA_Selected));
+	PrefsReplaceBool("nosound",		getv( obj[ID_PREFS_DISABLE_SOUND], GA_Selected));
+
+	// 0 = 1mb,	1 = 2 mb,	2 = 4 mb,	3 = 8 mb,	4 = 16 mb
+	value =getv( obj[ID_PREFS_SYSTEM_RAM_GAD], CHOOSER_Selected)  + 3 ;
+
+	PrefsReplaceInt32("ramsize",		(1 << value) * 1024 *1024 );
+	PrefsReplaceInt32("cpu",			getv( obj[ID_PREFS_SYSTEM_CPU_GAD], CHOOSER_Selected ) );
+	PrefsReplaceInt32("modelid",		getv( obj[ID_PREFS_SYSTEM_MODEL_GAD], CHOOSER_Selected) == 0 ? 5 : 14);
+	PrefsReplaceInt32("frameskip",	getv( obj[ID_PREFS_GFX_FRAMESKIP_GAD], SLIDER_Level));
+
+	str = (char *) getv( obj[ID_PREFS_SYSTEM_ROM_GAD] , STRINGA_TextVal );
+
+	if (*str)
+	{
+		PrefsReplaceString("rom", str);
+	}
+	else
+	{
+		PrefsRemoveItem("rom");
+	}
+}
+
+void add_volume(struct List *list,char *str, LONG num)
+{
+	struct Node *		node;
+
+	if ((node = AllocListBrowserNode(2,
+		LBNA_Column, 0,
+		LBNCA_CopyText, TRUE,
+		LBNCA_Text, str,
+		LBNCA_Editable, FALSE,
+
+		LBNA_Column, 1,
+		LBNCA_CopyInteger, TRUE,
+		LBNCA_Integer, &num,
+		LBNCA_Editable, FALSE,
+
+		TAG_DONE)))
+	{
+		AddTail(list, node);
+	}
+}
+
+void edit_volume(struct Node *node,char *str)
+{
+	SetListBrowserNodeAttrs (node, LBNA_Column, 0,
+		LBNCA_CopyText, TRUE,
+		LBNCA_Text, str,
+		LBNCA_Editable, FALSE,
+		TAG_DONE);
+}
+
+static void set_volumes_settings()
+{
+	char *str;
+
+	for (int i=0; (str = (char *) PrefsFindString("disk", i)) != NULL; i++)
+	{
+		add_volume(&list_files,str,0);
+	}
+
+	str = (char *) PrefsFindString("cdrom");
+
+	if (str)
+	{
+		ULONG	cdrom_unit;
+		ULONG	cdrom_dummy;
+		UBYTE	cdrom_name[MAX_STRING_LENGTH];
+
+		cdrom_unit		= 0;
+		cdrom_name[0]	= 0;
+
+		sscanf(str, "/dev/%[^/]/%ld/%ld/%ld/%ld/%ld", cdrom_name, &cdrom_unit, &cdrom_dummy, &cdrom_dummy, &cdrom_dummy, &cdrom_dummy);
+
+		RSetAttrO( win_prefs, ID_PREFS_CD_DEVICE_GAD, STRINGA_TextVal, &cdrom_name);
+		RSetAttrO( win_prefs, ID_PREFS_CD_UNIT_GAD, INTEGER_Number, cdrom_unit);
+	}
+
+	RSetAttrO( win_prefs, ID_PREFS_CD_BOOT_GAD, GA_Selected, PrefsFindInt32("bootdriver") == CDROMRefNum ? TRUE : FALSE );
+	RSetAttrO( win_prefs, ID_PREFS_CD_DISABLE_DRIVER_GAD, GA_Selected, PrefsFindBool("nocdrom"));
+
+	if ((str = (char *) PrefsFindString("extfs")))
+	{
+		RSetAttrO( win_prefs, ID_PREFS_AMIGAOS4_ROOT_GAD, STRINGA_TextVal, str);
+	}
+
+}
+
+static void set_scsi_settings( void )
+{
+	for (int i=0; i<7; i++)
+	{
+		char prefs_name[16];
+		sprintf(prefs_name, "scsi%d", i);
+		const char *str = PrefsFindString(prefs_name);
+
+		if (str)
+		{
+			UBYTE scsi_dev[MAX_STRING_LENGTH];
+			ULONG scsi_unit;
+
+			scsi_dev[0] = 0;
+			scsi_unit = 0;
+
+			sscanf(str, "%[^/]/%ld", scsi_dev, &scsi_unit);
+
+			RSetAttrO( win_prefs,  i+ID_PREFS_ID_0_DEVICE_GAD, STRINGA_TextVal, scsi_dev);
+			RSetAttrO( win_prefs,  i+ID_PREFS_ID_0_UNIT_GAD, INTEGER_Number, scsi_unit);
+		}
+	}
+}
+
+static void parse_ser_prefs( char *prefs, Object *str_devname, Object *str_unit, Object *ch_ispar)
+{
+	LONG	unit, ispar;
+	UBYTE	dev[MAX_STRING_LENGTH];
+
+	dev[0] = 0;
+	unit = 0;
+	ispar = false;
+
+	char *str = (char *) PrefsFindString(prefs);
+	if (str)
+	{
+		if (str[0] == '*')
+		{
+			ispar = true;
+			str++;
+		}
+		sscanf(str, "%[^/]/%ld", dev, &unit);
+
+		RSetAttr( win_prefs, str_devname, STRINGA_TextVal, &dev);
+		RSetAttr( win_prefs, str_unit, INTEGER_Number, unit);
+		RSetAttr( win_prefs, ch_ispar, CHOOSER_Selected, ispar);
+	}
+}
+
+static void set_serial_settings( void )
+{
+	CONST_STRPTR str;
+
+	parse_ser_prefs("seriala", 
+		obj[ ID_PREFS_MODEM_DEVICE_GAD ], 
+		obj[ ID_PREFS_MODEM_UNIT_GAD ],
+		obj[ ID_PREFS_MODEM_PARALLEL_GAD ] );
+
+	parse_ser_prefs("serialb", 
+		obj[ ID_PREFS_PRINTER_DEVICE_GAD ], 
+		obj[ ID_PREFS_PRINTER_UNIT_GAD ],
+		obj[ ID_PREFS_PRINTER_PARALLEL_GAD ] );
+
+	str = PrefsFindString("ether");
+
+	if (str)
+	{
+		UBYTE	ether_dev[MAX_STRING_LENGTH];
+		ULONG	ether_unit;
+
+		const char *FirstSlash = strchr(str, '/');
+		const char *LastSlash = strrchr(str, '/');
+
+		if (FirstSlash && FirstSlash && FirstSlash != LastSlash)
+		{
+			// Device name contains path, i.e. "Networks/xyzzy.device"
+			const char *lp = str;
+			UBYTE *dp = ether_dev;
+
+			while (lp != LastSlash)
+				*dp++ = *lp++;
+			*dp = '\0';
+
+			sscanf(LastSlash, "/%ld", &ether_unit);
+		}
+		else
+		{
+			sscanf(str, "%[^/]/%ld", ether_dev, &ether_unit);
+		}
+
+		RSetAttrO( win_prefs, ID_PREFS_ETHERNET_DEVICE_GAD, STRINGA_TextVal, &ether_dev );
+		RSetAttrO( win_prefs, ID_PREFS_ETHERNET_UNIT_GAD, INTEGER_Number, ether_unit );
+	}
+}
+
+static void set_emulation_settings( void )
+{
+	CONST_STRPTR str;
+	ULONG ramsize_mb, value, width = 800, height = 600;
+	LONG		id;
+	char			opt[4];
+	char			*mode = NULL; 
+
+	// Window width and height
+
+	mode = (char *) AllocVec(50,MEMF_SHARED);
+	if (!mode) return;
+
+	sprintf(mode,"50051102");
+	sprintf(opt,"win");
+
+	value = 0; // window
+
+	str = PrefsFindString("screen");
+	if (str)
+	{
+		printf("Screen: '%s'\n",str);
+
+		sscanf(str, "%c%c%c",&opt[0],&opt[1],&opt[2]);
+
+		if (strcasecmp( (char *) &opt,"win")==0)
+		{ sscanf(str,"win/%ld/%ld", (long int*) &width,(long int*) &height); value = 0; }
+
+		if (strcasecmp( (char *) &opt,"pip")==0)
+		{ sscanf(str,"pip/%ld/%ld", (long int*) &width,(long int*) &height); value = 1; }
+
+		if (strcasecmp( (char *) &opt,"scr")==0)
+		{
+
+			sscanf(str,"scr/%s", (char *) mode); 
+			value = 2; 
+		}
+	}
+
+	printf("mode %lu\n",value);
+
+	printf("Width & height: %u %u\n", (unsigned int) width, (unsigned int) height);
+
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_GAD,
+		CHOOSER_Selected, value );
+
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_WIDTH_GAD,
+		INTEGER_Number, width);
+
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_HEIGHT_GAD,
+		INTEGER_Number, height);
+
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_ID_GAD,
+		STRINGA_TextVal, mode);
+
+	if (mode)	{ FreeVec(mode); mode=NULL; }
+
+	RSetAttrO( win_prefs, ID_PREFS_GFX_8BIT_GAD, 
+		GA_Selected, PrefsFindBool("8bitgfx"));
+
+	RSetAttrO( win_prefs, ID_PREFS_GFX_FRAMESKIP_GAD,
+		SLIDER_Level, PrefsFindInt32("frameskip"));
+
+	// Sound
+
+	RSetAttrO( win_prefs,  ID_PREFS_DISABLE_SOUND,
+		GA_Selected, PrefsFindBool("nosound"));
+
+	// RAM
+
+	ramsize_mb	= PrefsFindInt32("ramsize") / (1024 *1024);
+
+	for (value=0;(ramsize_mb>>value)>1;value++);
+	// 0 = 1mb,	1 = 2mb,		2 = 4mb,		3 = 8mb,		4 = 16mb,
+
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_RAM_GAD,
+		CHOOSER_Selected, value - 3);
+
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_CPU_GAD,
+		CHOOSER_Selected, PrefsFindInt32("cpu") );
+
+	// Model
+
+	id = PrefsFindInt32("modelid");
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_MODEL_GAD, 
+		CHOOSER_Selected, id == 5 ? 0 : 1);	// id is 5 or 14
+
+	// ROM
+
+	str = PrefsFindString("rom");
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_ROM_GAD,
+		STRINGA_TextVal, str);
+}
+
+void close_window(int layout_nr)
+{
+	if (layout[ layout_nr ])
+	{
+		DisposeObject( (void *) layout[ layout_nr ] );
+		layout[ layout_nr ]	= 0;
+		win[ layout_nr ]	= 0;
+	}
+}
+
+/*
+static void check_hardfile(void)
+{
+	STRPTR filename;
+
+	filename = (STRPTR) getv(str_vol_hardfile, STRINGA_TextVal);
+
+	if (filename)
+	{
+		BPTR lock;
+
+		lock	= Lock(filename, ACCESS_READ);
+
+		RSetAttrO( win_prefs, grp_show_hf_size, CLICKTAB_Current, lock ? 0 : 1);
+		RSetAttrO( win_prefs, bt_create, GA_Disabled, lock ? TRUE : FALSE);
+		RSetAttrO( win_prefs, str_hf_size, INTEGER_Number, 1024);
+
+		if (lock)
+		{
+			struct FileInfoBlock fib;
+
+			Examine(lock, &fib);
+			UnLock(lock);
+			DoMethod(tx_hf_size, MUIM_SetAsString, STRINGA_TextVal, "%ld", fib.fib_Size / 1024 / 1024);
+		}
+	}
+}
+*/
+
+/*
+static void set_hardfile(void)
+{
+	struct FileRequester *req = (struct FileRequester *)REG_A1;
+	STRPTR dir, file, buf;
+	ULONG	size;
+
+	dir	= req->fr_Drawer;
+	file	= req->fr_File;
+	size	= strlen(dir) + strlen(file) + 10;
+	buf	= (STRPTR)AllocTaskPooled(size);
+
+	if (buf)
+	{
+		strcpy(buf, dir);
+		AddPart(buf, file, size);
+		RSetAttrO( win_prefs, str_vol_hardfile, STRINGA_TextVal, buf);
+		FreeTaskPooled(buf, size);
+		check_hardfile();
+	}
+}
+*/
+
+/*
+static void create_hardfile(void)
+{
+	STRPTR filename;
+
+	filename = (STRPTR)getv(str_vol_hardfile, STRINGA_TextVal );
+
+	if (filename)
+	{
+		BPTR fh;
+
+		fh	= Open(filename, MODE_OLDFILE);
+
+		if (!fh)
+		{
+			ULONG size;
+
+			fh = Open(filename, MODE_NEWFILE);
+
+			if (!fh)
+			{
+				return;
+			}
+
+			size = getv(str_hf_size, INTEGER_Number);
+
+			if (size == 0)
+			{
+				size	= 128;
+			}
+			else if (size > 2047)
+			{
+				size	= 2047;
+			}
+
+			SetFileSize(fh, size * 1024 * 1024, OFFSET_BEGINNING);
+			DoMethod(app, MUIM_Application_ReturnID, PREFS_VOLUMEWIN_DONE);
+		}
+
+		Close(fh);
+	}
+}
+*/
+
+#if 0
+static VOID drive_display(void)
+{
+	CONST_STRPTR *array = (CONST_STRPTR *)REG_A2;
+
+	array[0] = (STRPTR)REG_A1;
+
+	if ((IPTR)array[-1] % 2)
+		array[ -9 ] = (STRPTR)10;
+}
+#endif
+
+static void update_volume(ULONG add_new_volume)
+{
+	ULONG	type, unit, read_only;
+	STRPTR	device, partition, diskimage;
+	char str[MAX_STRING_LENGTH + 128];
+
+	type		= getv( obj[ID_PREFS_TYPE_GAD], CLICKTAB_Current);
+	read_only	= 0;
+
+
+	switch( type )
+	{
+		case 0:	// partition
+
+				device  = (STRPTR) getv( obj[ID_PREFS_DEVICE_GAD], STRINGA_TextVal );
+				unit = getv( obj[ID_PREFS_UNIT_GAD], INTEGER_Number );
+				partition = (STRPTR) getv( obj[ID_PREFS_PARTITION_NAME_GAD], STRINGA_TextVal );
+
+				sprintf(str, "%s/dev/%s/%ld/%s", read_only ? "*" : "", device, unit, partition );
+				break;
+
+		case 1:	// diskimage
+
+				diskimage = (STRPTR) getv( obj[ID_PREFS_FILE_GAD], STRINGA_TextVal );
+
+				sprintf(str, "%s%s", read_only ? "*" : "", (STRPTR) diskimage );
+				break;
+	}
+
+
+	if (add_new_volume)
+	{
+		// Add new item
+		int i;
+		PrefsAddString("disk", str);
+		for (i=0; PrefsFindString("disk", i); i++);
+
+		add_volume(&list_files,(char *) PrefsFindString("disk", i - 1),0);
+	}
+	else
+	{
+		// Replace existing item
+		struct Node *node = (struct Node *) getv(obj[ID_MAC_VOLUMES], LISTBROWSER_SelectedNode);
+		ULONG pos =getv(obj[ID_MAC_VOLUMES], LISTBROWSER_Selected);
+
+		PrefsReplaceString("disk", str, pos);
+
+
+		printf("Node 0x%x Node nr %lu\n",node, pos);
+
+		if (node) edit_volume(node,str);
+
+//		RSetAttrO( win_prefs, obj[ID_MAC_VOLUMES], LISTBROWSER_Selected, pos);
+	}
+}
+
+
+//--ADD-EDIT
+
+void add_edit_volume( int adding )
+{
+	UBYTE	dev_name[MAX_STRING_LENGTH], file_name[MAX_STRING_LENGTH];
+	UBYTE	partition_name[MAX_STRING_LENGTH];
+	LONG	read_only, is_device, dev_unit;
+	ULONG	n;
+
+	dev_name[0]	= 0;
+	file_name[0]	= 0;
+	partition_name[0] = 0;
+	read_only		= FALSE;
+	is_device		= FALSE;
+	dev_unit		= -1;
+
+
+	if (!adding)
+	{
+		CONST_STRPTR str = PrefsFindString("disk", getv(obj[ID_MAC_VOLUMES], LISTBROWSER_Selected));
+
+		if (str == NULL) return;
+
+		if (str[0] == '*')
+		{
+			read_only = TRUE;
+			str++;
+		}
+
+		if (strstr(str, "/dev/") == str)
+		{
+			is_device = TRUE;
+			sscanf(str, "/dev/%[^/]/%ld/%[^/]", dev_name, &dev_unit, partition_name);
+		}
+		else
+		{
+			for (n=0;((n<sizeof(file_name))&&(n<strlen(str)));n++) file_name[n] = str[n];
+
+//			file_name[ ((sizeof(file_name)<strlen(str)) ? sizeof(file_name) : strlen(str) -1] = 0;
+
+		}
+	}
+
+
+		init_win_disks(win_disks);
+
+
+		if ( ( win[win_disks] = RA_OpenWindow( layout[win_disks] ) ) )
+		{
+			RSetAttrO( win_prefs, ID_PREFS_ADD_GAD , GA_Disabled, TRUE);
+			RSetAttrO( win_prefs, ID_PREFS_EDIT_GAD , GA_Disabled, TRUE);
+			RSetAttrO( win_prefs, ID_PREFS_REMOVE_GAD , GA_Disabled, TRUE);
+
+			printf("Window opened\n");
+		}
+		else
+		{
+			printf("Window failed\n");
+		}
+
+	return;
+}
+
+
+static void remove_volume(Object *obj[ID_MAC_VOLUMES], Object *bt_editdisk, Object *bt_removedisk)
+{
+
+}
+
+/*
+static void remove_volume(Object *obj[ID_MAC_VOLUMES], Object *bt_editdisk, Object *bt_removedisk)
+{
+	CONST_STRPTR entry;
+
+	DoMethod(obj[ID_MAC_VOLUMES], MUIM_List_GetEntry, MUIV_List_GetEntry_Active, &entry);
+
+	if (entry)
+	{
+		PrefsRemoveItem("disk", getv(obj[ID_MAC_VOLUMES], LISTBROWSER_Selected));
+		DoMethod(obj[ID_MAC_VOLUMES], MUIM_List_Remove, MUIV_List_Remove_Active);
+
+		if (getv(obj[ID_MAC_VOLUMES], LISTBROWSER_Selected) == (ULONG)MUIV_List_Active_Off)
+		{
+			RSetAttrO( win_prefs, bt_editdisk, GA_Disabled, TRUE);
+			RSetAttrO( win_prefs, bt_removedisk, GA_Disabled, TRUE);
+		}
+	}
+}
+*/
+
+
+/*
+ *  Show preferences editor
+ *  Returns true when user clicked on "Start", false otherwise
+ */
+
+int get_r_event( int (*fn_event) (int id,int code) )
+{
+	int n,result,code;
+	int done = FALSE;
+
+	for (n=1;n<win_end;n++)
+	{
+		if ( layout[n] != 0 )
+		{
+			while ((result = RA_HandleInput( layout[n] ,&code)) != WMHI_LASTMSG)
+			{
+				Delay(1);
+
+//				printf("Reaction event: result %x -- %x\n", result, code);
+
+				switch(result & WMHI_CLASSMASK)
+				{
+					case WMHI_GADGETUP:
+						done = fn_event(result & WMHI_GADGETMASK,code / 0x10000);
+						break;
+
+					case WMHI_ICONIFY:
+						if ( RA_Iconify( layout[ win_prefs ] ) )
+						win[ win_prefs ] = NULL;
+						break;
+								 
+					case WMHI_UNICONIFY:
+						win[ win_prefs ] = RA_OpenWindow( layout[ win_prefs] );
+						break;
+
+					case WMHI_CLOSEWINDOW:
+						done = TRUE;
+
+						printf("Closewindow %x\n",result & ~ WMHI_CLASSMASK );
+						break;
+				}
+			}
+		}
+	}
+	return done;
+}
+
+
+int event(int id, int code)
+{
+	int retval = 0;
+
+	printf("Event %d code %d\n",id,code);
+
+	switch (id)
+	{
+		case ID_PREFS_START_GAD:
+			retval = 1;
+			break;
+
+		case ID_PREFS_QUIT_GAD:
+			retval = 2;
+			break;
+
+		case ID_PREFS_ADD_GAD:
+
+			printf("ID PREFS_ADD_GAD\n");
+
+			add_edit_volume(1); 
+			break;
+
+		case ID_PREFS_EDIT_GAD:
+			add_edit_volume(0); 
+			break;
+
+//		case ID_PREFS_REMOVE_GAD:
+//			remove_volume(obj[ID_MAC_VOLUMES], bt_editdisk, bt_removedisk); 
+//			break;
+
+		case ID_OK_GAD:
+
+			update_volume(0);	// 1 = add, 0 = update
+ 			close_window(win_disks);
+			RefreshGList( (Gadget *) refresh[win_prefs], win[win_prefs], NULL, -1 );
+
+			RSetAttrO( win_prefs, ID_PREFS_ADD_GAD , GA_Disabled, FALSE);
+			RSetAttrO( win_prefs, ID_PREFS_EDIT_GAD , GA_Disabled, FALSE);
+			RSetAttrO( win_prefs, ID_PREFS_REMOVE_GAD , GA_Disabled, FALSE);
+			break;
+
+		case ID_CANCEL_GAD:
+ 			close_window(win_disks);
+
+			RSetAttrO( win_prefs, ID_PREFS_ADD_GAD , GA_Disabled, FALSE);
+			RSetAttrO( win_prefs, ID_PREFS_EDIT_GAD , GA_Disabled, FALSE);
+			RSetAttrO( win_prefs, ID_PREFS_REMOVE_GAD , GA_Disabled, FALSE);
+			break;
+	}
+
+	return retval;
+}
+
+char *tablabels[]={"Disk","SCSI","IO","System",NULL};
+char *disk_tablabels[]={"Partition","Diskimage",NULL};
+
+struct ColumnInfo volumes_ci[] =
+{
+	{ 80, "name", 0 },
+	{ 20, "size", 0 },
+	{ ~0, (STRPTR) ~0, ~0 }
+};
+
+void init_win_disks(int win_nr)
+{
+	layout[win_nr] = (Object*) WindowObject,
+			WA_ScreenTitle, "",
+			WA_Title, "",
+			WA_SizeGadget, TRUE,
+			WA_Left, 40,
+			WA_Top, 30,
+			WA_DepthGadget, TRUE,
+			WA_DragBar, TRUE,
+			WA_CloseGadget, TRUE,
+			WA_Activate, TRUE,
+			WA_SmartRefresh, TRUE,
+			WINDOW_ParentGroup, VLayoutObject,
+				LAYOUT_SpaceOuter, TRUE,
+				LAYOUT_DeferLayout, TRUE,
+
+				LAYOUT_AddChild,  obj[ID_PREFS_TYPE_GAD] = (Object*) ClickTabObject,
+					GA_RelVerify, TRUE,
+					GA_Text, disk_tablabels,
+					GA_ID, ID_PREFS_TYPE_GAD ,
+
+					CLICKTAB_PageGroup,  PageObject,
+						LAYOUT_DeferLayout, TRUE,
+//----------------------------------------------------------------------------
+#include "gui_pages/page_add_partition.i"
+#include "gui_pages/page_add_diskimage.i"
+//----------------------------------------------------------------------------
+					PageEnd,
+				ClickTabEnd,
+
+				LAYOUT_AddChild, HGroupObject,
+					LAYOUT_AddChild, MakeButton(ID_OK_GAD),
+					LAYOUT_AddChild, MakeButton(ID_CANCEL_GAD),
+				LayoutEnd,
+
+			EndMember,
+		EndWindow;
+}
+
+
+void init_win_prefs(int win_nr)
+{
+	layout[win_nr] = (Object*) WindowObject,
+				
+		/* these tags describe the window */
+		
+		WA_IDCMP, IDCMP_RAWKEY | IDCMP_GADGETUP  | IDCMP_GADGETDOWN,
+
+		WA_SizeGadget, TRUE,
+		WA_DepthGadget, TRUE,
+		WA_DragBar, TRUE,
+		WA_CloseGadget, TRUE,
+		WA_Activate, TRUE,
+								
+		WA_Title, "GUI",
+		WA_ScreenTitle, "GUI",
+				
+		/* Turn on gadget help in the window  */
+				
+		// WINDOW_GadgetHelp, TRUE,
+				
+		/* Add an iconification gadget. If you have this, you must listen to
+		 * WMHI_ICONIFY.
+		 */
+				 
+		WINDOW_IconifyGadget, TRUE,
+				
+		/* This message port lets windowclass handle the icon and appwindow. */
+
+		WINDOW_Icon, GetDiskObject( "ICON" ),
+		WINDOW_IconTitle, "ICON",
+				
+		/* Below is the layout of the window  */
+				
+		WINDOW_ParentGroup, refresh[win_nr] = (Object *)
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+		 VGroupObject,
+
+			LAYOUT_AddChild,  ClickTabObject,
+				GA_RelVerify, TRUE,
+				GA_Text, tablabels,
+
+/*				CLICKTAB_PageGroup,  PageObject,*/
+/*					LAYOUT_DeferLayout, TRUE, */
+
+//----------------------------------------------------------------------------
+#include "gui_pages/page_disk.i"
+#include "gui_pages/page_scsi.i"
+#include "gui_pages/page_io.i" 
+#include "gui_pages/page_sys.i"
+//----------------------------------------------------------------------------
+				PageEnd,
+			ClickTabEnd,
+
+			LAYOUT_AddChild, HGroupObject,
+				LAYOUT_AddChild, MakeButton(ID_PREFS_START_GAD),
+				LAYOUT_AddChild, MakeButton(ID_PREFS_QUIT_GAD),
+			LayoutEnd,
+		LayoutEnd,
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+		EndWindow;
+}
+
+
+bool RunPrefs(void)
+{
+//	static int	localized = 0;
+	int		n = 0;
+	bool		retval;
+	retval	= false;
+
+	appport = CreateMsgPort();
+	if (!appport) return FALSE;
+
+	NewList( &list_files );
+
+
+	for (n=1;n<win_end;n++)
+	{
+		win[n]	= NULL;
+		layout[n]	= NULL;
+	}
+
+//	init_win_disks(win_disks);
+	init_win_prefs(win_prefs);
+
+	if ( ( win[win_prefs] = RA_OpenWindow( layout[win_prefs] ) ) )
+	{
+		set_volumes_settings();
+		set_scsi_settings();
+		set_serial_settings(); 
+		set_emulation_settings();
+
+		RefreshGList( (Gadget *) refresh[win_prefs], win[win_prefs], NULL, -1 );
+
+		for (;;)
+		{
+			switch( get_r_event( event ) )
+			{
+				case 1:	printf("Start\n");
+						retval = true;
+						goto done;
+
+				case 2:	printf("Quit\n");
+						retval = false;
+						goto quit;
+			}
+		}
+
+done:
+		if (retval)
+		{
+			read_volumes_settings();
+			read_scsi_settings();
+			read_serial_settings(); 
+			read_emulation_settings();
+			SavePrefs();
+
+
+		}
+	}
+
+quit:
+	for (n=0;n<win_end;n++) if (win[n]) close_window(n);
+	if (appport) DeleteMsgPort(appport);
+	return retval;
+}
+
+bool PrefsEditor(void)
+{
+	return RunPrefs();
+}
+
+

@@ -1,0 +1,50 @@
+PAGE_Add, VGroupObject,
+	LAYOUT_AddChild, VGroupObject,
+	GFrame(_L(ID_MAC_VOLUMES)) ,
+
+/*
+	LAYOUT_AddChild, MakeList( ID_MAC_VOLUMES, &volumes_ci, &list_files ), 
+
+		StartMember, obj[ID_MAC_VOLUMES] =(Object *) ListBrowserObject,
+			GA_ID, ID_MAC_VOLUMES,	
+			GA_RelVerify, TRUE,
+			LISTBROWSER_Labels, list_files,
+			LISTBROWSER_ColumnInfo, volumes_ci,
+			LISTBROWSER_ColumnTitles, TRUE,
+			LISTBROWSER_MultiSelect, FALSE,
+			LISTBROWSER_Separators, TRUE,
+			LISTBROWSER_ShowSelected, TRUE,
+			LISTBROWSER_Editable, FALSE,
+		EndMember,
+
+		LAYOUT_AddChild, HGroupObject,
+			LAYOUT_AddChild, MakeButton(ID_PREFS_ADD_GAD),
+			LAYOUT_AddChild, MakeButton(ID_PREFS_EDIT_GAD),
+			LAYOUT_AddChild, MakeButton(ID_PREFS_REMOVE_GAD),
+		LayoutEnd,
+		CHILD_WeightedHeight, 0,
+
+	LayoutEnd,
+*/
+	LAYOUT_AddChild, VGroupObject,
+		GFrame(_L(ID_CDROM)) ,
+
+		LAYOUT_AddChild, MakePopFile(ID_PREFS_CD_DEVICE_GAD, MAX_STRING_LENGTH, 0),
+		CHILD_Label, MakeLabel(ID_PREFS_CD_DEVICE_GAD), 
+
+		LAYOUT_AddChild, MakeInteger(ID_PREFS_CD_UNIT_GAD, 5),
+		CHILD_Label, MakeLabel(ID_PREFS_CD_UNIT_GAD), 
+
+		LAYOUT_AddChild, MakeCheck(ID_PREFS_CD_BOOT_GAD, 0),
+		LAYOUT_AddChild, MakeCheck(ID_PREFS_CD_DISABLE_DRIVER_GAD, 0),
+	LayoutEnd,
+	CHILD_WeightedHeight, 0,
+
+	LAYOUT_AddChild, HGroupObject,
+		LAYOUT_AddChild, MakePopFile(ID_PREFS_AMIGAOS4_ROOT_GAD, 1024, "TEST"),
+		CHILD_Label, MakeLabel(ID_PREFS_AMIGAOS4_ROOT_GAD), 
+	LayoutEnd,
+	CHILD_WeightedHeight, 0,
+
+LayoutEnd,
+

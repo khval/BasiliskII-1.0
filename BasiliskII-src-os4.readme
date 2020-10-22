@@ -1,0 +1,182 @@
+Short:        Source code to 68k Macintosh Emulator for AmigaOS4
+Author:       Christian Bauer, Ilkka Lehtoranta, Kjetil Hvalstrand
+Uploader:    Kjetil Hvalstrand
+Version:      1.0.1 
+Type:         dev/c
+Architecture: AmigaOS4
+
+Basilisk II is an open source 68k Macintosh emulator. It can emulate
+either a Mac Classic or a Mac II series machine with colour display
+and sound.
+
+ * RDB support
+ * Displays disk-image and partition size (when found!)
+ * Mouse wheel support 
+ * Hard-disk support with 64bit addressing
+ * Supports 2 and 256 colors and 32bit video modes on a 32bit workbench window.
+ * Full screen uses native video modes.
+ * Supports CD-ROM
+ * All PC keyboard keys are supported in emulation
+(Se source code if you like to help)
+ 
+DISCLAIMER:
+
+* PARTITIONS:
+DO NOT USE DH0, MAKE A NEW MAKE A NEW PARTITION AND CALL IT SOME THING SMART,
+PARTITION WILL BE OVERWRITTEN !!! MAKE THE PARTITION NO LARGER THEN 2GB,
+IF YOU LIKE TO BE SAFE USE SLOWER DISK-IMAGES.
+
+* IF YOU DO GET DSI ERRORS, DO NOT IGNORE ERRORS, BE SAFE; WARM REBOOT.
+MACINTOSH SOFTWARE CAN HAVE BUGS, THERE IS NO MEMORY PROTECTION THAT CAN STOP IT FROM CRASHING YOU SYSTEM.
+(IF YOU DO THIS THE IT'S ON YOUR OWN RISK.)
+
+* POWERUP USERS:
+IT IS PROBABLY BETTER RUN SHAPESHIFTER OR FUSION ON
+THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
+BPPC/CSPPC IS TOO SLOW.
+
+Changes in Basilisk II 1.0.3 AmigaOS4 14.10.2013 (Kjetil Hvalstrand)
+
+* Optimized uae_cpu/memory.h; now use inline powerpc asm.
+* Optimized sysdeps.h for AmigaOS4; now use inline powerpc asm.
+* Added min/max values frame skip and line skip.
+* Small fix: line_skip = 0 is now no line_skip (like before), and like_skip=1 is one line skip (new).
+* Added window/boot depth option to gui under system tab.
+
+Changes in Basilisk II 1.0.2 AmigaOS4 10.10.2013 (Kjetil Hvalstrand)
+
+* Added Peg2ide.device on request from Luigi / tlosm
+
+Changes in Basilisk II 1.0.1 AmigaOS4 22.09.2013  (Kjetil Hvalstrand)
+
+* Copied AmigaOS4 src into Basilisk II 1.0.
+* Copied video_amiga.cpp from Basilisk II 1.0
++ added support for mouse wheel from  Basilisk II 0.9
++ added a new mode window composition mode support.
++ rewriten window mode, so it support many resolutions.
++ now 8bit option does enable 8bit gfx as default in window modes.
++ B/W support in composition window mode.
++ 8Bit video mode support on 32bit workbench screen.
++ B/W to 32bit assembler optimizedet
++ 8bit to 32bit assembler optimizedet
+* prefs_editor_amigaos4.cpp
++ added support for rw protection on disk images.
++ Selecting a Videomode whit ASL requester, now updates width and height. 
+- Removed Quit button.
++ updated extfs_amigaos based on the OS3.x version.
+
+
+Changes in Basilisk II 0.9.8 experimental AmigaOS4 22.06.2012
+
+* Merged changes from Scott A. Cabit
+* Fixed Icon DiskObject not set to NULL as initial value.
+(potential risk of DSI error/memory corruption at exit or some where else.)
+* moved Prefs and xpram file names into main, to make it easier to run two versions of BasiliskII.
+* prefs files can now be read from different directory, by entering a different path as argument in shell.
+* fixed ether_amiga4.cpp (SanaII), hooks are not setup correct.
+(warning think the exit code is broken)
+
+[-- Inifity TCP/IP - driver experimental --]
+* Fixed initial NULL value not set for msg-port used for Ethernet, dangers on exit.
+* Experminantal TCP/IP api added (not SanaII). 
+* fixed exit code for Experminantal TCP/IP api not SanaII :-)
+[------------------------------------------]
+
+Changes in Basilisk II 0.9.7 experimental AmigaOS4 02.07.2011 (Scott A. Cabit):
+
+* modified Os4_prefs file to fix bug in choosing serial/parallel mode for
+seriala & serialb
+  The Parallel checkbox now works, if deselected it is possible to connect via
+modem to the internet
+* Added device USBDisk.device to CD drive list - you can now access USB based CD
+drives
+* Added back 8bitgfx mode for prefs parsing - not sure if it is really
+implemented in the emulator
+  but it now works in the Amiga OS4 prefs gui and prefs file
+* Incremented experimental version numbers in Os4_prefs file to show 9.7
+* Stripped comments out of executable using strip -R.comment, reducing code size
+by over 2 Megabytes
+* Note - the executable may be found in the src/AmigaOS-4 directory
+
+Changes in Basilisk II 0.9.6 experimental AmigaOS4 06.10.2010: (Kjetil Hvalstrand)
+
+* Changed prefs file for new screen modes.
+* GUI updated screen mode selector
+You now can use 3 different full screen modes: frame skipping, mmu hack, direct video.
+(Not all modes will work for you, if you need special version of mmu hack see source code)
+- Ethernet support is disabled (dummy routines)
+
+Changes in Basilisk II 0.9.5 experimental AmigaOS4 28.09.2010: (Kjetil Hvalstrand)
+
+* inline assembler for video convection
+(for experimental MMU video memory emulation)
+
+Changes in Basilisk II 0.9.4 experimental AmigaOS4 19.06.2010: (Kjetil Hvalstrand)
+
+* direct video support on 32bit
+* MMU based video memory emulation on read and write opcodes
+* Can quit emulator at anytime ("emergency quit")
+- Frame skipping is obsolete
+- Ethernet support is not working
+
+Changes in Basilisk II 0.9.3+ AmigaOS4 11.Aug.2008: (Kjetil Hvalstrand)
+
+ * Mouse wheel support.
+ * Ethernet fixes, (don't know if they work).
+ * ASL fileselector for Ethernet device
+ * New "Add bootdisk" button.
+ * Shows partition and diskimage size in GUI.
+ * 
+
+Changes in Basilisk II 0.9.3 AmigaOS4 3.Aug.2008: (Kjetil Hvalstrand)
+
+ * Added ASL fileselector for ROM and diskimages.
+
+Changes in Basilisk II 0.9.3 AmigaOS4 7.Nov.2007: (Kjetil Hvalstrand)
+ * Merged the AmigaOS3.x sources whit MorphOS sources.
+ * Removed MUI stuff
+ * Simplified error messages (NO MUI STUFF)
+ * Added reaction GUI
+ * Removed TD64 support
+ * Fixed bug in disk support (random memory corruption)
+ * Added NSD64 (large disk support used in OS3.5/3.9/4.0)
+ * Removed Cybergraphic stuff not relevant to AmigaOS4.
+ * added Picasso96 support from OS3.x sourcecode
+ * removed direct video-output (none working video-modes) slower but works
+ * Added RDB support, no need to enter start and size in blocks.
+ * New Icon from Martin "Mason" Merz
+ * Buggy exit code fixed.
+
+Changes in Basilisk II 0.9.3 MorphOS version:
+ * Integrated UAE CPU engine from Basilisk II 1.0
+      - now supports FPU
+      - notably faster
+ * Fixed color problems in 8bit modes
+
+Changes in Basilisk II 0.9.2 MorphOS version:
+ * Can create hardfiles in GUI
+ * Can quit emulator at anytime ("emergency quit")
+ * Optimized speed
+ * Added frameskip option
+
+
+MorphUp: http://www.lehtoranta.net/morphup/index.pmi
+
+
+Differences to AmigaOS3.x/Classic Amiga version:
+
+This version doesnt run MacOS "natively" (natively as in virtual 68k engine in
+AmigaOS4/MorphOS) but uses UAE 68k emulation engine. Performance is relatively poor but
+good enough to run demanding 68k games (040 was the best CPU used on 68k Mac).
+
+Support for Mac HD floppies is removed because built-in floppy controller on
+Pegasos is not supported in MorphOS.
+
+NSD and P96 support was removed since it is not relevant on MorphOS.
+
+AHI support was rewritten and uses high level API instead of old lowlevel API
+which blocked other musical programs. It also defaults to 48000Hz/16bit now.
+
+The largest possible MacOS RAM size is 1024MB but the minimum is 16MB.
+
+SCSI no longer respects CHIP/24BITDMA flags.
