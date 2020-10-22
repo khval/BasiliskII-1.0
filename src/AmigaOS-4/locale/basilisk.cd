@@ -60,7 +60,7 @@ MSG_PREFS_CD_DISABLE_DRIVER_GAD (//)
 Disable CD-ROM driver
 ;
 MSG_PREFS_MORPHOS_ROOT_GAD (//)
-MorphOS root
+AmigaOS root
 ;
 MSG_PREFS_VOLUMETYPE_FILE_GAD (//)
 File
@@ -219,7 +219,7 @@ MSG_AUTHOR_INFORMATION (//)
 \33cBasilisk II 1.0 by Christian Bauer\n© Copyright 1997-2001\nDistribtion under General Public License (GPL)
 ;
 MSG_PORT_INFORMATION (//)
-MorphOS port by Ilkka Lehtoranta, 2005-2007
+AmigaOS port by Kjetil Hvalstrand, 2007-2014
 ;
 MSG_GFX_INFORMATION (//)
 Basilisk icons by Christian Rosentereter

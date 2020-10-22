@@ -91,7 +91,7 @@ static void make_helper_path(const char *src, char *dest, const char *add, bool 
 	dest[0] = 0;
 
 	// Get pointer to last component of path
-	char *last_part = FilePart((char *)src);
+	const char *last_part = FilePart((char *)src);
 
 	// Copy everything before
 	slen =  (ULONG) last_part - (ULONG) src;

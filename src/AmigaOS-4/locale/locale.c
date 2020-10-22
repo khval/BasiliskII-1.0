@@ -5,9 +5,7 @@
 /****************************************************************************/
 
 
-/* This file was created automatically by CatComp.
- * Do NOT edit by hand!
- */
+/* This file was edited in Notepad do not use CatComp */
 
 
 #ifndef EXEC_TYPES_H

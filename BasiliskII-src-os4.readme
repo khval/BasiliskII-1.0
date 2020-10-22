@@ -27,13 +27,22 @@ PARTITION WILL BE OVERWRITTEN !!! MAKE THE PARTITION NO LARGER THEN 2GB,
 IF YOU LIKE TO BE SAFE USE SLOWER DISK-IMAGES.
 
 * IF YOU DO GET DSI ERRORS, DO NOT IGNORE ERRORS, BE SAFE; WARM REBOOT.
-MACINTOSH SOFTWARE CAN HAVE BUGS, THERE IS NO MEMORY PROTECTION THAT CAN STOP IT FROM CRASHING YOU SYSTEM.
+MACINTOSH SOFTWARE CAN HAVE BUGS, THERE IS NO MEMORY PROTECTION THAT CAN STOP IT FROM CRASHING YOUR SYSTEM.
 (IF YOU DO THIS THE IT'S ON YOUR OWN RISK.)
 
 * POWERUP USERS:
 IT IS PROBABLY BETTER RUN SHAPESHIFTER OR FUSION ON
 THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
 BPPC/CSPPC IS TOO SLOW.
+
+Changes in Basilisk II 1.0.4 AmigaOS4 03.01.2014 (Kjetil Hvalstrand)
+
+* Added "Uae lock on screens bitmap" in GUI for AGP/PCI graphic cards.
+* added support for bitmap looking in amiga_video.cpp
+* added default english translation to locale.c
+* Updated local/basilisk.cd and local/basilisk.cd (warning do not generate locale.h / locale.c from this files)
+* Some of the icons where not AmigaOS4 icons, converted.
+* Tested on AmigaONE-X1000 and AmigaOne-XE.
 
 Changes in Basilisk II 1.0.3 AmigaOS4 14.10.2013 (Kjetil Hvalstrand)
 

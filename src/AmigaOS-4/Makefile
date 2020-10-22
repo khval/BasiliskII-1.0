@@ -5,11 +5,11 @@ STRIP = echo
 
 CC = g++ -noixemul -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
 CXX = g++ -noixemul -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
-CXXFLAGS = -g  -funroll-loops -finline-functions -ffast-math -mcpu=750 -mstring -mmultiple ## -Wall -Wno-multichar
+CXXFLAGS = -g  -funroll-loops -finline-functions -ffast-math -mcpu=740 -mstring -mmultiple ## -Wall -Wno-multichar
 CPPFLAGS = -I../include -I../uae_cpu -I.
 DEFS = -DUSE_SDL
 LDFLAGS = -noixemul
-LIBS =
+LIBS = -lsdl 
 AS = as
 ASFLAGS =
 CATCOMP = catcomp
@@ -39,8 +39,8 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
     ../macos_util.cpp ../xpram.cpp xpram_amigaos4.cpp ../timer.cpp \
     timer_amigaos4.cpp clip_amigaos4.cpp ../adb.cpp ../serial.cpp \
     serial_amiga.cpp  ../ether.cpp ../dummy/ether_dummy.cpp  ../sony.cpp ../disk.cpp \
-    ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp video_amiga.cpp \
-    ../audio.cpp ../dummy/audio_dummy.cpp ../extfs.cpp  ../extfs_amigaos4.cpp \
+    ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp video_amigaos4.cpp \
+    ../audio.cpp ../sdl/audio_sdl.cpp ../extfs.cpp  ../extfs_amigaos4.cpp \
     ../user_strings.cpp user_strings_amigaos4.cpp prefs_editor_amigaos4.cpp   \
 	$(CPUSRCS)
 

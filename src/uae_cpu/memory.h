@@ -263,6 +263,10 @@ static __inline__ void put_byte(uaecptr addr, uae_u32 b)
 }
 */
 
+#define get_byte(addr) *((char *) ((uint32) MEMBaseDiff + (uint32) + addr))
+#define get_word(addr) *((short *) ((uint32) MEMBaseDiff + (uint32) + addr))
+#define get_long(addr) *((uint32 *) ((uint32) MEMBaseDiff + (uint32) + addr))
+
 #define get_real_address(addr)	do_get_real_address(addr)
 #define get_virtual_address(addr)	do_get_virtual_address(addr)
 

@@ -296,10 +296,9 @@ int main(int argc, char **argv)
 		if (wbmsg->sm_NumArgs > 1)
 			wargs++;
 
-		lock	= CurrentDir(wargs->wa_Lock);
+		lock	= SetCurrentDir(wargs->wa_Lock);
 		dobj	= GetDiskObject((char *const)wargs->wa_Name);
-
-		CurrentDir(lock);
+		SetCurrentDir(lock);
 	}
 	else
 	{

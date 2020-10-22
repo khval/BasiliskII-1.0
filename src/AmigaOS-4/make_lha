@@ -41,6 +41,7 @@
 		Copy BasiliskII.db {target_lha}/BasiliskII
 		Copy icons/BasiliskII.db.info {target_lha}/BasiliskII.info
 		Copy //BasiliskII-src-os4.readme {target_lha}
+		Copy //BasiliskII-src-os4.readme ram:
 		Copy //README {target_lha}
 		Copy //INSTALL {target_lha}
 		copy //COPYING {target_lha}

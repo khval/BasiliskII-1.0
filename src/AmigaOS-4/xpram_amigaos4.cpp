@@ -66,6 +66,6 @@ void SaveXPRAM(void)
 
 void ZapPRAM(void)
 {
-	DeleteFile(XPRAM_FILE_NAME);
-	DeleteFile(XPRAM_FILE_NAME_ARC);
+	Delete(XPRAM_FILE_NAME);
+	Delete(XPRAM_FILE_NAME_ARC);
 }
