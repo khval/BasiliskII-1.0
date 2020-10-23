@@ -31,7 +31,6 @@
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <graphics/composite.h>
-#include <proto/Picasso96API.h>
 
 #include "sysdeps.h"
 #include "cpu_emulation.h"
@@ -85,7 +84,7 @@ enum {
 	DISPLAY_SCREEN_FRAME_SKIP,
 	DISPLAY_SCREEN_MMU_HACK,
 	DISPLAY_SCREEN_DIRECT_VIDEO,
-	DISPLAY_SCREEN_P96,
+	DISPLAY_SCREEN,
 };
 
 // Global variables
@@ -197,10 +196,10 @@ private:
 };
 
 
-class driver_screen_p96 : public driver_base {
+class driver_screen : public driver_base {
 public:
-	driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id);
-	~driver_screen_p96();
+	driver_screen(Amiga_monitor_desc &m, ULONG mode_id);
+	~driver_screen();
 	virtual int draw();
 
 	void set_palette(uint8 *pal, int num);
@@ -219,10 +218,10 @@ static driver_base *drv = NULL;	// Pointer to currently used driver object
 static void periodic_func(void);
 static void add_mode(uint32 width, uint32 height, uint32 resolution_id, uint32 bytes_per_row, video_depth depth);
 static void add_modes(uint32 width, uint32 height, video_depth depth);
-static ULONG find_mode_for_depth(uint32 width, uint32 height, uint32 depth);
+//static ULONG find_mode_for_depth(uint32 width, uint32 height, uint32 depth);
 static ULONG bits_from_depth(video_depth depth);
 static bool is_valid_modeid(int display_type, ULONG mode_id);
-static bool check_modeid_p96(ULONG mode_id);
+static bool check_modeid(ULONG mode_id);
 
 
 /*
@@ -230,42 +229,62 @@ static bool check_modeid_p96(ULONG mode_id);
  */
 
 
-static ULONG find_mode_for_depth(uint32 width, uint32 height, uint32 depth)
+uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
 {
-	struct List *ml;
-	struct P96Mode	*mn;
 	ULONG ID;
+	struct DisplayInfo dispi;
+	struct DimensionInfo di;
+	ULONG w,h;
 
-	if (depth == 1) depth=8; 
-	if (depth == 24) depth=32;
+	uint64 a,get_a, diff_a, found_a, found_better_a;
+	uint32 found_mode, better_found_mode;
 
-	if(ml=p96AllocModeListTags(	
-			P96MA_MinWidth, width, P96MA_MaxWidth, width,
-			P96MA_MinHeight, height, P96MA_MaxHeight, height,
-			P96MA_MinDepth, depth, P96MA_MaxDepth, depth,  
-			TAG_DONE))
+	get_a = get_w * get_h;
+
+	found_mode = INVALID_ID;
+	better_found_mode = INVALID_ID;
+
+	found_a = ~0;
+	found_better_a = ~0;
+
+	depth_bits = depth_bits == 32 ? 24 : depth_bits;
+
+	for( ID = NextDisplayInfo( INVALID_ID ) ; ID !=INVALID_ID ;  ID = NextDisplayInfo( ID ) )
 	{
-		for(mn=(struct P96Mode *)(ml->lh_Head);mn->Node.ln_Succ;mn=(struct P96Mode *)mn->Node.ln_Succ)
+		if (
+			(GetDisplayInfoData( NULL, &di, sizeof(di) , DTAG_DIMS, ID)) &&
+			(GetDisplayInfoData( NULL, &dispi, sizeof(dispi) ,  DTAG_DISP, ID))
+		)
 		{
-			if (check_modeid_p96(mn -> DisplayID))
+			if (depth_bits == di.MaxDepth )
 			{
-				ID = mn -> DisplayID;
+				w =  di.Nominal.MaxX -di.Nominal.MinX +1;
+				h =  di.Nominal.MaxY -di.Nominal.MinY +1;
+
+				if ((get_w == w) && (get_h == h))
+				{
+					better_found_mode = ID;
+					break;
+				}
 			}
 		}
-		p96FreeModeList(ml);
 	}
 
-	return ID;
+	return better_found_mode != INVALID_ID ? better_found_mode : found_mode;
 }
 
 
 
-int p96_add_modes(int mode_id, video_depth depth)
+
+
+int add_modes(int mode_id, video_depth depth)
 {
 	LONG depth_bits;
 	int bpr;
 	struct List *ml;
-	struct P96Mode	*mn;
+	struct DisplayInfo di;
+	struct DimensionInfo dimi;
+	uint32_t DisplayID;
 
 	int lw=0,lh=0;
 	int w,h;
@@ -278,23 +297,24 @@ int p96_add_modes(int mode_id, video_depth depth)
 		case VDEPTH_32BIT: depth_bits = 32; break;
 	}
 
-	if(ml=p96AllocModeListTags(	P96MA_MinDepth, depth_bits, P96MA_MaxDepth, depth_bits,  TAG_DONE))
+	for( DisplayID = NextDisplayInfo( INVALID_ID ) ; DisplayID !=INVALID_ID ;  DisplayID = NextDisplayInfo( DisplayID ) )
 	{
-		for(mn=(struct P96Mode *)(ml->lh_Head);mn->Node.ln_Succ;mn=(struct P96Mode *)mn->Node.ln_Succ)
-		{
 
-			if (check_modeid_p96(mn -> DisplayID))
+		if (check_modeid( DisplayID))
+		{
+			if (GetDisplayInfoData( NULL, &di, sizeof(di) , DTAG_DISP,  DisplayID)&&
+				GetDisplayInfoData( NULL, &dimi, sizeof(dimi) , DTAG_DIMS,  DisplayID))
 			{
-				w =  p96GetModeIDAttr( mn -> DisplayID, P96IDA_WIDTH );
-				h =  p96GetModeIDAttr( mn -> DisplayID, P96IDA_HEIGHT );
+				w =  dimi.Nominal.MaxX -dimi.Nominal.MinX +1;
+				h =  dimi.Nominal.MaxY -dimi.Nominal.MinY +1;
 
 				if (depth==VDEPTH_32BIT)
 				{
-					bpr =  p96GetModeIDAttr( mn -> DisplayID, P96IDA_STDBYTESPERROW );
+					bpr =  GetBoardBytesPerRow( di.RTGBoardNum, (PIX_FMT) di.PixelFormat, w );
 				}
 				else
 				{
-					bpr =  TrivialBytesPerRow( mn -> Width, depth );
+					bpr =  TrivialBytesPerRow( w, depth );
 				}
 
 				if ((lw != w) && (lh != h))
@@ -303,16 +323,14 @@ int p96_add_modes(int mode_id, video_depth depth)
 
 					if (bpr>0)
 					{
-						add_mode( mn -> Width, mn -> Height, mode_id,	 bpr, depth);
-//						D(bug("%d,%d bpr %d -  %s\n",w,h, bpr,  mn->Description);
+						add_mode( w, h, mode_id,	 bpr, depth);
 						mode_id ++;
 					}
 				}
 			}
 		}
-
-		p96FreeModeList(ml);
 	}
+
 
 	return mode_id;
 }
@@ -369,20 +387,13 @@ bool VideoInit(bool classic)
 	default_width = window_width = 512;
 	default_height = window_height = 384;
 
-//	D(bug("%s\n",mode_str);
-
 	if (mode_str) {
 		if (sscanf(mode_str, "win/%d/%d", &window_width, &window_height) == 2)
 			default_display_type = DISPLAY_WINDOW;
-		else if (sscanf(mode_str, "wic/%d/%d", &window_width, &window_height) == 2 && P96Base)
+		else if (sscanf(mode_str, "wic/%d/%d", &window_width, &window_height) == 2 )
 			default_display_type = DISPLAY_WINDOW_COMP;
-		else if (sscanf(mode_str, "scr/%d/%08x", &mode_opt,&screen_mode_id) == 2 && ( P96Base)) {
-//			if (P96Base && p96GetModeIDAttr(screen_mode_id, P96IDA_ISP96))
-				default_display_type = DISPLAY_SCREEN_P96;
-//			else {
-//				ErrorAlert(STR_NO_P96_MODE_ERR);
-//				return false;
-//			}
+		else if (sscanf(mode_str, "scr/%d/%08x", &mode_opt,&screen_mode_id) == 2 ) {
+			default_display_type = DISPLAY_SCREEN;
 		}
 	}
 
@@ -426,7 +437,7 @@ bool VideoInit(bool classic)
 			add_modes(window_width, window_height, VDEPTH_32BIT);
 			break;
 
-		case DISPLAY_SCREEN_P96:
+		case DISPLAY_SCREEN:
 
 			struct DimensionInfo dimInfo;
 			DisplayInfoHandle handle = FindDisplayInfo(screen_mode_id);
@@ -451,10 +462,10 @@ bool VideoInit(bool classic)
 				case 32: default_depth = VDEPTH_32BIT; break;
 			}
 
-			mode_id = p96_add_modes(0x80 , VDEPTH_1BIT);
-			mode_id = p96_add_modes(0x80 , VDEPTH_8BIT);
-			mode_id = p96_add_modes(0x80 , VDEPTH_16BIT);
-			mode_id = p96_add_modes(0x80 , VDEPTH_32BIT);
+			mode_id = add_modes(0x80 , VDEPTH_1BIT);
+			mode_id = add_modes(0x80 , VDEPTH_8BIT);
+			mode_id = add_modes(0x80 , VDEPTH_16BIT);
+			mode_id = add_modes(0x80 , VDEPTH_32BIT);
 
 			break;
 	}
@@ -524,6 +535,7 @@ bool VideoInit(bool classic)
 	return true;
 }
 
+// uint32 find_best_screenmode(int RTGBoardNum, uint32 depth_bits, float aspect, int get_w, int get_h)
 
 bool Amiga_monitor_desc::video_open()
 {
@@ -556,8 +568,8 @@ bool Amiga_monitor_desc::video_open()
 			drv = new driver_window_comp(*this, mode.x, mode.y);
 			break;
 
-		case DISPLAY_SCREEN_P96:
-			drv = new driver_screen_p96(*this, ID);
+		case DISPLAY_SCREEN:
+			drv = new driver_screen(*this, ID);
 			break;
 	}
 
@@ -744,7 +756,7 @@ static void periodic_func(void)
 	// create a new msgport becouse this runing in its own task.
 
 	win_port_old = drv -> the_win -> UserPort;
-	win_port = CreateMsgPort();
+	win_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 
 //	D(bug("periodic_func task: %08x\n",win_mask);
 
@@ -753,14 +765,14 @@ static void periodic_func(void)
 		drv->the_win->UserPort = win_port;
 
 		ModifyIDCMP(drv->the_win, IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
-			((drv->monitor.display_type == DISPLAY_SCREEN_P96) ? IDCMP_DELTAMOVE : 0));
+			((drv->monitor.display_type == DISPLAY_SCREEN) ? IDCMP_DELTAMOVE : 0));
 	}
 
 	D(bug("periodic_func/%ld: \n", __LINE__));
 
 	// Start 60Hz timer for window refresh
 //	if (drv->monitor.display_type == DISPLAY_WINDOW || drv->monitor.display_type == DISPLAY_WINDOW_COMP) {
-		timer_port = CreateMsgPort();
+		timer_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 		if (timer_port) {
 			timer_io = (struct timerequest *) CreateIORequest(timer_port, sizeof(struct timerequest));
 			if (timer_io) {
@@ -823,7 +835,7 @@ static void periodic_func(void)
 					case IDCMP_MOUSEMOVE:
 
 						switch (drv->monitor.display_type) {
-							case DISPLAY_SCREEN_P96:
+							case DISPLAY_SCREEN:
 
 								mx = msg->MouseX;
 								my = msg->MouseY;
@@ -921,7 +933,7 @@ static void periodic_func(void)
 
 								D(bug("periodic_func/%ld: \n", __LINE__));
 
-	if (timer_port)	DeleteMsgPort(timer_port);
+	if (timer_port)	FreeSysObject(ASOT_PORT,timer_port);
 
 								D(bug("periodic_func/%ld: \n", __LINE__));
 
@@ -941,10 +953,10 @@ static void periodic_func(void)
 	Permit();
 
 
-	DeleteMsgPort(win_port);
+	FreeSysObject(ASOT_PORT,win_port);
 								D(bug("periodic_func/%ld: \n", __LINE__));
 
-	if (win_port_old) DeleteMsgPort(win_port_old);
+	if (win_port_old) FreeSysObject(ASOT_PORT,win_port_old);
 
 	D(bug("periodic_func/%ld: END \n", __LINE__));
 
@@ -1021,8 +1033,8 @@ static bool is_valid_modeid(int display_type, ULONG mode_id)
 		return false;
 
 	switch (display_type) {
-		case DISPLAY_SCREEN_P96:
-			return check_modeid_p96(mode_id);
+		case DISPLAY_SCREEN:
+			return check_modeid(mode_id);
 			break;
 		default:
 			return false;
@@ -1031,28 +1043,38 @@ static bool is_valid_modeid(int display_type, ULONG mode_id)
 }
 
 
-static bool check_modeid_p96(ULONG mode_id)
+static bool check_modeid(ULONG mode_id)
 {
+	struct DisplayInfo dispi;
+	struct DimensionInfo di;
+
 	// Check if the mode is one we can handle
-	uint32 depth = p96GetModeIDAttr(mode_id, P96IDA_DEPTH);
-	uint32 format = p96GetModeIDAttr(mode_id, P96IDA_RGBFORMAT);
+
+	if ( ! (
+		(GetDisplayInfoData( NULL, &di, sizeof(di) , DTAG_DIMS, mode_id)) &&
+		(GetDisplayInfoData( NULL, &dispi, sizeof(dispi) ,  DTAG_DISP, mode_id))
+	))
+	{
+		return false;
+	}
+
+
+	uint32 depth = di.MaxDepth;
+	uint32 format = dispi.PixelFormat;
 
 	D(bug("check_modeid_p96: mode_id=%08lx  depth=%ld  format=%ld\n", mode_id, depth, format));
-
-	if (!p96GetModeIDAttr(mode_id, P96IDA_ISP96))
-		return false;
 
 	switch (depth) {
 		case 8:
 			break;
 		case 15:
 		case 16:
-			if (format != RGBFB_R5G5B5)
+			if (format != PIXF_R5G5B5)
 				return false;
 			break;
 		case 24:
 		case 32:
-			if (format != RGBFB_A8R8G8B8)
+			if (format != PIXF_A8R8G8B8)
 				return false;
 			break;
 		default:
@@ -1115,10 +1137,16 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 
 	// Create bitmap ("height + 2" for safety)
 
-	the_bitmap = p96AllocBitMap( width, height+2, 32, BMF_USERPRIVATE, NULL, RGBFB_A8R8G8B8 );
+	the_bitmap = AllocBitMapTags( width, height+2, 32, 
+			BMATags_PixelFormat,  PIXF_A8R8G8B8,
+			BMATags_Clear, TRUE,
+			BMATags_UserPrivate, TRUE,				
+			TAG_END);
 
+/*
 	if ( depth != VDEPTH_32BIT)
 	{
+*/
 		vmem_size = TrivialBytesPerRow(width, depth ) * (height + 2);
 
 		VIDEO_BUFFER = (char *)  AllocVecTags( vmem_size,
@@ -1131,15 +1159,16 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 		vmem = (unsigned int) VIDEO_BUFFER;
 
 		monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) VIDEO_BUFFER));
-
+/*
 	} else {
 
 		VIDEO_BUFFER = NULL;
-		monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) p96GetBitMapAttr(the_bitmap, P96BMA_MEMORY)));
+		monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) GetBitMapAttr(the_bitmap, BMA_MEMORY)));
 
-		vmem_size = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW) * height ;
-		vmem = p96GetBitMapAttr(the_bitmap, P96BMA_MEMORY), p96GetBitMapAttr(the_bitmap, P96BMA_MEMORY);
+		vmem_size = GetBitMapAttr(the_bitmap, BMA_BYTESPERROW) * height ;
+		vmem = GetBitMapAttr(the_bitmap, BMA_MEMORY), p96GetBitMapAttr(the_bitmap, BMA_MEMORY);
 	}
+*/
 
 	printf("Video mem %08X - %08X\n",vmem, vmem + vmem_size );
 
@@ -1174,7 +1203,7 @@ driver_window::~driver_window()
 	// Window mode, free bitmap
 	if (the_bitmap) {
 		WaitBlit();
-		p96FreeBitMap(the_bitmap);
+		FreeBitMap(the_bitmap);
 		the_bitmap = NULL;
 	}
 
@@ -1275,10 +1304,12 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 
 
 	the_bitmap =AllocBitMap( width, height, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
-	bytes_per_row = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW);	
+//	bytes_per_row = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW);	
 	FreeBitMap(the_bitmap);
 	the_bitmap = NULL;
 
+
+	bytes_per_row = TrivialBytesPerRow(width, depth );
 	vmem_size = TrivialBytesPerRow(width, depth ) * (height + 2);
 
 	VIDEO_BUFFER = (char *)  AllocVecTags( vmem_size , 
@@ -1535,15 +1566,20 @@ void convert_8bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  bytes )
 	}
 }
 
+struct RenderInfo
+{
+	uint32_t BytesPerRow;
+	char *Memory;
+};
 
-int driver_screen_p96::draw()
+int driver_screen::draw()
 {
 	char *to_mem ;
 	int bytes_per_row;  
 	int from_bytes_per_row;  
 	int n,nn;
 	struct RenderInfo ri;
-	uint32 BMLock;
+	APTR BMLock;
 
 
 	if (VIDEO_BUFFER)
@@ -1556,7 +1592,10 @@ int driver_screen_p96::draw()
 
 		if (use_p96_lock)
 		{
-			if (BMLock = p96LockBitMap(&the_screen -> BitMap, (UBYTE*) &ri, sizeof(ri)))
+			if (BMLock = LockBitMapTags(&the_screen -> BitMap, 
+				LBM_BaseAddress, &ri.BytesPerRow,
+				LBM_BytesPerRow, &ri.Memory,
+				TAG_END))
 			{
 				bytes_per_row = ri.BytesPerRow;
 				to_mem = (char *) ri.Memory;
@@ -1564,8 +1603,11 @@ int driver_screen_p96::draw()
 		}
 		else
 		{
-			bytes_per_row = p96GetBitMapAttr(&the_screen -> BitMap, P96BMA_BYTESPERROW);	
-			to_mem = (char *) p96GetBitMapAttr(&the_screen ->BitMap, P96BMA_MEMORY);
+//			bytes_per_row = GetBitMapAttr(&the_screen -> BitMap, BMA_BYTESPERROW);	
+//			to_mem = (char *) GetBitMapAttr(&the_screen ->BitMap, BMA_MEMORY);
+
+			bytes_per_row = the_screen -> BitMap.BytesPerRow;
+			to_mem = (char *) the_screen -> BitMap.Planes[0];
 			BMLock = 0;
 		}
 
@@ -1605,7 +1647,7 @@ int driver_screen_p96::draw()
 
 		if  (BMLock)
 		{
-			p96UnlockBitMap(&the_screen -> BitMap,BMLock);
+			UnlockBitMap(BMLock);
 		}
 
 /*
@@ -1637,8 +1679,8 @@ int driver_window::draw()
 	{
 		case VDEPTH_1BIT:
 
-			bytes_per_row = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW);	
-			to_mem = (char *) p96GetBitMapAttr(the_bitmap, P96BMA_MEMORY);
+			bytes_per_row = the_bitmap -> BytesPerRow;	
+			to_mem = (char *) the_bitmap -> Planes[0];
 			for (nn=0; nn<height/line_skip;nn++)
 			{
 				n = frame_dice+(nn*line_skip);
@@ -1649,8 +1691,8 @@ int driver_window::draw()
 
 		case VDEPTH_8BIT:
 
-			bytes_per_row = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW);	
-			to_mem = (char *) p96GetBitMapAttr(the_bitmap, P96BMA_MEMORY);
+			bytes_per_row = the_bitmap -> BytesPerRow;	
+			to_mem = (char *) the_bitmap -> Planes[0];
 			for (nn=0; nn<height/line_skip;nn++)
 			{
 				n = frame_dice+(nn*line_skip);
@@ -1694,8 +1736,8 @@ int driver_window_comp::draw()
 	if (!the_bitmap)
 	{
 		the_bitmap =AllocBitMap( width, height, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
-		bytes_per_row = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW);	
-		to_mem = (char *) p96GetBitMapAttr(the_bitmap, P96BMA_MEMORY);
+		bytes_per_row = the_bitmap -> BytesPerRow;	
+		to_mem = (char *) the_bitmap -> Planes[0];
 	}
 
 	if (!the_bitmap) return 0xFFFFFF;
@@ -1769,8 +1811,8 @@ int driver_window_comp::draw()
 	return error;
 }
 
-// Open Picasso96 screen
-driver_screen_p96::driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id)
+// Open Picasso screen
+driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id)
 	: driver_base(m)
 {
 	int vsize;
@@ -1782,7 +1824,7 @@ driver_screen_p96::driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id)
 	ADBSetRelMouseMode(true);
 
 	// Check if the mode is one we can handle
-	if (!check_modeid_p96(mode_id))
+	if (!check_modeid(mode_id))
 	{
 		init_ok = false;
 		ErrorAlert(STR_WRONG_SCREEN_FORMAT_ERR);
@@ -1803,19 +1845,37 @@ driver_screen_p96::driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id)
 	}
 */
 
-	width = p96GetModeIDAttr(mode_id, P96IDA_WIDTH);
-	height = p96GetModeIDAttr(mode_id, P96IDA_HEIGHT);
+	struct DisplayInfo dispi;
+	struct DimensionInfo dimInfo;
+
+	// Check if the mode is one we can handle
+
+	if ( ! (
+		(GetDisplayInfoData( NULL, &dimInfo, sizeof(dimInfo) , DTAG_DIMS, mode_id)) &&
+		(GetDisplayInfoData( NULL, &dispi, sizeof(dispi) ,  DTAG_DISP, mode_id))
+	))
+	{
+		init_ok = false;
+		return;
+	}
+
+/*
+	uint32 depth = di.MaxDepth;
+	uint32 format = dispi.PixelFormat;
+*/
+
+	width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
+	height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
 
 	// Open screen
-	the_screen = p96OpenScreenTags(
-		P96SA_DisplayID, mode_id,
-		P96SA_Title, (ULONG)GetString(STR_WINDOW_TITLE),
-		P96SA_Quiet, true,
-		P96SA_NoMemory, true,
-		P96SA_NoSprite, true,
-		P96SA_Exclusive, true,
-		TAG_END
-	);
+	the_screen = OpenScreenTags(
+		NULL,
+		SA_DisplayID, mode_id,
+		SA_Title, (ULONG)GetString(STR_WINDOW_TITLE),
+		SA_Quiet, true,
+		SA_Exclusive, true,
+		TAG_END);
+
 	if (the_screen == NULL) {
 		ErrorAlert(STR_OPEN_SCREEN_ERR);
 		init_ok = false;
@@ -1852,7 +1912,7 @@ driver_screen_p96::driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id)
 
 	} else {
 		VIDEO_BUFFER = NULL;
-		monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) p96GetBitMapAttr(the_screen->RastPort.BitMap, P96BMA_MEMORY)));
+		monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) the_screen->RastPort.BitMap->Planes[0] ) );
 	}
 
 	printf("Video memory: %08X - %08X - %d x %d\n", 
@@ -1870,7 +1930,7 @@ driver_screen_p96::driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id)
 	init_ok = true;
 }
 
-driver_screen_p96::~driver_screen_p96()
+driver_screen::~driver_screen()
 {
 	// Close window
 	if (the_win)
@@ -1887,7 +1947,7 @@ driver_screen_p96::~driver_screen_p96()
 
 	// Close screen
 	if (the_screen) {
-		p96CloseScreen(the_screen);
+		CloseScreen(the_screen);
 		the_screen = NULL;
 	}
 }
@@ -1919,7 +1979,7 @@ void driver_window_comp::set_palette(uint8 *pal, int num)
 	}
 }
 
-void driver_screen_p96::set_palette(uint8 *pal, int num)
+void driver_screen::set_palette(uint8 *pal, int num)
 {
 	// Convert palette to 32 bits
 	ULONG table[2 + 256 * 3];

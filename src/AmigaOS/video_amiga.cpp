@@ -57,7 +57,7 @@ static vector<video_mode> VideoModes;
 enum {
 	DISPLAY_WINDOW,
 	DISPLAY_PIP,
-	DISPLAY_SCREEN_P96,
+	DISPLAY_SCREEN,
 	DISPLAY_SCREEN_CGFX
 };
 
@@ -149,10 +149,10 @@ private:
 	struct BitMap *the_bitmap;
 };
 
-class driver_screen_p96 : public driver_base {
+class driver_screen : public driver_base {
 public:
-	driver_screen_p96(Amiga_monitor_desc &m, ULONG mode_id);
-	~driver_screen_p96();
+	driver_screen(Amiga_monitor_desc &m, ULONG mode_id);
+	~driver_screen();
 
 	void set_palette(uint8 *pal, int num);
 
