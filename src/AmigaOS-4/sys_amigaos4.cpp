@@ -155,54 +155,94 @@ void SysAddSerialPrefs(void)
  *
  */
 
+struct initSysOpen
+{
+	struct ExamineData *Edata;
+	BPTR fd;
+	uint64_t size;
+
+	initSysOpen();
+
+	void errorFreeAll( const char *error );
+};
+
+initSysOpen::initSysOpen()
+{
+	Edata = NULL;
+	fd = 0;
+	size = 0;
+}
+
+void initSysOpen::errorFreeAll( const char *error)
+{
+	printf("Error: %s\n",error);
+
+	if (Edata) FreeDosObject(DOS_EXAMINEDATA,Edata);
+	Edata = NULL;
+	if (fd) Close(fd);
+	fd = 0;
+}
+
 void *Sys_open(const char *name, bool read_only)
 {
 	bool is_file = (strstr(name, "/dev/") != name);
 
-	D(bug("Sys_open(%s, %s)\n", name, read_only ? "read-only" : "read/write"));
+//	D(bug("Sys_open(%s, %s)\n", name, read_only ? "read-only" : "read/write"));
+
+	printf("Sys_open(%s, %s)\n", name, read_only ? "read-only" : "read/write");
 
 	// File or device?
 	if (is_file)
 	{
-		uint64_t size = 0;
-		struct ExamineData *Edata;
+		struct initSysOpen i;
+
+		i.Edata = ExamineObjectTags(EX_StringNameInput,name,TAG_END);
+
+		if ( ! i.Edata )
+		{
+			i.errorFreeAll("Failed no Examine object");
+			return NULL;
+		}
+		
 
 		// File, open it and get stats
-		BPTR f = Open((char *)name, MODE_OLDFILE);
-		if (!f)	return NULL;
-
-
-		Edata = ExamineObjectTags( EX_LockInput, f, TAG_DONE );
-		if (Edata)
+		 i.fd = Open((char *)name, MODE_OLDFILE);
+		if (!i.fd)
 		{
-			if ( Edata -> Protection & EXDF_NO_WRITE ) read_only = true;
-			size = Edata -> FileSize;
-		    	FreeDosObject(DOS_EXAMINEDATA,Edata);
-
-			if (size == ~0)
-			{
-				Printf("sorry bad size in file %s:%ld\n",__FILE__,__LINE__);
-				Close(f);
-				return NULL;
-			}
-		}
-		else 	
-		{
-			Close(f);
+			i.errorFreeAll("no file lock\n");
 			return NULL;
 		}
 
+//		Edata = ExamineObjectTags( EX_LockInput, f, TAG_DONE );
+
+		if (i.Edata)
+		{
+			printf("got Examine object\n");
+
+			if ( i.Edata -> Protection & EXDF_NO_WRITE ) read_only = true;
+			i.size = i.Edata -> FileSize;
+
+			printf("size: %lld\n", i.size);
+
+			if ((i.size == ~0) || (i.size == 0))
+			{
+				i.errorFreeAll("Sorry bad size");
+				return NULL;
+			}
+			
+			FreeDosObject(DOS_EXAMINEDATA,i.Edata);
+		}
 
 		// Create file_handle
 		file_handle *fh = new file_handle;
-		fh->f = f;
+		fh->f = i.fd;
 		fh->is_file = true;
 		fh->read_only = read_only;
 
 		// Detect disk image file layout
 		ChangeFilePosition(fh->f, 0, OFFSET_BEGINNING);
 		Read(fh->f, &tmp_buf, 256);
-		FileDiskLayout(size, tmp_buf, fh->start_byte, fh->size);
+		FileDiskLayout(i.size, tmp_buf, fh->start_byte, fh->size);
 		return fh;
 
 	} else {
