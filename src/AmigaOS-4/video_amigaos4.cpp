@@ -547,9 +547,9 @@ bool Amiga_monitor_desc::video_open()
 
 	D(bug("video_open/%ld: width=%ld  height=%ld  depth=%ld  ID=%08lx\n", __LINE__, mode.x, mode.y, depth_bits, ID));
 
-	if (ID == INVALID_ID) {
-		ErrorAlert(STR_NO_VIDEO_MODE_ERR);
-		return false;
+	if ((ID == INVALID_ID) && ( display_type == DISPLAY_SCREEN))
+	{
+		display_type = DISPLAY_WINDOW;
 	}
 
 	D(bug("video_open/%ld: display_type=%ld\n", __LINE__, display_type));
@@ -580,10 +580,14 @@ bool Amiga_monitor_desc::video_open()
 	D(bug("video_open/%ld: drv=%08lx\n", __LINE__, drv));
 
 	if (drv == NULL)
+	{
+		ErrorAlert(STR_NO_VIDEO_MODE_ERR);
 		return false;
+	}
 
 	D(bug("video_open/%ld: init_ok=%ld\n", __LINE__, drv->init_ok));
 	if (!drv->init_ok) {
+		ErrorAlert(STR_NO_VIDEO_MODE_ERR);
 		delete drv;
 		drv = NULL;
 		return false;
