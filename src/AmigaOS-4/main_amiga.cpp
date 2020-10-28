@@ -533,50 +533,38 @@ void QuitEmulator(void)
 
 	printf("** Abort processes\n");
 
-	Forbid();
-	if (Sound_Proc)
-	{
-		Signal((struct Task *)Sound_Proc, SIGBREAKF_CTRL_C);
-	}
-	Permit();
+	if (Sound_Proc)	Signal((struct Task *)Sound_Proc, SIGBREAKF_CTRL_C);
+
+	print_sigs( __FUNCTION__ ,  __LINE__ );
 
 	printf("** Stop 60Hz process\n");
 
 	// Stop 60Hz process
-	Forbid();
-	if (tick_proc)
-	{
-		Signal((struct Task *)tick_proc, SIGBREAKF_CTRL_C);
-		tick_proc_active = false;
-	}
-	Permit();
+
+	if (tick_proc) Signal((struct Task *)tick_proc, SIGBREAKF_CTRL_C);
+	tick_proc_active = false;
+
+	print_sigs( __FUNCTION__ ,  __LINE__ );
 
 	printf("** Stop XPRAM watchdog process\n");
 
 	// Stop XPRAM watchdog process
-	Forbid();
-	if (xpram_proc)
-	{
-		Signal((struct Task *)xpram_proc, SIGBREAKF_CTRL_C);
-	}
-	Permit();
+
+	if (xpram_proc)	Signal((struct Task *)xpram_proc, SIGBREAKF_CTRL_C);
+
+	print_sigs( __FUNCTION__ ,  __LINE__ );
 
 	ADBExit();
 
-	// Stop GUI process
-	Forbid();
-	if (gui_proc)
-	{
-		Signal((struct Task *)gui_proc, SIGBREAKF_CTRL_C);
-	}
-	Permit();
+	if (gui_proc) Signal((struct Task *)gui_proc, SIGBREAKF_CTRL_C);
+
+	print_sigs( __FUNCTION__ ,  __LINE__ );
 
 	// Deinitialize everything
 	ExitAll();
 
 	// Close timer.device
-	if (TimerBase)
-		CloseDevice((struct IORequest *)&timereq);
+	if (TimerBase) CloseDevice((struct IORequest *)&timereq);
 
 	// Exit system routines
 	SysExit();
