@@ -200,7 +200,7 @@ void *Sys_open(const char *name, bool read_only)
 		fh->read_only = read_only;
 
 		// Detect disk image file layout
-		Seek(fh->f, 0, OFFSET_BEGINNING);
+		ChangeFilePosition(fh->f, 0, OFFSET_BEGINNING);
 		Read(fh->f, &tmp_buf, 256);
 		FileDiskLayout(size, tmp_buf, fh->start_byte, fh->size);
 		return fh;
@@ -324,7 +324,7 @@ size_t Sys_read(void *arg, void *buffer, loff_t offset, size_t length)
 	if (fh->is_file) {
 
 		// File, seek to position
-		if (Seek(fh->f, offset + fh->start_byte, OFFSET_BEGINNING) == -1)
+		if (ChangeFilePosition(fh->f, offset + fh->start_byte, OFFSET_BEGINNING) == 0)
 			return 0;
 
 		// Read data
@@ -408,7 +408,7 @@ size_t Sys_write(void *arg, void *buffer, loff_t offset, size_t length)
 	if (fh->is_file) {
 
 		// File, seek to position if necessary
-		if (Seek(fh->f, offset + fh->start_byte, OFFSET_BEGINNING) == -1)
+		if (ChangeFilePosition(fh->f, offset + fh->start_byte, OFFSET_BEGINNING) == 0)
 			return 0;
 
 		// Write data
