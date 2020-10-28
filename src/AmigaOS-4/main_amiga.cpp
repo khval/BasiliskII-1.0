@@ -151,6 +151,8 @@ struct Catalog *catalog;
  char *XPRAM_FILE_NAME = NULL; 
  char *XPRAM_FILE_NAME_ARC = NULL; 
 
+#define AllocVecSharedClear(size) AllocVecTags( size, AVT_Type, MEMF_SHARED, AVT_ClearWithValue, 0, TAG_END );
+
 /*
  * Open libraries
  */
@@ -214,7 +216,7 @@ void open_ahi()
 	IAHI		= NULL;
 	AHIBase	= NULL;
 
-	ahi_port = CreateMsgPort();
+	ahi_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (ahi_port) {
 
 		printf("AHI port %x\n", (unsigned int) ahi_port);
@@ -246,7 +248,7 @@ void close_ahi()
 	printf("AHI: Remove IO Request\n");
 	if (ahi_io)		DeleteIORequest((struct IORequest *)ahi_io);
 	printf("AHI: Delete MsgPort\n");
-	if (ahi_port)	DeleteMsgPort(ahi_port);
+	if (ahi_port)	FreeSysObject(ASOT_PORT,ahi_port);
 }
 
 #define only_prefs_filename "BasiliskII_prefs"
@@ -328,7 +330,9 @@ int main(int argc, char **argv)
 		dobj	= GetDiskObject("PROGDIR:BasiliskII");
 	}
 
-	if ((StartupMsgPort = CreateMsgPort()) == NULL) //  || InitGUIThread() == 0)
+	StartupMsgPort = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
+
+	if ( StartupMsgPort == NULL) 
 	{
 		QuitEmulator();
 	}
@@ -363,7 +367,7 @@ int main(int argc, char **argv)
 	}
 
 	// Allocate scratch memory
-	ScratchMem = (uint8 *)AllocVec(SCRATCH_MEM_SIZE , MEMF_SHARED|MEMF_CLEAR);
+	ScratchMem = (uint8 *)AllocVecSharedClear(SCRATCH_MEM_SIZE);
 	if (ScratchMem == NULL) {
 		ErrorAlert(GetString(STR_NO_MEM_ERR));
 		QuitEmulator();
@@ -382,7 +386,7 @@ int main(int argc, char **argv)
 	do
 	{
 		MacAddressSpace = RAMSize +  0x300000;
-		RAMBaseHost = (uint8 *) AllocVec( MacAddressSpace, MEMF_VIRTUAL|MEMF_CLEAR );
+		RAMBaseHost = (uint8 *) AllocVecSharedClear( MacAddressSpace );
 
 		if (!RAMBaseHost)
 		{
@@ -453,10 +457,8 @@ int main(int argc, char **argv)
 
 	Delay(5);
 
-
 	// Initialize everything
-	if (!InitAll(NULL))
-		QuitEmulator();
+	if (!InitAll(NULL)) QuitEmulator();
 
 	struct Message msg1, msg2;
 
@@ -512,7 +514,6 @@ int main(int argc, char **argv)
 
 		// Jump to ROM boot routine
 		//VNewRawDoFmt("Start emulation\n", (APTR (*)(APTR, UBYTE))1, NULL, NULL);
-
 
 		printf("main_amiga.cpp / Start680x0()\n");
 
@@ -588,7 +589,7 @@ void QuitEmulator(void)
 	// Exit preferences
 	PrefsExit();
 
-	DeleteMsgPort(StartupMsgPort);
+	if (StartupMsgPort) FreeSysObject(ASOT_PORT,StartupMsgPort);
 
 	// Close libraries
 
@@ -678,7 +679,7 @@ static void tick_func(void)
 	ULONG timer_mask = 0;
 
 	// Start 60Hz timer
-	timer_port = CreateMsgPort();
+	timer_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (timer_port) {
 		timer_io = (struct TimeRequest *) CreateIORequest(timer_port, sizeof(struct TimeRequest));
 		if (timer_io) {
@@ -725,7 +726,7 @@ static void tick_func(void)
 		DeleteIORequest( (struct IORequest*) timer_io);
 	}
 	if (timer_port)
-		DeleteMsgPort(timer_port);
+		FreeSysObject(ASOT_PORT,timer_port);
 
 	// Main task asked for termination, send signal
 	Forbid();
