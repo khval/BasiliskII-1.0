@@ -157,6 +157,12 @@ struct Catalog *catalog;
  * Open libraries
  */
 
+void print_sigs(const char *txt, uint32_t line)
+{
+	struct Task *t = FindTask(NULL);
+	printf("%s:%d --- tc_SigAlloc: %08x\n", txt, line, t->tc_SigAlloc);
+}
+
 static int openlibs(void)
 {
 	if ((GfxBase = OpenLibrary("graphics.library", 39)))
