@@ -20,6 +20,8 @@
 
 #define __USE_OLD_TIMEVAL__
 
+#include <proto/dos.h>
+
 #include <exec/types.h>
 #include <intuition/intuition.h>
 #include <graphics/rastport.h>
@@ -39,6 +41,10 @@
 #include "prefs.h"
 #include "user_strings.h"
 #include "video.h"
+
+#include "video_convert.h"
+
+#define convert_type void (*)(ULONG*, char*, char*, int)
 
 #define DEBUG 0
 #include "debug.h"
@@ -97,6 +103,7 @@ static UWORD *current_pointer = (UWORD *)-1;		// Currently visible mouse pointer
 static struct Process *periodic_proc = NULL;		// Periodic process
 
 extern struct Task *MainTask;				// Pointer to main task (from main_amiga.cpp)
+BPTR out = 0;
 
 // Amiga -> Mac raw keycode translation table
 static const uint8 keycode2mac[0x80] = {
@@ -585,7 +592,7 @@ bool Amiga_monitor_desc::video_open()
 			break;
 
 		case DISPLAY_SCREEN:
-			drv = new driver_screen(*this, ID);
+			drv = new driver_screen(*this, ID, mode.x, mode.y);
 			break;
 	}
 
@@ -1211,6 +1218,7 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 
 driver_window::~driver_window()
 {
+	if (out) 	Close(out);
 
 	Delay(1);
 	D(bug("driver_window::~driver_window() START %d\n",__LINE__));
@@ -1425,50 +1433,30 @@ int driver_screen::draw()
 			BMLock = 0;
 		}
 
-		switch (depth)
+		min_bpr = mac_bpr < to_bpr ? mac_bpr : to_bpr ;
+
+		if (convert)
 		{
-			case VDEPTH_1BIT:
-
-				for (nn=0; nn<height/line_skip;nn++)
-				{
-					n = frame_dice+(nn*line_skip);
-					n = n <= height ? n : height-1;
-					convert_1bit_to_8bit( vpal , (char *) VIDEO_BUFFER + (n*from_bytes_per_row),  (char *) to_mem + (n*bytes_per_row),  from_bytes_per_row );
-				}
-				break;
-
-			case VDEPTH_8BIT:
-
-				for (nn=0; nn<height/line_skip;nn++)
-				{
-					n = frame_dice+(nn*line_skip);
-					n = n <= height ? n : height-1;
-					CopyMemQuick( (char *) VIDEO_BUFFER + (n*from_bytes_per_row ),   (char *) to_mem + (n*bytes_per_row),  from_bytes_per_row );
-				}
-
-			case VDEPTH_32BIT:
-
-				for (nn=0; nn<height/line_skip;nn++)
-				{
-					n = frame_dice+(nn*line_skip);
-					n = n <= height ? n : height-1;
-					CopyMemQuick( (char *) VIDEO_BUFFER + (n*from_bytes_per_row ),   (char *) to_mem + (n*bytes_per_row),  from_bytes_per_row );
-				}
-				break;
+			for (nn=0; nn<mac_height/line_skip;nn++)
+			{
+				n = frame_dice+(nn*line_skip);
+				n = n <= mac_height ? n : mac_height-1;
+				convert( vpal , (char *) VIDEO_BUFFER + (n*mac_bpr),  (char *) to_mem + (n*to_bpr),  mac_width );
+			}
 		}
-
-		WaitBOVP( &the_screen -> ViewPort );
 
 		if  (BMLock)
 		{
 			UnlockBitMap(BMLock);
 		}
 
-/*
+
 		BltBitMapRastPort( the_bitmap, 0, 0,drv->the_win->RPort, 
 			drv->the_win->BorderLeft, drv->the_win->BorderTop,
 			mode.x, mode.y,0x0C0 );
-*/
+
+		WaitBOVP( &the_screen -> ViewPort );
+
 	}
 
 	return 0;
@@ -1640,13 +1628,16 @@ int driver_window_comp::draw()
 }
 
 // Open Picasso screen
-driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id)
+driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 	: driver_base(m)
 {
 	int vsize;
 	const video_mode &mode = m.get_current_mode();
 	depth = mode.depth;
 
+	int scr_width;
+	int scr_height;
+	int scr_depth;
 
 	// Set relative mouse mode
 	ADBSetRelMouseMode(true);
@@ -1720,29 +1711,67 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id)
 		TAG_END
 	);
 
-	if ( (depth!=VDEPTH_32BIT) || (!use_direct_video_for_32bit_screens) )
-	{	
-		vsize = TrivialBytesPerRow(width, depth ) * (height + 2);
+	if ( ! ((use_direct_video_for_32bit_screens) && (dimInfo.MaxDepth == 32)))
+	{
+		if (dimInfo.MaxDepth == 32)
+		{
+			the_bitmap =AllocBitMap( mac_width, mac_height, dimInfo.MaxDepth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
+		}
+		else
+		{
+			the_bitmap = AllocBitMapTags( mac_width, mac_height+2, dimInfo.MaxDepth, 
+				BMATags_PixelFormat,  dispi.PixelFormat,
+				BMATags_Clear, TRUE,
+				BMATags_UserPrivate, TRUE,
+				TAG_END);
+		}
+	}
+
+
 	mac_bpr = TrivialBytesPerRow(mac_width, depth );
 	vsize = mac_bpr  * (mac_height + 2);
 
-		VIDEO_BUFFER = (char *) AllocVecTags(  vsize , 
-				AVT_Type, MEMF_SHARED,
-				AVT_Contiguous, TRUE,
-				AVT_Lock,	TRUE,
-				AVT_PhysicalAlignment, TRUE,
-				TAG_END);
-		monitor.set_mac_frame_base( (uint32) Host2MacAddr((uint8 *) VIDEO_BUFFER) ) ;
+	VIDEO_BUFFER = (char *) AllocVecTags(  vsize , 
+			AVT_Type, MEMF_SHARED,
+			AVT_Contiguous, TRUE,
+			AVT_Lock,	TRUE,
+			AVT_PhysicalAlignment, TRUE,
+			TAG_END);
 
-	} else {
-		VIDEO_BUFFER = NULL;
-		monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) the_screen->RastPort.BitMap->Planes[0] ) );
+	monitor.set_mac_frame_base( (uint32) Host2MacAddr((uint8 *) VIDEO_BUFFER) ) ;
+
+	convert = NULL;
+
+	switch (scr_depth)
+	{
+		case VDEPTH_8BIT:
+			if (depth == VDEPTH_1BIT)	convert = (convert_type) &convert_1bit_to_8bit;
+			if (depth == VDEPTH_8BIT)	convert = (convert_type) &convert_copy_8bit;
+			break;
+		case VDEPTH_16BIT:
+			if (depth == VDEPTH_1BIT)	convert = (convert_type) &convert_1bit_to_16bit;
+			if (depth == VDEPTH_8BIT)	convert = (convert_type) &convert_1bit_to_16bit;
+			if (depth == VDEPTH_16BIT)	convert = (convert_type) &convert_copy_16bit;
+			break;
+		case VDEPTH_32BIT:
+			if (depth == VDEPTH_1BIT)	convert = (convert_type) &convert_1bit_to_32bit;
+			if (depth == VDEPTH_8BIT)	convert = (convert_type) &convert_8bit_to_32bit;
+			if (depth == VDEPTH_16BIT)	convert = (convert_type) &convert_16bit_to_32bit;
+			if (depth == VDEPTH_32BIT)	convert = (convert_type) &convert_copy_32bit;
+			break;
 	}
 
 	printf("Video memory: %08X - %08X - %d x %d\n", 
 		(ULONG) Mac2HostAddr( monitor.get_mac_frame_base() ),
 		(ULONG) Mac2HostAddr( monitor.get_mac_frame_base() ) + vsize,
 		mac_width, mac_height );
+
+	if (convert == NULL)
+	{
+		ErrorAlert(STR_OPEN_WINDOW_ERR);
+		init_ok = false;
+		return;
+	}
 
 	if (the_win == NULL)
 	{
