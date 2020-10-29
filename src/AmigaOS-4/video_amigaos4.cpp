@@ -238,18 +238,16 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
 	ULONG ID;
 	struct DisplayInfo dispi;
 	struct DimensionInfo di;
-	ULONG w,h;
+	uint32_t w,h;
+	uint32_t dx=~0,dy=~0;
+	uint32_t last_dx=~0,last_dy=~0;
 
 	uint64 a,get_a, diff_a, found_a, found_better_a;
-	uint32 found_mode, better_found_mode;
+	uint32 found_mode;
 
 	get_a = get_w * get_h;
 
 	found_mode = INVALID_ID;
-	better_found_mode = INVALID_ID;
-
-	found_a = ~0;
-	found_better_a = ~0;
 
 	depth_bits = depth_bits == 32 ? 24 : depth_bits;
 
@@ -265,16 +263,30 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
 				w =  di.Nominal.MaxX -di.Nominal.MinX +1;
 				h =  di.Nominal.MaxY -di.Nominal.MinY +1;
 
+				if ((get_w <= w) && (get_h <= h))
+				{
+					dx = w - get_w;
+					dy = h - get_h;
+
+					if ((dx<last_dx) &&(dy<last_dy))
+					{
+						found_mode = ID;
+
+						last_dx = dx;
+						last_dy = dy;
+					}
+				}
+
 				if ((get_w == w) && (get_h == h))
 				{
-					better_found_mode = ID;
+					found_mode = ID;
 					break;
 				}
 			}
 		}
 	}
 
-	return better_found_mode != INVALID_ID ? better_found_mode : found_mode;
+	return  found_mode ;
 }
 
 
