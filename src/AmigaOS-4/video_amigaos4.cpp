@@ -1659,20 +1659,6 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id)
 		return;
 	}
 
-/*
-	// Yes, get width and height
-
-	switch ( p96GetModeIDAttr(mode_id, P96IDA_DEPTH))
-	{
-		case 1: depth = VDEPTH_1BIT; break;
-		case 8: depth = VDEPTH_8BIT; break;
-		case 15:
-		case 16: depth = VDEPTH_16BIT; break;
-		case 24:
-		case 32: depth = VDEPTH_32BIT; break;
-	}
-*/
-
 	struct DisplayInfo dispi;
 	struct DimensionInfo dimInfo;
 
