@@ -49,6 +49,8 @@
 int last_wheel = 0;
 int delta_wheel = 0;
 
+extern bool quit_program_gui;
+
 int window_x = 0;
 int window_y = 0;
 
@@ -768,7 +770,7 @@ static void periodic_func(void)
 		win_mask = 1 << win_port->mp_SigBit;
 		drv->the_win->UserPort = win_port;
 
-		ModifyIDCMP(drv->the_win, IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
+		ModifyIDCMP(drv->the_win, IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
 			((drv->monitor.display_type == DISPLAY_SCREEN) ? IDCMP_DELTAMOVE : 0));
 	}
 
@@ -835,6 +837,10 @@ static void periodic_func(void)
 
 				// Handle message according to class
 				switch (cl) {
+
+					case IDCMP_CLOSEWINDOW:
+						quit_program_gui = true;
+						break;
 
 					case IDCMP_MOUSEMOVE:
 
@@ -1114,14 +1120,17 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 	// Set absolute mouse mode
 	ADBSetRelMouseMode(false);
 
-	width = w;
-	height = h;
+	mac_width = w;
+	mac_height = h;
+
+//	out = Open("CON:",MODE_NEWFILE);
+//	FPrintf(out,"Hello world\n");
 
 	// Open window
 	the_win = OpenWindowTags(NULL,
 		WA_Left, window_x, 
 		WA_Top, window_y,
-		WA_InnerWidth, width, WA_InnerHeight, height,
+		WA_InnerWidth, mac_width, WA_InnerHeight, mac_height,
 		WA_SimpleRefresh, true,
 		WA_NoCareRefresh, true,
 		WA_Activate, true,
@@ -1130,7 +1139,9 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 		WA_DragBar, true,
 		WA_DepthGadget, true,
 		WA_SizeGadget, false,
+		WA_CloseGadget, TRUE,
 		WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
+		WA_IDCMP,0 ,
 		TAG_END
 	);
 	if (the_win == NULL) {

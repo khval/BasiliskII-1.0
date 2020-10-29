@@ -35,6 +35,8 @@ B2_mutex *spcflags_lock = NULL;
 #endif
 
 bool quit_program = false;
+bool quit_program_gui = false;
+
 struct flag_struct regflags;
 
 /* Opcode of faulting instruction */
@@ -1318,7 +1320,7 @@ int m68k_do_specialties (void)
 
 void m68k_do_execute (void)
 {
-	while (quit_program == false) {
+	while (! (quit_program_gui | quit_program) ) {
 		uae_u32 opcode = GET_OPCODE;
 #if FLIGHT_RECORDER
 		m68k_record_step(m68k_getpc());
@@ -1335,7 +1337,7 @@ void m68k_do_execute (void)
 void m68k_compile_execute (void)
 {
     for (;;) {
-	  if (quit_program)
+	  if (quit_program)|quit_program_gui)
 		break;
 	  m68k_do_compile_execute();
     }
@@ -1347,11 +1349,10 @@ void m68k_execute (void)
 #if USE_JIT
     ++m68k_execute_depth;
 #endif
-    for (;;) {
-	  if (quit_program)
-		break;
-	  m68k_do_execute();
-    }
+	while (! (quit_program_gui | quit_program) )
+	{
+		m68k_do_execute();
+	}
 #if USE_JIT
     --m68k_execute_depth;
 #endif
