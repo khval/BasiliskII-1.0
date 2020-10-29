@@ -1,2 +1,6 @@
 
 *.o
+
+src/AmigaOS-4/BasiliskII.db
+
+src/AmigaOS-4/obj/build68k
