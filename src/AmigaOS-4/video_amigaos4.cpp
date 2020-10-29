@@ -1515,6 +1515,18 @@ int driver_window::draw()
 			}
 			break;
 
+		case VDEPTH_32BIT:
+
+			to_bpr = the_bitmap -> BytesPerRow;	
+			to_mem = (char *) the_bitmap -> Planes[0];
+
+			for (nn=0; nn<(mac_height/ line_skip);nn++)
+			{
+				n = frame_dice+(nn*line_skip);
+				n = n <= mac_height ? n : mac_height-1;
+				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mac_bpr ),   (char *) to_mem + (n*to_bpr),  mac_bpr );
+			}
+
 	}
 
 	BltBitMapRastPort( drv->get_bitmap(), 0, 0,drv->the_win->RPort, 
