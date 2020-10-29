@@ -39,7 +39,9 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
     ../macos_util.cpp ../xpram.cpp xpram_amigaos4.cpp ../timer.cpp \
     timer_amigaos4.cpp clip_amigaos4.cpp ../adb.cpp ../serial.cpp \
     serial_amiga.cpp  ../ether.cpp ../dummy/ether_dummy.cpp  ../sony.cpp ../disk.cpp \
-    ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp video_amigaos4.cpp \
+    ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp \
+	video_amigaos4.cpp \
+	video_convert.cpp \
     ../audio.cpp ../sdl/audio_sdl.cpp ../extfs.cpp  ../extfs_amigaos4.cpp \
     ../user_strings.cpp user_strings_amigaos4.cpp prefs_editor_amigaos4.cpp   \
 	$(CPUSRCS)
