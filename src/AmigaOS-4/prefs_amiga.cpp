@@ -38,7 +38,6 @@ prefs_desc platform_prefs_items[] = {
 
 // Prefs file name
 extern char *PREFS_FILE_NAME;
-extern char *PREFS_FILE_NAME_ARC;
 
 /*
  *  Load preferences from settings file
@@ -70,10 +69,6 @@ void SavePrefs(void)
 {
 	FILE *f;
 	if ((f = fopen(PREFS_FILE_NAME, "w")) != NULL) {
-		SavePrefsToStream(f);
-		fclose(f);
-	}
-	if ((f = fopen(PREFS_FILE_NAME_ARC, "w")) != NULL) {
 		SavePrefsToStream(f);
 		fclose(f);
 	}

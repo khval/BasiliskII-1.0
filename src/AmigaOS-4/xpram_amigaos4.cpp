@@ -26,7 +26,6 @@
 
 // XPRAM file name
 extern char *XPRAM_FILE_NAME;
-extern char *XPRAM_FILE_NAME_ARC;
 
 /*
  *  Load XPRAM from settings file
@@ -53,10 +52,6 @@ void SaveXPRAM(void)
 		Write(fh, XPRAM, 256);
 		Close(fh);
 	}
-	if ((fh = Open(XPRAM_FILE_NAME_ARC, MODE_NEWFILE)) != NULL) {
-		Write(fh, XPRAM, 256);
-		Close(fh);
-	}
 }
 
 
@@ -67,5 +62,4 @@ void SaveXPRAM(void)
 void ZapPRAM(void)
 {
 	Delete(XPRAM_FILE_NAME);
-	Delete(XPRAM_FILE_NAME_ARC);
 }

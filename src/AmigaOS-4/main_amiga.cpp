@@ -147,9 +147,7 @@ extern void ADBExit(void);
 struct Catalog *catalog;
 
  char *PREFS_FILE_NAME = NULL; 
- char *PREFS_FILE_NAME_ARC = NULL; 
  char *XPRAM_FILE_NAME = NULL; 
- char *XPRAM_FILE_NAME_ARC = NULL; 
 
 #define AllocVecSharedClear(size) AllocVecTags( size, AVT_Type, MEMF_SHARED, AVT_ClearWithValue, 0, TAG_END );
 
@@ -274,12 +272,8 @@ int main(int argc, char **argv)
 	DateStamp(&ds);
 	srand(ds.ds_Tick);
 
-
-	PREFS_FILE_NAME =		strdup("ENV:"    only_prefs_filename);
-	PREFS_FILE_NAME_ARC =	strdup("ENVARC:" only_prefs_filename);
-	XPRAM_FILE_NAME =		strdup("ENV:"    only_xpram_filename);
-	XPRAM_FILE_NAME_ARC =	strdup("ENVARC:" only_xpram_filename);
-
+	PREFS_FILE_NAME =	strdup("PROGDIR:"    only_prefs_filename);
+	XPRAM_FILE_NAME =strdup("PROGDIR:"    only_xpram_filename);
 
 	if (openlibs() == 0)
 	{
@@ -319,9 +313,7 @@ int main(int argc, char **argv)
 				if ((c=='/')||(c==':'))
 				{
 					MERGE_STR(PREFS_FILE_NAME,		argv[1],	only_prefs_filename);
-					MERGE_STR(PREFS_FILE_NAME_ARC,	argv[1],	only_prefs_filename);
 					MERGE_STR(XPRAM_FILE_NAME,		argv[1],	only_xpram_filename);
-					MERGE_STR(XPRAM_FILE_NAME_ARC,	argv[1],	only_xpram_filename);
 				}
 			}
 		}
@@ -611,10 +603,7 @@ void QuitEmulator(void)
 	}
 
 	FREE_STR(PREFS_FILE_NAME);
-	FREE_STR(PREFS_FILE_NAME_ARC);
 	FREE_STR(XPRAM_FILE_NAME);
-	FREE_STR(XPRAM_FILE_NAME_ARC);
-
 
 	exit(0);
 }
