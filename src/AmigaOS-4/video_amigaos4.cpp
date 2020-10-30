@@ -357,6 +357,10 @@ int add_modes(int mode_id, video_depth depth)
 	return mode_id;
 }
 
+#define AllocShard(size) AllocVecTags(size,	\ 
+		AVT_Type, MEMF_SHARED,		\
+		AVT_ClearWithValue, 0,			\
+		TAG_END)
 
 
 bool VideoInit(bool classic)
@@ -380,7 +384,7 @@ bool VideoInit(bool classic)
 
 	// Allocate blank mouse pointer data
 
-	null_pointer = (UWORD *)AllocMem(12, MEMF_PUBLIC | MEMF_CHIP | MEMF_CLEAR);
+	null_pointer = (UWORD *)AllocShard(12);
 
 	if (null_pointer == NULL) {
 		ErrorAlert(STR_NO_MEM_ERR);
@@ -669,10 +673,16 @@ void VideoExit(void)
 
 	D(bug("VideoExit(void) %d\n",__LINE__));
 
-	// Free mouse pointer
-	if (null_pointer) {
-		FreeMem(null_pointer, 12);
+	if (null_pointer)
+	{
+		FreeVec(null_pointer);
 		null_pointer = NULL;
+	}
+
+	if (out) 
+	{
+		Close(out);
+		out = NULL;
 	}
 
 	D(bug("VideoExit(void) %d\n",__LINE__));
@@ -1216,8 +1226,6 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 
 driver_window::~driver_window()
 {
-	if (out) 	Close(out);
-
 	Delay(1);
 	D(bug("driver_window::~driver_window() START %d\n",__LINE__));
 
@@ -1727,7 +1735,14 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		TAG_END
 	);
 
-	if ( ! ((use_direct_video_for_32bit_screens) && (dimInfo.MaxDepth == 32)))
+	if ((the_win) && (null_pointer))
+	{
+		// Hide mouse pointer inside window
+		SetPointer(the_win, null_pointer, 1, 16, 0, 0);
+		current_pointer = null_pointer;
+	}
+
+	if ( ! ((render_method == rm_direct ) && (dimInfo.MaxDepth == 32)))
 	{
 		if (dimInfo.MaxDepth == 32)
 		{
