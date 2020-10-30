@@ -104,9 +104,10 @@ char convert_1bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  bytes )
 }
 
 
-void convert_1bit_to_8bit( ULONG *pal, char *from, char *to,int  bytes )
+void convert_1bit_to_8bit( ULONG *pal, char *from, char *to,int  pixels )
 {
 	register int n;
+	int bytes = pixels / 8;
 
 	for (n=0; n<bytes;n++)
 	{
@@ -121,9 +122,10 @@ void convert_1bit_to_8bit( ULONG *pal, char *from, char *to,int  bytes )
 	}
 }
 
-void convert_1bit_to_16bit( ULONG *pal, char *from, uint16 *to,int  bytes )
+void convert_1bit_to_16bit( ULONG *pal, char *from, uint16 *to,int  pixels )
 {
 	register int n;
+	int bytes = pixels / 8;
 
 	for (n=0; n<bytes;n++)
 	{
@@ -139,9 +141,10 @@ void convert_1bit_to_16bit( ULONG *pal, char *from, uint16 *to,int  bytes )
 }
 
 
-void convert_1bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  bytes )
+void convert_1bit_to_32bit( ULONG *pal, char *from, uint32 *to,int pixels )
 {
 	register int n;
+	int bytes = pixels / 8;
 
 	for (n=0; n<bytes;n++)
 	{
@@ -156,12 +159,12 @@ void convert_1bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  bytes )
 	}
 }
 
-void convert_8bit_to_32bit_db( ULONG *pal, char *from, uint32 *to,int  bytes )
+void convert_8bit_to_32bit_db( ULONG *pal, char *from, uint32 *to,int  pixels )
 {
 	register int n;
 	register int v;
 
-	for (n=0; n<bytes;n++)
+	for (n=0; n<pixels;n++)
 	{
 		v = pal[from[n]];
 		*to++=v;
@@ -169,7 +172,7 @@ void convert_8bit_to_32bit_db( ULONG *pal, char *from, uint32 *to,int  bytes )
 	}
 }
 
-void convert_8bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  bytes )
+void convert_8bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  pixels )
 {
 	asm
 	(
@@ -206,16 +209,15 @@ void convert_8bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  bytes )
 		"cmpw	cr7,9,%3 \n"
 		"blt+	cr7,loop"
 
-		::"r" (pal), "r" (from), "r" (to), "r" (bytes): "r9","r0","r3"
+		::"r" (pal), "r" (from), "r" (to), "r" (pixels): "r9","r0","r3"
 	);
 }
 
-void convert_8bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  bytes )
+void convert_8bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  pixels )
 {
 	int n;
-	int count = bytes / 2;
 
-	for (n=0; n<bytes;n++)
+	for (n=0; n<pixels;n++)
 	{
 		to[n] = pal[from[n]];
 	}
@@ -224,10 +226,18 @@ void convert_8bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  bytes )
 void convert_16bit_to_32bit( ULONG *pal, uint16 *from, uint32 *to,int  pixels )
 {
 	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
 
 	for (n=0; n<pixels;n++)
 	{
-		to[n] = 0xFF000000 | from[n];
+		rgb = from[n];
+		r = (rgb & 0x00F800) << 8;
+		g = (rgb & 0x0007E0) << 5;
+		b = (rgb & 0x00001F) << 3;
+		to[n] = 0xFF000000 | r | g | b;
 	}
 }
 
