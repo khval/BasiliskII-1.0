@@ -874,7 +874,8 @@ static void periodic_func(void)
 
 					case IDCMP_MOUSEMOVE:
 
-						switch (drv->monitor.display_type) {
+						switch (drv->monitor.display_type) 
+						{
 							case DISPLAY_SCREEN:
 
 								mx = msg->MouseX;
@@ -894,7 +895,6 @@ static void periodic_func(void)
 								MutexRelease(video_mutex);
 
 								break;
-
 						}
 						break;
 				
@@ -1154,7 +1154,6 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 	mac_height = h;
 
 //	out = Open("CON:",MODE_NEWFILE);
-//	FPrintf(out,"Hello world\n");
 
 	// Open window
 	the_win = OpenWindowTags(NULL,
