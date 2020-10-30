@@ -1719,6 +1719,7 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		WA_SimpleRefresh, true,
 		WA_NoCareRefresh, true,
 		WA_Borderless, true,
+		WA_CloseGadget,false,
 		WA_Activate, true,
 		WA_RMBTrap, true,
 		WA_ReportMouse, true,
