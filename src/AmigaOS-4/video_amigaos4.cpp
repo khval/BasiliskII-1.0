@@ -62,8 +62,8 @@ int window_y = 0;
 
 // ---- Default options!!! ----
 
-int use_p96_lock = 1;
-int use_direct_video_for_32bit_screens = 0;
+int use_lock = 1;
+int render_method = 0;
 
 // ----------------------------
 
@@ -93,6 +93,13 @@ enum {
 	DISPLAY_SCREEN_MMU_HACK,
 	DISPLAY_SCREEN_DIRECT_VIDEO,
 	DISPLAY_SCREEN,
+};
+
+enum 
+{
+	rm_internal,
+	rm_wpa,
+	rm_direct
 };
 
 // Global variables
@@ -362,7 +369,6 @@ int add_modes(int mode_id, video_depth depth)
 		AVT_ClearWithValue, 0,			\
 		TAG_END)
 
-
 bool VideoInit(bool classic)
 {
 	video_depth default_depth = VDEPTH_32BIT;
@@ -375,8 +381,8 @@ bool VideoInit(bool classic)
 	int boot_depth;
 
 	boot_depth = PrefsFindInt32("windowdepth");
-    use_p96_lock = PrefsFindBool("use_p96_lock");
-	use_direct_video_for_32bit_screens = PrefsFindBool("use_direct_video_32b");
+	use_lock = PrefsFindBool("use_bitmap_lock");
+	render_method = PrefsFindBool("render_method");
 
 	printf("boot_depth %d\n",boot_depth);
 
@@ -1413,10 +1419,10 @@ int driver_screen::draw()
 		frame_dice ++;
 		if (frame_dice >  line_skip)  frame_dice = 0;
 
-		use_p96_lock = 0;
+		use_lock = 0;
 /*
 
-		if (use_p96_lock)
+		if (use_lock)
 		{
 			BMLock = LockBitMapTags(&the_screen -> BitMap, 
 				LBM_BaseAddress, &to_mem,

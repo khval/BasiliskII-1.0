@@ -78,6 +78,13 @@ char	*window_depth_names[]=
 	NULL
 };
 
+char	*window_render_method_names[]=
+{
+	"Internal convertion",
+	"System Write Pixel Array",
+	"Direct write (if possible)",
+	NULL
+};
 
 char	*device_names[]=
 {
@@ -447,15 +454,16 @@ static void read_emulation_settings( void )
 				break;
 	}
 
+
+
 	PrefsReplaceString("screen", buf);
 
-	printf("use_p96_lock: %s \n",	getv( obj[ID_PREFS_GFX_LOCK_P96_GAD], GA_Selected) ? "True" : "False" ); 
-	printf("use_direct_video_32b: %s\n",	getv( obj[ID_PREFS_GFX_FSCREEN_32B_GAD], GA_Selected) ? "True" : "False"); 
+	printf("use_bitmap_lock: %s \n",	getv( obj[ID_PREFS_GFX_LOCK_GAD], GA_Selected) ? "True" : "False" ); 
+	printf("render_method: %d\n",	getv( obj[ID_PREFS_GFX_RENDER_METHOD_GAD], CHOOSER_Selected) ); 
 
+	PrefsReplaceBool("use_bitmap_lock",		getv( obj[ID_PREFS_GFX_LOCK_GAD], GA_Selected)); 
 
-
-	PrefsReplaceBool("use_p96_lock",		getv( obj[ID_PREFS_GFX_LOCK_P96_GAD], GA_Selected)); 
-	PrefsReplaceBool("use_direct_video_32b",		getv( obj[ID_PREFS_GFX_FSCREEN_32B_GAD], GA_Selected)); 
+	PrefsReplaceInt32("render_method",		getv( obj[ID_PREFS_GFX_RENDER_METHOD_GAD], CHOOSER_Selected)); 
 
 	PrefsReplaceInt32("windowdepth",	getv( obj[ID_PREFS_GFX_WINDOW_DEPTH_GAD], CHOOSER_Selected) ) ;
 
@@ -773,18 +781,17 @@ static void set_emulation_settings( void )
 	RSetAttrO( win_prefs, ID_PREFS_GFX_WINDOW_DEPTH_GAD, 
 		CHOOSER_Selected, PrefsFindInt32("windowdepth")) ;
 
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_RENDER_METHOD_GAD,
+		CHOOSER_Selected, PrefsFindInt32("render_method")) ;
+
 	RSetAttrO( win_prefs, ID_PREFS_GFX_FRAMESKIP_GAD,
 		INTEGER_Number, PrefsFindInt32("frameskip"));
 
 	RSetAttrO( win_prefs, ID_PREFS_GFX_LINESKIP_GAD,
 		INTEGER_Number, PrefsFindInt32("lineskip"));
 
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_LOCK_P96_GAD,
-		GA_Selected, PrefsFindBool("use_p96_lock"));
-
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_FSCREEN_32B_GAD,
-		GA_Selected, PrefsFindBool("use_direct_video_32b"));
-
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_LOCK_GAD,
+		GA_Selected, PrefsFindBool("use_bitmap_lock"));
 
 	// Sound
 

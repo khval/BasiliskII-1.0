@@ -30,8 +30,8 @@ prefs_desc platform_prefs_items[] = {
 	{"scsimemtype", TYPE_INT32, false, "SCSI buffer memory type"},
 	{"lineskip", TYPE_INT32, false, "Skip scan lines"},
 	{"windowdepth", TYPE_INT32, false, "Window depth" },
-	{"use_p96_lock", TYPE_BOOLEAN, false, "Lock screen in fullscreen" },
-	{"use_direct_video_32b", TYPE_BOOLEAN, false, "For some videocards" },
+	{"use_bitmap_lock", TYPE_BOOLEAN, false, "Use bitmap lock" },
+	{"render_method", TYPE_INT32, false, "how to render the gfx" },
 	{NULL, TYPE_END, false, NULL} // End of list
 };
 
