@@ -1407,19 +1407,18 @@ int driver_screen::draw()
 		if (frame_dice >  line_skip)  frame_dice = 0;
 
 		use_p96_lock = 0;
+/*
 
 		if (use_p96_lock)
 		{
-			if (BMLock = LockBitMapTags(&the_screen -> BitMap, 
-				LBM_BaseAddress, &ri.BytesPerRow,
-				LBM_BytesPerRow, &ri.Memory,
-				TAG_END))
-			{
-				to_bpr = ri.BytesPerRow;
-				to_mem = (char *) ri.Memory;
-			}
+			BMLock = LockBitMapTags(&the_screen -> BitMap, 
+				LBM_BaseAddress, &to_mem,
+				LBM_BytesPerRow, &to_bpr,
+				TAG_END);
+	
 		}
-		else
+
+		if ( ! BMLock )	// default
 		{
 			to_bpr = the_bitmap -> BytesPerRow;	
 			to_mem = (char *) the_bitmap -> Planes[0];
@@ -1428,13 +1427,16 @@ int driver_screen::draw()
 
 		mode.mode.bytes_per_row = mode.mode.bytes_per_row;
 
+
 		if (convert)
 		{
-			for (nn=0; nn<mac_height/line_skip;nn++)
+			for (nn=0; nn<mac_height / 4;nn++)
 			{
-				n = frame_dice+(nn*line_skip);
-				n = n <= mac_height ? n : mac_height-1;
-				convert( vpal , (char *) VIDEO_BUFFER + (n*mac_bpr),  (char *) to_mem + (n*to_bpr),  mac_width );
+				n = nn;
+
+//				convert_8bit_to_32bit_asm( vpal , (char *) VIDEO_BUFFER + (n*mode.mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
+//				convert( vpal , (char *) VIDEO_BUFFER + (n*mode.mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  mode.x / 2 );
+				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mode.mode.bytes_per_row ),   (char *) to_mem + (n*to_bpr),  to_bpr );
 			}
 		}
 
@@ -1442,12 +1444,33 @@ int driver_screen::draw()
 		{
 			UnlockBitMap(BMLock);
 		}
+*/
 
+		       WritePixelArray( (uint8*) VIDEO_BUFFER,
+				0, 0,
+				mode.bytes_per_row, PIXF_A8R8G8B8,
+				drv->the_win->RPort, 
+				drv->the_win->BorderLeft, drv->the_win->BorderTop,
+				mode.x, mode.y);
 
-		BltBitMapRastPort( the_bitmap, 0, 0,drv->the_win->RPort, 
-			drv->the_win->BorderLeft, drv->the_win->BorderTop,
-			mode.x, mode.y,0x0C0 );
+/*
+		{
+			struct RastPort rp;
+			InitRastPort(&rp);
+			rp.BitMap = the_bitmap;
 
+			RectFillColor( &rp, 0, 0,   50,  50, 0xFFFF0000);
+		}
+*/
+
+/*
+		if ( ! BMLock )
+		{
+			BltBitMapRastPort( the_bitmap, 0, 0,drv->the_win->RPort, 
+				drv->the_win->BorderLeft, drv->the_win->BorderTop,
+				mode.x, mode.y,0x0C0 );
+		}		
+*/
 		WaitBOVP( &the_screen -> ViewPort );
 	}
 
