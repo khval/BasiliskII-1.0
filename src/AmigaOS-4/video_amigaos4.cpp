@@ -169,7 +169,6 @@ public:
 
 	int mac_width;
 	int mac_height;
-	int mac_bpr;
 };
 
 class driver_window : public driver_base {
@@ -1179,8 +1178,7 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 			BMATags_UserPrivate, TRUE,				
 			TAG_END);
 
-		mac_bpr = TrivialBytesPerRow(mac_width, depth );
-		vmem_size = mac_bpr * (mac_height + 2);
+		vmem_size = mode.bytes_per_row * (mac_height + 2);
 
 		VIDEO_BUFFER = (char *)  AllocVecTags( vmem_size,
 			AVT_Type, MEMF_SHARED,
@@ -1327,15 +1325,11 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 		return;
 	}
 
-
 	the_bitmap =AllocBitMap( mac_width, mac_height, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
-//	bytes_per_row = p96GetBitMapAttr(the_bitmap, P96BMA_BYTESPERROW);	
 	FreeBitMap(the_bitmap);
 	the_bitmap = NULL;
 
-
-	mac_bpr = TrivialBytesPerRow(mac_width, depth );
-	vmem_size = mac_bpr * (mac_height + 2);
+	vmem_size = mode.bytes_per_row * (mode.y + 2);
 
 	VIDEO_BUFFER = (char *)  AllocVecTags( vmem_size , 
 			AVT_Type, MEMF_SHARED,
@@ -1406,14 +1400,13 @@ int driver_screen::draw()
 	struct RenderInfo ri;
 	APTR BMLock;
 
-
 	if (VIDEO_BUFFER)
 	{
 
 		frame_dice ++;
 		if (frame_dice >  line_skip)  frame_dice = 0;
 
-		mac_bpr = TrivialBytesPerRow( mac_width, depth );
+		use_p96_lock = 0;
 
 		if (use_p96_lock)
 		{
@@ -1433,7 +1426,7 @@ int driver_screen::draw()
 			BMLock = 0;
 		}
 
-		min_bpr = mac_bpr < to_bpr ? mac_bpr : to_bpr ;
+		mode.mode.bytes_per_row = mode.mode.bytes_per_row;
 
 		if (convert)
 		{
@@ -1456,7 +1449,6 @@ int driver_screen::draw()
 			mode.x, mode.y,0x0C0 );
 
 		WaitBOVP( &the_screen -> ViewPort );
-
 	}
 
 	return 0;
@@ -1486,7 +1478,7 @@ int driver_window::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mac_height ? n : mac_height-1;
-				convert_1bit_to_32bit( vpal , (char *) VIDEO_BUFFER + (n*mac_bpr), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mac_width );
+				convert_1bit_to_32bit( vpal , (char *) VIDEO_BUFFER + (n*mode.bytes_per_row), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
 			}
 			break;
 
@@ -1499,7 +1491,7 @@ int driver_window::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mac_height ? n : mac_height-1;
-				convert_8bit_to_32bit_asm( vpal , (char *) VIDEO_BUFFER + (n*mac_bpr), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mac_width);
+				convert_8bit_to_32bit_asm( vpal , (char *) VIDEO_BUFFER + (n*mode.bytes_per_row), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x);
 			}
 			break;
 
@@ -1512,7 +1504,7 @@ int driver_window::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mac_height ? n : mac_height-1;
-				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mac_bpr ),   (char *) to_mem + (n*to_bpr),  mac_bpr );
+				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ),   (char *) to_mem + (n*to_bpr),  mode.bytes_per_row );
 			}
 
 	}
@@ -1572,7 +1564,7 @@ int driver_window_comp::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mac_height ? n : mac_height-1;
-				convert_1bit_to_32bit( vpal , (char *) VIDEO_BUFFER + (n*mac_bpr ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mac_width );
+				convert_1bit_to_32bit( vpal , (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mac_width );
 			}
 			break;
 
@@ -1581,7 +1573,7 @@ int driver_window_comp::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mac_height ? n : mac_height-1;
-				convert_8bit_to_32bit_asm( vpal , (char *) VIDEO_BUFFER + (n*mac_bpr ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mac_width );
+				convert_8bit_to_32bit_asm( vpal , (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mac_width );
 			}
 			break;
 
@@ -1591,7 +1583,7 @@ int driver_window_comp::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mac_height ? n : mac_height-1;
-				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mac_bpr ),   (char *) to_mem + (n*to_bpr),  mac_bpr );
+				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ),   (char *) to_mem + (n*to_bpr),  mode.bytes_per_row );
 			}
 			break;
 	}
@@ -1727,9 +1719,7 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		}
 	}
 
-
-	mac_bpr = TrivialBytesPerRow(mac_width, depth );
-	vsize = mac_bpr  * (mac_height + 2);
+	vsize = mode.bytes_per_row  * (mac_height + 2);
 
 	VIDEO_BUFFER = (char *) AllocVecTags(  vsize , 
 			AVT_Type, MEMF_SHARED,
