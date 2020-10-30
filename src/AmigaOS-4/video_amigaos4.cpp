@@ -309,7 +309,7 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
 int add_modes(int mode_id, video_depth depth)
 {
 	LONG depth_bits;
-	int bpr;
+	int bpr1,bpr2,bpr;
 	struct List *ml;
 	struct DisplayInfo di;
 	struct DimensionInfo dimi;
@@ -318,13 +318,7 @@ int add_modes(int mode_id, video_depth depth)
 	int lw=0,lh=0;
 	int w,h;
 
-	switch (depth)
-	{
-		case VDEPTH_1BIT:	depth_bits = 8; break;
-		case VDEPTH_8BIT: depth_bits = 8; break;
-		case VDEPTH_16BIT: depth_bits = 16; break;
-		case VDEPTH_32BIT: depth_bits = 32; break;
-	}
+	if ( !out ) out = Open("CON:",MODE_NEWFILE);
 
 	for( DisplayID = NextDisplayInfo( INVALID_ID ) ; DisplayID !=INVALID_ID ;  DisplayID = NextDisplayInfo( DisplayID ) )
 	{
@@ -337,9 +331,11 @@ int add_modes(int mode_id, video_depth depth)
 				w =  dimi.Nominal.MaxX -dimi.Nominal.MinX +1;
 				h =  dimi.Nominal.MaxY -dimi.Nominal.MinY +1;
 
-				if (depth==VDEPTH_32BIT)
+				if ((depth == VDEPTH_32BIT) && (di.PixelFormat == PIXF_A8R8G8B8))
 				{
-					bpr =  GetBoardBytesPerRow( di.RTGBoardNum, (PIX_FMT) di.PixelFormat, w );
+					bpr1 =  GetBoardBytesPerRow( di.RTGBoardNum, (PIX_FMT) di.PixelFormat, w );
+					bpr2 =  TrivialBytesPerRow( w, depth );
+					bpr = bpr1 > bpr2 ? bpr1 : bpr2;
 				}
 				else
 				{
@@ -354,6 +350,10 @@ int add_modes(int mode_id, video_depth depth)
 					{
 						add_mode( w, h, mode_id,	 bpr, depth);
 						mode_id ++;
+					}
+					else
+					{
+						printf("%s: bad bpr\n",__FUNCTION__);
 					}
 				}
 			}
