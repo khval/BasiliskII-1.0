@@ -1723,19 +1723,15 @@ bool RunPrefs(void)
 		}
 
 done:
-//		if (retval)
-//		{
-			printf("****done*****\n");
+		read_volumes_settings();
+		read_scsi_settings();
+		read_serial_settings(); 
+		read_emulation_settings();
+		SavePrefs();
 
-			read_volumes_settings();
-			read_scsi_settings();
-			read_serial_settings(); 
-			read_emulation_settings();
-			SavePrefs();
-//		}
 	}
 
-// quit:
+
 	for (n=0;n<win_end;n++) if (win[n]) close_window(n);
 	if (appport) DeleteMsgPort(appport);
 
