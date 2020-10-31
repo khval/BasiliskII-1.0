@@ -526,14 +526,11 @@ int main(int argc, char **argv)
 
 void QuitEmulator(void)
 {
-
 	// Abort processes
 
 	printf("** Abort processes\n");
 
 	if (Sound_Proc)	Signal((struct Task *)Sound_Proc, SIGBREAKF_CTRL_C);
-
-	print_sigs( __FUNCTION__ ,  __LINE__ );
 
 	printf("** Stop 60Hz process\n");
 
@@ -542,21 +539,15 @@ void QuitEmulator(void)
 	if (tick_proc) Signal((struct Task *)tick_proc, SIGBREAKF_CTRL_C);
 	tick_proc_active = false;
 
-	print_sigs( __FUNCTION__ ,  __LINE__ );
-
 	printf("** Stop XPRAM watchdog process\n");
 
 	// Stop XPRAM watchdog process
 
 	if (xpram_proc)	Signal((struct Task *)xpram_proc, SIGBREAKF_CTRL_C);
 
-	print_sigs( __FUNCTION__ ,  __LINE__ );
-
 	ADBExit();
 
 	if (gui_proc) Signal((struct Task *)gui_proc, SIGBREAKF_CTRL_C);
-
-	print_sigs( __FUNCTION__ ,  __LINE__ );
 
 	// Deinitialize everything
 	ExitAll();
