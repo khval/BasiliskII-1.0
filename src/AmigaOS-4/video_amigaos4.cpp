@@ -162,8 +162,8 @@ public:
 	virtual void set_palette(uint8 *pal, int num) {};
 	virtual struct BitMap *get_bitmap() { return NULL; };
 	virtual int draw() { return 1;}
-	virtual int get_width() { return mac_width; }
-	virtual int get_height() { return mac_height; }
+	virtual int get_width() { return mode.x; }
+	virtual int get_height() { return mode.y; }
 
 public:
 	Amiga_monitor_desc &monitor;	// Associated video monitor
