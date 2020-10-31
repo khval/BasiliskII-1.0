@@ -1320,7 +1320,18 @@ void window_draw_internal( driver_base *drv )
 	int n,nn;
 	char *to_mem ;
 	int to_bpr;  
+	int to_bpp;
 	APTR BMLock;
+	uint32_t iw,ih;
+	uint32_t dx,dy;
+
+	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
+	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
+
+	dx = iw /2 - drv -> mode.x / 2;
+	dy = ih /2 - drv -> mode.y / 2;
+
+	to_bpp = GetBitMapAttr(drv->the_win->RPort ->BitMap, BMA_BYTESPERPIXEL);
 
 	BMLock = LockBitMapTags(drv->the_win->RPort ->BitMap, 
 		LBM_BaseAddress, &to_mem,
@@ -1329,6 +1340,8 @@ void window_draw_internal( driver_base *drv )
 
 	if (BMLock)
 	{
+		to_mem += (dy*to_bpr) + (dx*to_bpp);
+
 		for (nn=0; nn<drv ->mode.y;nn++)
 		{
 			n = nn;
@@ -1343,8 +1356,21 @@ void window_draw_internal_no_lock( driver_base *drv )
 {
 	int n,nn;
 	char *to_mem = (char *) drv->the_win->RPort ->BitMap -> Planes[0];
-	int to_bpr = drv->the_win->RPort ->BitMap -> BytesPerRow;  
+	uint32 to_bpr = drv->the_win->RPort ->BitMap -> BytesPerRow;  
+	uint32 to_bpp;
 	APTR BMLock;
+	uint32_t iw,ih;
+	uint32_t dx,dy;
+
+	to_bpp = GetBitMapAttr(drv->the_win->RPort ->BitMap, BMA_BYTESPERPIXEL);
+
+	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
+	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
+
+	dx = iw /2 - drv -> mode.x / 2;
+	dy = ih /2 - drv -> mode.y / 2;
+
+	to_mem += (dy*to_bpr) + (dx * to_bpp);
 
 	for (nn=0; nn<drv ->mode.y;nn++)
 	{
@@ -1360,6 +1386,14 @@ void bitmap_draw_internal( driver_base *drv )
 	char *to_mem ;
 	int to_bpr;  
 	APTR BMLock;
+	uint32_t iw,ih;
+	uint32_t dx,dy;
+
+	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
+	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
+
+	dx = iw /2 - drv -> mode.x / 2;
+	dy = ih /2 - drv -> mode.y / 2;
 
 	BMLock = LockBitMapTags(drv->the_bitmap, 
 		LBM_BaseAddress, &to_mem,
@@ -1378,8 +1412,8 @@ void bitmap_draw_internal( driver_base *drv )
 	}
 
 	BltBitMapRastPort( drv->get_bitmap(), 0, 0,drv->the_win->RPort, 
-		drv->the_win->BorderLeft, 
-		drv->the_win->BorderTop,
+		dx+drv->the_win->BorderLeft, 
+		dy+drv->the_win->BorderTop,
 		drv->mode.x, 
 		drv->mode.y,0x0C0 );
 }
@@ -1391,6 +1425,15 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 	int to_bpr = drv->the_bitmap -> BytesPerRow;  
 	APTR BMLock;
 
+	uint32_t iw,ih;
+	uint32_t dx,dy;
+
+	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
+	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
+
+	dx = iw /2 - drv -> mode.x / 2;
+	dy = ih /2 - drv -> mode.y / 2;
+
 	for (nn=0; nn<drv ->mode.y;nn++)
 	{
 		n = nn;
@@ -1398,8 +1441,8 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 	}
 
 	BltBitMapRastPort( drv->get_bitmap(), 0, 0,drv->the_win->RPort, 
-		drv->the_win->BorderLeft, 
-		drv->the_win->BorderTop,
+		dx+drv->the_win->BorderLeft + dx, 
+		dy+drv->the_win->BorderTop + dy,
 		drv->mode.x, 
 		drv->mode.y,0x0C0 );
 }
@@ -1408,9 +1451,27 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 
 void window_draw_wpa ( driver_base *drv )
 {
+	uint32_t iw,ih;
+	uint32_t dx,dy;
+
+	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
+	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
+
+	dx = iw /2 - drv -> mode.x / 2;
+	dy = ih /2 - drv -> mode.y / 2;
 
 	switch (drv->mode.depth)
 	{
+		case VDEPTH_8BIT:
+
+			       WritePixelArray( (uint8*) drv->VIDEO_BUFFER,
+					0, 0,
+					drv->mode.bytes_per_row, PIXF_CLUT,
+					drv->the_win->RPort, 
+					drv->the_win->BorderLeft, drv->the_win->BorderTop,
+					drv->mode.x, drv ->mode.y);
+					break;
+
 		case VDEPTH_16BIT:
 
 			       WritePixelArray( (uint8*) drv->VIDEO_BUFFER,
@@ -1427,7 +1488,8 @@ void window_draw_wpa ( driver_base *drv )
 					0, 0,
 					drv->mode.bytes_per_row, PIXF_A8R8G8B8,
 					drv->the_win->RPort, 
-					drv->the_win->BorderLeft, drv->the_win->BorderTop,
+					dx + drv->the_win->BorderLeft, 
+					dy + drv->the_win->BorderTop,
 					drv->mode.x, drv ->mode.y);
 					break;
 	}
@@ -1573,6 +1635,7 @@ int driver_window_comp::draw()
 	return error;
 }
 
+
 // Open Picasso screen
 driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 	: driver_base(m)
@@ -1682,6 +1745,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 	}
 
 	if (out) FPrintf(out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
+
+	RectFillColor(the_win -> RPort, 0, 0, the_win -> Width, the_win -> Height, 0x00000000);
 
 	BMLock = LockBitMapTags(&(the_screen -> BitMap), 
 		LBM_BaseAddress, &to_mem,
