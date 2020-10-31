@@ -308,10 +308,14 @@ void CDROMInit(void)
 
 void CDROMExit(void)
 {
+	printf("-- Close CDROM -- START\n");
+
 	drive_vec::iterator info, end = drives.end();
 	for (info = drives.begin(); info != end; ++info)
 		info->close_fh();
 	drives.clear();
+
+	printf("-- Close CDROM -- END\n");
 }
 
 
