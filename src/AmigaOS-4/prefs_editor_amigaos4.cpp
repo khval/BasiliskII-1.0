@@ -15,7 +15,7 @@ int add_vol_opt = 0;
 /*
  *  prefs_editor_AmigaOS4.cpp - Preferences editor, AmigaOS4 implementation
  *
- * Basilisk II Reaction GUI (C) 2007-2013 Kjetil Hvalstrand
+ * Basilisk II Reaction GUI (C) 2007-2020 Kjetil Hvalstrand
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -267,31 +267,6 @@ ULONG getv( Object *obj, ULONG arg )
 
 	GetAttr( arg, obj, &ret );
 	return ret; 
-}
-
-
-char *my_strndup(char *str,int n)
-{
-	int c;
-	char *nstr = (char *) AllocVec(n+1,MEMF_ANY);
-
-	if (!nstr) return NULL;
-
-	for (c=n;c>-1;c--)
-	{
-		nstr[c]=str[c];
-	}
-	nstr[n+1] = 0;
-
-	return nstr;
-}
-
-char *my_new_str()
-{
-	int c;
-	char *nstr = (char *) AllocVec(1,MEMF_ANY);
-	nstr[0] = 0;
-	return nstr;
 }
 
 
@@ -1242,9 +1217,9 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 		if (i<=0) i =(int) (strrchr(str, ':') - str);
 
 		if (i>0)
-		{ path = my_strndup(str,i); }
+		{ path = strndup(str,i); }
 		else
-		{ path = my_new_str(); }
+		{ path = strdup(""); }
 
 		rc = AslRequestTags (freq, ASLFR_InitialDrawer,path,ASLFR_InitialFile,"",ASLFR_DrawersOnly, opt ,TAG_END);
 
@@ -1277,7 +1252,7 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 		}
 		else	Printf ("requester was cancelled\n");
 
-		if (path) { FreeVec(path); path = NULL; }
+		if (path) { free(path); path = NULL; }
 		if (freq) FreeAslRequest (freq);
 	}
 }
