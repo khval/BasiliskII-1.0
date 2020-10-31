@@ -1199,6 +1199,62 @@ int get_r_event( int (*fn_event) (int id,int code) )
 	return done;
 }
 
+char *last_asl_path = NULL;
+
+void imagefile_asl( int win_id, int str_gad_id, BOOL opt )
+{
+	struct FileRequester *freq;
+	BOOL rc;
+	char *name_whit_path = NULL;
+	char *str = NULL;
+	char *path = NULL;
+	int i;
+
+	freq = (struct FileRequester *) AllocAslRequestTags (ASL_FileRequest,TAG_END);
+	if (freq)
+	{
+		if ( ! last_asl_path) last_asl_path = strdup("");
+
+		rc = AslRequestTags (freq, ASLFR_InitialDrawer,last_asl_path,ASLFR_InitialFile,"",ASLFR_DrawersOnly, opt ,TAG_END);
+
+		if (rc)
+		{
+			name_whit_path = (char *) AllocVec(strlen(freq->fr_Drawer)+strlen(freq->fr_File)+2,MEMF_ANY);
+
+
+			if (last_asl_path) free (last_asl_path);
+			last_asl_path = strdup(freq->fr_Drawer);
+
+			if (name_whit_path) 
+			{
+				if (strlen(freq->fr_Drawer)>0)
+				{
+					switch (freq->fr_Drawer[strlen(freq->fr_Drawer)-1])
+					{
+						case '/':
+						case ':':
+								sprintf(name_whit_path,"%s%s",freq->fr_Drawer,freq->fr_File);
+								break;
+						default:
+								sprintf(name_whit_path,"%s/%s",freq->fr_Drawer,freq->fr_File);
+					}
+				}
+				else
+				{
+					sprintf(name_whit_path,"");
+				}
+
+				RSetAttrO( win_id, str_gad_id, STRINGA_TextVal, name_whit_path);
+				FreeVec(name_whit_path);
+			}
+		}
+		else	Printf ("requester was cancelled\n");
+
+		if (path) { free(path); path = NULL; }
+		if (freq) FreeAslRequest (freq);
+	}
+}
+
 void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 {
 	struct FileRequester *freq;
@@ -1355,7 +1411,7 @@ int event(int id, int code)
 			break;
 
 		case ID_PREFS_FILE_SELECT_GAD:
-			DO_ASL (win_disks, ID_PREFS_FILE_GAD, FALSE);
+			imagefile_asl (win_disks, ID_PREFS_FILE_GAD, FALSE);
 			break;
 
 		case ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD:
@@ -1682,6 +1738,10 @@ done:
 // quit:
 	for (n=0;n<win_end;n++) if (win[n]) close_window(n);
 	if (appport) DeleteMsgPort(appport);
+
+	if (last_asl_path) free(last_asl_path);
+	last_asl_path = NULL;
+
 	return retval;
 }
 
