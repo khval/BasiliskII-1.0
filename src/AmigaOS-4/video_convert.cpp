@@ -213,6 +213,44 @@ void convert_8bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  pixels )
 	);
 }
 
+void convert_8bit_to_16bit( ULONG *pal, char *from, uint16 *to,int  pixels )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+
+	for (n=0; n<pixels;n++)
+	{
+		rgb = pal[from[n]];
+		r = (rgb & 0xF80000) >> 8;
+		g = (rgb & 0x00FC00) >> 5;
+		b = (rgb & 0x0000F8) >> 3;
+		to[n] = 0xFF000000 | r | g | b;
+	}
+}
+
+void convert_32bit_to_16bit( ULONG *pal, uint32 *from, uint16 *to,int  pixels )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	for (n=0; n<pixels;n++)
+	{
+		rgb = from[n];
+		r = (rgb & 0xF80000) >> 8;
+		g = (rgb & 0x00FC00) >> 5;
+		b = (rgb & 0x0000F8) >> 3;
+		to[n] = 0xFF000000 | r | g | b;
+	}
+}
+
+
 void convert_8bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  pixels )
 {
 	int n;
