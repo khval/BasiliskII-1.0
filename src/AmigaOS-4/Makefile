@@ -42,6 +42,9 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
     ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp \
 	video_amigaos4.cpp \
 	video_convert.cpp \
+	video_driver_screen.cpp \
+	video_driver_window.cpp \
+	video_driver_window_comp.cpp \
     ../audio.cpp ../sdl/audio_sdl.cpp ../extfs.cpp  ../extfs_amigaos4.cpp \
     ../user_strings.cpp user_strings_amigaos4.cpp prefs_editor_amigaos4.cpp   \
 	$(CPUSRCS)
