@@ -592,10 +592,10 @@ void VideoExit(void)
 		null_pointer = NULL;
 	}
 
-	if (out) 
+	if (video_debug_out) 
 	{
-		Close(out);
-		out = NULL;
+		Close(video_debug_out);
+		video_debug_out = NULL;
 	}
 
 	D(bug("VideoExit(void) %d\n",__LINE__));
