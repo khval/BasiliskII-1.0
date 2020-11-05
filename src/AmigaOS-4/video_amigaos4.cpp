@@ -692,17 +692,44 @@ void TheCloseWindow(struct Window *win)
 	dispose_icon( win, &iconifyIcon);
 	CloseWindow( win );
 }
+
+void empty_que(struct MsgPort *win_port)
+{
 	struct IntuiMessage *msg;
-	struct MsgPort *win_port_old = NULL;
-	struct MsgPort *win_port = NULL;
 
-	ULONG win_mask = 0, timer_mask = 0;
-	int error;
-	int mx,my;
+	while (msg = (struct IntuiMessage *) GetMsg(win_port))
+	{
+		ReplyMsg((struct Message *) msg);
+	}
+}
 
-	D(bug("periodic_func/%ld: START \n", __LINE__));
+struct periodic_func_context
+{
+	struct MsgPort *win_port_old ;
+	struct MsgPort *win_port ;
+	ULONG win_mask;
+
+	periodic_func_context();
+	void CreateNewMsgportForWindow();
+	void RemovePortFromWindow();
+	void RestoreWindow();
+};
 
 
+void periodic_func_context::RestoreWindow()
+{
+	drv_init_context.open_output_driver();
+}
+
+periodic_func_context::periodic_func_context()
+{
+	win_port_old = NULL;
+	win_port = NULL;
+	win_mask = 0;
+}
+
+void periodic_func_context::CreateNewMsgportForWindow()
+{
 	// create a new msgport becouse this runing in its own task.
 
 	win_port_old = drv -> the_win -> UserPort;
@@ -714,9 +741,55 @@ void TheCloseWindow(struct Window *win)
 		win_mask = 1 << win_port->mp_SigBit;
 		drv->the_win->UserPort = win_port;
 
-		ModifyIDCMP(drv->the_win, IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
+		ModifyIDCMP(drv->the_win, IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
 			((drv->monitor.display_type == DISPLAY_SCREEN) ? IDCMP_DELTAMOVE : 0));
 	}
+
+	if (win_port_old) FreeSysObject(ASOT_PORT,win_port_old);		// don't need to keep it.
+	win_port_old = NULL;
+}
+
+
+void periodic_func_context::RemovePortFromWindow()
+{
+	struct IntuiMessage *msg;
+
+	Forbid();
+	msg = (struct IntuiMessage *) win_port->mp_MsgList.lh_Head;
+	struct Node *succ;
+	while (succ = msg->ExecMessage.mn_Node.ln_Succ) 
+	{
+		if (msg->IDCMPWindow == drv->the_win)
+		{
+			Remove((struct Node *)msg);
+			ReplyMsg((struct Message *)msg);
+		}
+		msg = (struct IntuiMessage *)succ;
+	}
+	drv->the_win->UserPort = NULL;
+	ModifyIDCMP(drv->the_win, 0);
+	Permit();
+
+	FreeSysObject(ASOT_PORT,win_port);
+}
+
+
+static void periodic_func(void)
+{
+	struct MsgPort *timer_port = NULL;
+	struct timerequest *timer_io = NULL;
+	struct IntuiMessage *msg;
+
+	ULONG  timer_mask = 0;
+	int error;
+	int mx,my;
+	UWORD GadgetID;
+
+	struct periodic_func_context self;
+
+	D(bug("periodic_func/%ld: START \n", __LINE__));
+
+	self.CreateNewMsgportForWindow();
 
 	D(bug("periodic_func/%ld: \n", __LINE__));
 
@@ -744,7 +817,7 @@ void TheCloseWindow(struct Window *win)
 		const video_mode &mode = drv->monitor.get_current_mode();
 
 		// Wait for timer and/or window (CTRL_C is used for quitting the task)
-		ULONG sig = Wait(win_mask | timer_mask | SIGBREAKF_CTRL_C);
+		ULONG sig = Wait( self.win_mask | timer_mask | SIGBREAKF_CTRL_C);
 
 		if (sig & SIGBREAKF_CTRL_C)
 			break;
@@ -764,15 +837,28 @@ void TheCloseWindow(struct Window *win)
 			SendIO((struct IORequest *)timer_io);
 		}
 
-		if (sig & win_mask) {
+		if (sig & self.win_mask)
+		{
+			bool que_emptied = false;
 
 			// Handle window messages
-			while (msg = (struct IntuiMessage *)GetMsg(win_port)) {
+			while (msg = (struct IntuiMessage *)GetMsg( self.win_port)) {
 
 				// Get data from message and reply
 				ULONG cl = msg->Class;
 				UWORD code = msg->Code;
 				UWORD qualifier = msg->Qualifier;
+
+				if ( cl == IDCMP_GADGETUP) 
+				{
+					GadgetID = ((struct Gadget *) ( msg -> IAddress)) -> GadgetID ;
+				}
+				else
+				{
+					GadgetID = 0;
+				}
+
+				Printf("GetEvent\n");
 
 
 //				D(bug("msg class %08lx, display_type %d\n", cl, drv->monitor.display_type);
@@ -781,6 +867,27 @@ void TheCloseWindow(struct Window *win)
 
 				// Handle message according to class
 				switch (cl) {
+
+					case IDCMP_GADGETUP:
+
+							switch (GadgetID)
+							{
+								case GID_ICONIFY:
+
+									empty_que( self.win_port );
+									enable_Iconify( drv->the_win ); 		
+
+									self.RemovePortFromWindow();
+									delete drv;
+
+									Delay(100);
+
+									self.RestoreWindow();
+									self.CreateNewMsgportForWindow();								
+									break;
+							}
+							return;
+
 
 					case IDCMP_CLOSEWINDOW:
 						quit_program_gui = true;
@@ -868,7 +975,7 @@ void TheCloseWindow(struct Window *win)
 
 				}
 
-				ReplyMsg((struct Message *)msg);
+				if ( ! que_emptied )	ReplyMsg((struct Message *)msg);
 			}
 
 		}
@@ -891,26 +998,11 @@ void TheCloseWindow(struct Window *win)
 
 								D(bug("periodic_func/%ld: \n", __LINE__));
 
-	// Remove port from window and delete it
-	Forbid();
-	msg = (struct IntuiMessage *) win_port->mp_MsgList.lh_Head;
-	struct Node *succ;
-	while (succ = msg->ExecMessage.mn_Node.ln_Succ) {
-		if (msg->IDCMPWindow == drv->the_win) {
-			Remove((struct Node *)msg);
-			ReplyMsg((struct Message *)msg);
-		}
-		msg = (struct IntuiMessage *)succ;
-	}
-	drv->the_win->UserPort = NULL;
-	ModifyIDCMP(drv->the_win, 0);
-	Permit();
+	self.RemovePortFromWindow();
 
-
-	FreeSysObject(ASOT_PORT,win_port);
 								D(bug("periodic_func/%ld: \n", __LINE__));
 
-	if (win_port_old) FreeSysObject(ASOT_PORT,win_port_old);
+
 
 	D(bug("periodic_func/%ld: END \n", __LINE__));
 
