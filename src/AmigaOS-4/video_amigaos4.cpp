@@ -24,6 +24,8 @@
 
 #include <exec/types.h>
 #include <intuition/intuition.h>
+#include <intuition/imageclass.h>
+#include <intuition/gadgetclass.h>
 #include <graphics/rastport.h>
 #include <graphics/gfx.h>
 #include <dos/dostags.h>
@@ -43,6 +45,7 @@
 #include "video.h"
 
 #include "video_convert.h"
+#include "window_icons.h"
 #include "common_screen.h"
 
 #include "video_driver_classes.h"
@@ -62,10 +65,17 @@ extern bool quit_program_gui;
 int window_x = 0;
 int window_y = 0;
 
+void (*do_draw) ( driver_base *drv ) = NULL;
+
 // ---- Default options!!! ----
 
 int use_lock = 1;
 int render_method = 0;
+
+struct kIcon iconifyIcon = { NULL, NULL };
+struct kIcon zoomIcon = { NULL, NULL };
+
+struct windowclass window_save_state;
 
 // ----------------------------
 
