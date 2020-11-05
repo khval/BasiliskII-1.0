@@ -22,5 +22,5 @@ See the file "COPYING" that is included in the distribution for details.
 
 Copyright (C) 1997-2008 Christian Bauer et al.
 
-Some files are under MIT licence, read the top of files.
+Some of the files are under MIT licence, read the top of files.
 (C) 2020 Kjetil Hvalstrand
