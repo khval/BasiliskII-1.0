@@ -311,6 +311,7 @@ void Sys_close(void *arg)
 
 		// File, simply close it
 		Close(fh->f);
+		fh -> f = NULL;
 
 	} else {
 
@@ -321,9 +322,10 @@ void Sys_close(void *arg)
 		fh->io->io_Command = TD_MOTOR;
 		fh->io->io_Length = 0;
 		DoIO((struct IORequest *)fh->io);
-
 		CloseDevice((struct IORequest *)fh->io);
 		DeleteIORequest((IORequest*) fh->io);
+
+		fh -> io == NULL;
 	}
 	delete fh;
 }
