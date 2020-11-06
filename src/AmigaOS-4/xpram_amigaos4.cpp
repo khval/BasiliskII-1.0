@@ -34,9 +34,17 @@ extern char *XPRAM_FILE_NAME;
 void LoadXPRAM(const char *vmdir)
 {
 	BPTR fh;
-	if ((fh = Open(XPRAM_FILE_NAME, MODE_OLDFILE)) != NULL) {
-		Read(fh, XPRAM, 256);
-		Close(fh);
+
+	if (XPRAM_FILE_NAME)
+	{
+		fh = Open(XPRAM_FILE_NAME, MODE_OLDFILE);
+
+		if (fh)
+		{
+			Read(fh, XPRAM, 256);
+			Close(fh);
+			fh = NULL;
+		}
 	}
 }
 
@@ -48,9 +56,17 @@ void LoadXPRAM(const char *vmdir)
 void SaveXPRAM(void)
 {
 	BPTR fh;
-	if ((fh = Open(XPRAM_FILE_NAME, MODE_NEWFILE)) != NULL) {
-		Write(fh, XPRAM, 256);
-		Close(fh);
+
+	if (XPRAM_FILE_NAME)
+	{
+		fh = Open(XPRAM_FILE_NAME, MODE_NEWFILE);
+
+		if (fh)
+		{
+			Write(fh, XPRAM, 256);
+			Close(fh);
+			fh = NULL;
+		}
 	}
 }
 
@@ -61,5 +77,8 @@ void SaveXPRAM(void)
 
 void ZapPRAM(void)
 {
-	Delete(XPRAM_FILE_NAME);
+	if (XPRAM_FILE_NAME)
+	{
+		Delete(XPRAM_FILE_NAME);
+	}
 }
