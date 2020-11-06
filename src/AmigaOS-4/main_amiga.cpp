@@ -545,6 +545,9 @@ void QuitEmulator(void)
 
 	if (xpram_proc)	Signal((struct Task *)xpram_proc, SIGBREAKF_CTRL_C);
 
+
+	printf("** ADBExit()\n");
+
 	ADBExit();
 
 	if (gui_proc) Signal((struct Task *)gui_proc, SIGBREAKF_CTRL_C);
@@ -553,7 +556,11 @@ void QuitEmulator(void)
 	ExitAll();
 
 	// Close timer.device
-	if (TimerBase) CloseDevice((struct IORequest *)&timereq);
+	if (TimerBase) 
+	{
+		CloseDevice((struct IORequest *)&timereq);
+		TimerBase = NULL;
+	}
 
 	// Exit system routines
 	SysExit();
@@ -566,7 +573,11 @@ void QuitEmulator(void)
 	// Exit preferences
 	PrefsExit();
 
-	if (StartupMsgPort) FreeSysObject(ASOT_PORT,StartupMsgPort);
+	if (StartupMsgPort)
+	{
+		FreeSysObject(ASOT_PORT,StartupMsgPort);
+		StartupMsgPort = NULL;
+	}
 
 	// Close libraries
 
@@ -574,12 +585,14 @@ void QuitEmulator(void)
 	{
 		CloseCatalog(catalog);
 		CloseLibrary(LocaleBase);
+		LocaleBase = NULL;
 	}
 
 	if (IconBase)
 	{
 		FreeDiskObject(dobj);
 		CloseLibrary(IconBase);
+		IconBase = NULL;
 	}
 
 	safecloselib(AslBase);
