@@ -213,45 +213,79 @@ bool InitAll(const char *vmdir)
 
 void ExitAll(void)
 {
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 #if ENABLE_MON
 	// Deinitialize mon
 	mon_exit();
 #endif
 
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	// Save XPRAM
 	XPRAMExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
 
 	// Exit video
 	VideoExit();
 
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	// Exit audio
 	AudioExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
 
 	// Exit ADB
 	ADBExit();
 
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	// Exit clipboard
 	ClipExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
 
 	// Exit Time Manager
 	TimerExit();
 
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	// Exit serial ports
 	SerialExit();
 
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	// Exit network
 	EtherExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
 
 #if SUPPORTS_EXTFS
 	// Exit external file system
 	ExtFSExit();
 #endif
 
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	// Exit drivers
 	SCSIExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	CDROMExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	DiskExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
+
 	SonyExit();
+
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
 }
 
 
