@@ -46,11 +46,15 @@ extern struct kIcon iconifyIcon;
 extern struct kIcon zoomIcon;
 extern APTR video_mutex;
 
+extern struct MsgPort *periodic_msgPort;
 
 struct XYSTW_Vertex3D { 
 float x, y; 
 float s, t, w; 
 }; 
+
+#define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
+
 
 driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 	: black_pen(-1), white_pen(-1), driver_base(m)
@@ -79,16 +83,12 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 	the_win = OpenWindowTags(NULL,
 			WA_Left, window_x, 
 			WA_Top, window_y,
-
 			WA_InnerWidth, mode.x, 
 			WA_InnerHeight, mode.y,
-
 			WA_MinWidth,	100,
 		 	WA_MinHeight,	100,	
-
 			WA_MaxWidth,		ScreenW,
 		 	WA_MaxHeight,	ScreenH,	
-
 			WA_SimpleRefresh, TRUE,
 			WA_NoCareRefresh, TRUE,
 			WA_Activate, TRUE,
@@ -97,11 +97,12 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 			WA_DragBar, TRUE,
 			WA_DepthGadget, TRUE,
 			WA_SizeGadget, TRUE,
+			WA_SizeBBottom, TRUE,
 			WA_CloseGadget, TRUE,
-			WA_Title, "Basilisk II",
-			WA_IDCMP,0 ,
-			TAG_END
-	);
+			WA_UserPort,  periodic_msgPort ,
+			WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
+			WA_IDCMP, IDCMP_common,
+			TAG_END	);
 
 	if (the_win == NULL)
 	{
@@ -288,3 +289,72 @@ driver_window_comp::~driver_window_comp()
 
 	MutexRelease(video_mutex);
 }
+
+void driver_window_comp::kill_gfx_output()
+{
+	MutexObtain(video_mutex);
+
+	// Free pens and close window
+	if (the_win) {
+		ReleasePen(the_win->WScreen->ViewPort.ColorMap, black_pen);
+		ReleasePen(the_win->WScreen->ViewPort.ColorMap, white_pen);
+
+		window_x = the_win -> LeftEdge;
+		window_y = the_win -> TopEdge;
+
+		TheCloseWindow(the_win);
+
+		the_win = NULL;
+	}
+
+	MutexRelease(video_mutex);
+}
+
+void driver_window_comp::restore_gfx_output()
+{
+	struct Screen *src;
+	int ScreenW;
+	int ScreenH;
+
+	// Set absolute mouse mode
+	ADBSetRelMouseMode(false);
+
+	if (src = LockPubScreen(NULL))
+	{
+		ScreenW = src -> Width;
+		ScreenH = src -> Height;
+
+		UnlockScreen(src);
+	}
+
+	// Open window
+	the_win = OpenWindowTags(NULL,
+			WA_Left, window_x, 
+			WA_Top, window_y,
+			WA_InnerWidth, mode.x, 
+			WA_InnerHeight, mode.y,
+			WA_MinWidth,	100,
+		 	WA_MinHeight,	100,	
+			WA_MaxWidth,		ScreenW,
+		 	WA_MaxHeight,	ScreenH,	
+			WA_SimpleRefresh, TRUE,
+			WA_NoCareRefresh, TRUE,
+			WA_Activate, TRUE,
+			WA_RMBTrap, TRUE,
+			WA_ReportMouse, TRUE,
+			WA_DragBar, TRUE,
+			WA_DepthGadget, TRUE,
+			WA_SizeBBottom, TRUE,
+			WA_SizeGadget, TRUE,
+			WA_CloseGadget, TRUE,
+			WA_UserPort,  periodic_msgPort ,
+			WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
+			WA_IDCMP, IDCMP_common,
+			TAG_END	);
+
+	if (the_win)
+	{
+		open_icon( the_win, ICONIFYIMAGE, GID_ICONIFY, &iconifyIcon );
+	}
+}
+

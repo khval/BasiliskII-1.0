@@ -111,7 +111,7 @@ int32 line_skip;
 UWORD *null_pointer = NULL;			// Blank mouse pointer data
 UWORD *current_pointer = (UWORD *)-1;		// Currently visible mouse pointer data
 
-
+struct MsgPort *periodic_msgPort = NULL;
 static struct Process *periodic_proc = NULL;		// Periodic process
 
 extern struct Task *MainTask;				// Pointer to main task (from main_amiga.cpp)
@@ -478,22 +478,31 @@ bool VideoInit(bool classic)
 
 bool Amiga_monitor_desc::video_open()
 {
+	if ( !video_debug_out ) video_debug_out = Open("CON:",MODE_NEWFILE);
+
+	// Start periodic process
+	periodic_proc = CreateNewProcTags(
+		NP_Entry, (ULONG)periodic_func,
+		NP_Name, (ULONG)"Basilisk II IDCMP Handler",
+		NP_Priority, 0,
+		TAG_END
+	);
+
+	if (periodic_proc == NULL) {
+		ErrorAlert(STR_NO_MEM_ERR);
+		return false;
+	}
+
+	while ( periodic_msgPort ==  NULL) Delay(1);	// wait for a public window msgport...
+
 	const video_mode &mode = get_current_mode();
 	ULONG depth_bits = bits_from_depth(mode.depth);
 	ULONG ID = find_mode_for_depth(mode.x, mode.y, depth_bits);
-
-	show_sigs("START Amiga_monitor_desc::video_open()\n");
-
-	D(bug("video_open/%ld: width=%ld  height=%ld  depth=%ld  ID=%08lx\n", __LINE__, mode.x, mode.y, depth_bits, ID));
 
 	if ((ID == INVALID_ID) && ( display_type == DISPLAY_SCREEN))
 	{
 		display_type = DISPLAY_WINDOW;
 	}
-
-	D(bug("video_open/%ld: display_type=%ld\n", __LINE__, display_type));
-
-	show_sigs("Before Amiga_monitor_desc::switch;()\n");
 
 	MutexObtain(video_mutex);
 
@@ -514,17 +523,12 @@ bool Amiga_monitor_desc::video_open()
 
 	MutexRelease(video_mutex);
 
-	show_sigs("AFTER Amiga_monitor_desc::switch;()\n");
-
-	D(bug("video_open/%ld: drv=%08lx\n", __LINE__, drv));
-
 	if (drv == NULL)
 	{
 		ErrorAlert(STR_NO_VIDEO_MODE_ERR);
 		return false;
 	}
 
-	D(bug("video_open/%ld: init_ok=%ld\n", __LINE__, drv->init_ok));
 	if (!drv->init_ok) {
 		ErrorAlert(STR_NO_VIDEO_MODE_ERR);
 		delete drv;
@@ -532,42 +536,25 @@ bool Amiga_monitor_desc::video_open()
 		return false;
 	}
 
-	show_sigs("BEFORE Amiga_monitor_desc::Start periodic process\n");
-
-	// Start periodic process
-	periodic_proc = CreateNewProcTags(
-		NP_Entry, (ULONG)periodic_func,
-		NP_Name, (ULONG)"Basilisk II IDCMP Handler",
-		NP_Priority, 0,
-		TAG_END
-	);
-
-	D(bug("video_open/%ld: periodic_proc=%08lx\n", __LINE__, periodic_proc));
-
-	if (periodic_proc == NULL) {
-		ErrorAlert(STR_NO_MEM_ERR);
-		return false;
-	}
-
-	show_sigs("END Amiga_monitor_desc::video_open()\n");
-
 	return true;
 }
 
 
 void Amiga_monitor_desc::video_close()
 {
-	D(bug("Amiga_monitor_desc::video_close() START %d\n",__LINE__));
+	// Close window / screen.
+
+	delete drv;
+	drv = NULL;
+
+	// if window is closed, periodic function can delete msgport.
+
 	// Stop periodic process
 	if (periodic_proc) {
 		SetSignal(0, SIGF_SINGLE);
 		Signal(&periodic_proc->pr_Task, SIGBREAKF_CTRL_C);
 		Wait(SIGF_SINGLE);
 	}
-
-	delete drv;
-	drv = NULL;
-	D(bug("Amiga_monitor_desc::video_close() END %d\n",__LINE__));
 }
 
 
@@ -687,12 +674,6 @@ void set_mouse_window(int mx,int my)
 }
 
 
-void TheCloseWindow(struct Window *win)
-{
-	dispose_icon( win, &iconifyIcon);
-	CloseWindow( win );
-}
-
 void empty_que(struct MsgPort *win_port)
 {
 	struct IntuiMessage *msg;
@@ -703,79 +684,16 @@ void empty_que(struct MsgPort *win_port)
 	}
 }
 
-struct periodic_func_context
+void TheCloseWindow(struct Window *win)
 {
-	struct MsgPort *win_port_old ;
-	struct MsgPort *win_port ;
-	ULONG win_mask;
-
-	periodic_func_context();
-	void CreateNewMsgportForWindow();
-	void RemovePortFromWindow();
-	void RestoreWindow();
-};
-
-
-void periodic_func_context::RestoreWindow()
-{
-	drv_init_context.open_output_driver();
-}
-
-periodic_func_context::periodic_func_context()
-{
-	win_port_old = NULL;
-	win_port = NULL;
-	win_mask = 0;
-}
-
-void periodic_func_context::CreateNewMsgportForWindow()
-{
-	// create a new msgport becouse this runing in its own task.
-
-	win_port_old = drv -> the_win -> UserPort;
-	win_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
-
-//	D(bug("periodic_func task: %08x\n",win_mask);
-
-	if (win_port) {
-		win_mask = 1 << win_port->mp_SigBit;
-		drv->the_win->UserPort = win_port;
-
-		ModifyIDCMP(drv->the_win, IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
-			((drv->monitor.display_type == DISPLAY_SCREEN) ? IDCMP_DELTAMOVE : 0));
-	}
-
-	if (win_port_old) FreeSysObject(ASOT_PORT,win_port_old);		// don't need to keep it.
-	win_port_old = NULL;
-}
-
-
-void periodic_func_context::RemovePortFromWindow()
-{
-	struct IntuiMessage *msg;
-
-	Forbid();
-	msg = (struct IntuiMessage *) win_port->mp_MsgList.lh_Head;
-	struct Node *succ;
-	while (succ = msg->ExecMessage.mn_Node.ln_Succ) 
-	{
-		if (msg->IDCMPWindow == drv->the_win)
-		{
-			Remove((struct Node *)msg);
-			ReplyMsg((struct Message *)msg);
-		}
-		msg = (struct IntuiMessage *)succ;
-	}
-	drv->the_win->UserPort = NULL;
-	ModifyIDCMP(drv->the_win, 0);
-	Permit();
-
-	FreeSysObject(ASOT_PORT,win_port);
+ 	dispose_icon( win, &iconifyIcon);
+	CloseWindow( win );
 }
 
 
 static void periodic_func(void)
 {
+	ULONG win_mask;
 	struct MsgPort *timer_port = NULL;
 	struct timerequest *timer_io = NULL;
 	struct IntuiMessage *msg;
@@ -785,11 +703,16 @@ static void periodic_func(void)
 	int mx,my;
 	UWORD GadgetID;
 
-	struct periodic_func_context self;
+//	struct periodic_func_context self;
 
 	D(bug("periodic_func/%ld: START \n", __LINE__));
 
-	self.CreateNewMsgportForWindow();
+//	self.CreateNewMsgportForWindow();
+
+	periodic_msgPort = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
+
+	win_mask = 1 << periodic_msgPort->mp_SigBit;
+
 
 	D(bug("periodic_func/%ld: \n", __LINE__));
 
@@ -817,7 +740,7 @@ static void periodic_func(void)
 		const video_mode &mode = drv->monitor.get_current_mode();
 
 		// Wait for timer and/or window (CTRL_C is used for quitting the task)
-		ULONG sig = Wait( self.win_mask | timer_mask | SIGBREAKF_CTRL_C);
+		ULONG sig = Wait( win_mask | timer_mask | SIGBREAKF_CTRL_C);
 
 		if (sig & SIGBREAKF_CTRL_C)
 			break;
@@ -837,17 +760,21 @@ static void periodic_func(void)
 			SendIO((struct IORequest *)timer_io);
 		}
 
-		if (sig & self.win_mask)
+		if (sig & win_mask)
 		{
 			bool que_emptied = false;
 
-			// Handle window messages
-			while (msg = (struct IntuiMessage *)GetMsg( self.win_port)) {
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- got event\n",__FUNCTION__,__LINE__);
 
+			// Handle window messages
+			while (msg = (struct IntuiMessage *)GetMsg( periodic_msgPort ))
+			{
 				// Get data from message and reply
 				ULONG cl = msg->Class;
 				UWORD code = msg->Code;
 				UWORD qualifier = msg->Qualifier;
+				WORD mouseX = msg -> MouseX;
+
 
 				if ( cl == IDCMP_GADGETUP) 
 				{
@@ -861,8 +788,6 @@ static void periodic_func(void)
 				Printf("GetEvent\n");
 
 
-//				D(bug("msg class %08lx, display_type %d\n", cl, drv->monitor.display_type);
-
 				struct IntuiWheelData *mouse_wheel = (struct IntuiWheelData *) msg -> IAddress;
 
 				// Handle message according to class
@@ -874,19 +799,26 @@ static void periodic_func(void)
 							{
 								case GID_ICONIFY:
 
-									empty_que( self.win_port );
-									enable_Iconify( drv->the_win ); 		
+									ReplyMsg((struct Message *)msg);
+									empty_que( drv -> the_win -> UserPort );
 
-									self.RemovePortFromWindow();
-									delete drv;
+									enable_Iconify( drv->the_win ); 	
+									drv -> kill_gfx_output();	// this will remove messages from queue...
 
-									Delay(100);
+									Delay(200);
 
-									self.RestoreWindow();
-									self.CreateNewMsgportForWindow();								
+									dispose_Iconify(); 	
+									MutexObtain(video_mutex);	// try to prohibit nasty stuff...
+									drv -> restore_gfx_output();
+									MutexRelease(video_mutex);
+
+									que_emptied = true;	// don't try to replay to message that is removed from queue...
+
+									if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- Time to return... to main event loop\n",__FUNCTION__,__LINE__);
+
 									break;
 							}
-							return;
+							break;
 
 
 					case IDCMP_CLOSEWINDOW:
@@ -975,9 +907,13 @@ static void periodic_func(void)
 
 				}
 
-				if ( ! que_emptied )	ReplyMsg((struct Message *)msg);
-			}
+				if (que_emptied) if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- brefore ReplyMsg\n",__FUNCTION__,__LINE__);
 
+				if ( que_emptied  == false )	ReplyMsg((struct Message *)msg);
+
+				if (que_emptied) if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+			}
+			if (que_emptied) if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 		}
 	}
 
@@ -998,13 +934,10 @@ static void periodic_func(void)
 
 								D(bug("periodic_func/%ld: \n", __LINE__));
 
-	self.RemovePortFromWindow();
+	while (drv) Delay(1);	// wait for driver to close...
 
-								D(bug("periodic_func/%ld: \n", __LINE__));
-
-
-
-	D(bug("periodic_func/%ld: END \n", __LINE__));
+	if (periodic_msgPort)	FreeSysObject(ASOT_PORT,periodic_msgPort);
+	periodic_msgPort = NULL;
 
 	Signal(MainTask, SIGF_SINGLE);
 }
@@ -1138,6 +1071,14 @@ driver_base::driver_base(Amiga_monitor_desc &m)
 }
 
 driver_base::~driver_base()
+{
+}
+
+void driver_base::kill_gfx_output()
+{
+}
+
+void driver_base::restore_gfx_output()
 {
 }
 
