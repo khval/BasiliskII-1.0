@@ -90,8 +90,13 @@ void ClipInit(void)
 
 void ClipExit(void)
 {
-	CloseClipboard(ch);
-	FreeIFF(iffw);
+	// free it only if its open.
+	if (ch) CloseClipboard(ch);
+	if (iffw) FreeIFF(iffw);
+
+	// make sure, its not freed twice.
+	ch = NULL;
+	iffw = NULL;
 }
 
 
