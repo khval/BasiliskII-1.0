@@ -120,7 +120,7 @@ struct RigidDiskBlock *get_diskinfo(struct IOExtTD *tio, uint32 blocksize )
 
 int get_blocks(char *device,unsigned int unit,char *devicename,ULONG *startblock,ULONG *sizeblocks,ULONG *blocksize)
 {
-	int error;
+	int error = true;
 	int part_block = 0;
 	int count = 0;
 	int found = 0;
@@ -130,12 +130,16 @@ int get_blocks(char *device,unsigned int unit,char *devicename,ULONG *startblock
 	struct PartitionBlock	*part = NULL;
 
 	char			*block = NULL;
-	struct MsgPort *msgport;
-	struct IOExtTD	*tio;
+	struct MsgPort *msgport = NULL;
+	struct IOExtTD	*tio = NULL;
  
 	msgport	= CreateMsgPort();
-	tio		= (struct IOExtTD *) CreateIORequest(msgport, sizeof(struct IOExtTD));
-	error		= OpenDevice(device, unit, (struct IORequest *) tio, 0);
+
+	if (msgport)
+	{
+		tio		= (struct IOExtTD *) CreateIORequest(msgport, sizeof(struct IOExtTD));
+		if (tio) error = OpenDevice(device, unit, (struct IORequest *) tio, 0);
+	}
 
 //	printf("devicename: %s\n",devicename);
 //	printf("device: %s\n",device);
@@ -143,10 +147,8 @@ int get_blocks(char *device,unsigned int unit,char *devicename,ULONG *startblock
 //	printf("blocksize: %lu\n", *blocksize);
 //	printf("Error: 0x%x\n\n", error);
 
-
 	if ( !error )
 	{
-
 		diskinfo = get_diskinfo( tio, *blocksize );
 		part_block = diskinfo -> rdb_PartitionList ;
 		*blocksize = diskinfo -> rdb_BlockBytes;
@@ -206,15 +208,21 @@ int get_blocks(char *device,unsigned int unit,char *devicename,ULONG *startblock
 		if (diskinfo)	{	FreeVec(diskinfo); diskinfo = NULL;	}
 		if (block)		{	FreeVec(block); block = NULL;		}
 
-		if (tio)
-		{
-			CloseDevice( (IORequest*) tio);
-			DeleteIORequest( (struct IORequest *) tio);
-			tio = NULL;
-		}
-
-		if (msgport)	{	DeleteMsgPort(msgport); msgport = NULL;	}
 	}
+
+	if (tio)
+	{
+		if (!error) CloseDevice( (IORequest*) tio);
+		DeleteIORequest( (struct IORequest *) tio);
+		tio = NULL;
+	}
+
+	if (msgport)	
+	{
+		DeleteMsgPort(msgport); 
+		msgport = NULL;
+	}
+
 	return found;
 }
 
