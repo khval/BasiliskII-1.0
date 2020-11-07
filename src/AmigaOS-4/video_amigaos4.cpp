@@ -697,24 +697,16 @@ static void periodic_func(void)
 	struct MsgPort *timer_port = NULL;
 	struct timerequest *timer_io = NULL;
 	struct IntuiMessage *msg;
-
 	ULONG  timer_mask = 0;
 	int error;
 	int mx,my;
 	UWORD GadgetID;
 
-//	struct periodic_func_context self;
-
-	D(bug("periodic_func/%ld: START \n", __LINE__));
-
-//	self.CreateNewMsgportForWindow();
+ 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 	periodic_msgPort = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
-
 	win_mask = 1 << periodic_msgPort->mp_SigBit;
 
-
-	D(bug("periodic_func/%ld: \n", __LINE__));
 
 	// Start 60Hz timer for window refresh
 //	if (drv->monitor.display_type == DISPLAY_WINDOW || drv->monitor.display_type == DISPLAY_WINDOW_COMP) {
@@ -742,13 +734,10 @@ static void periodic_func(void)
 		// Wait for timer and/or window (CTRL_C is used for quitting the task)
 		ULONG sig = Wait( win_mask | timer_mask | SIGBREAKF_CTRL_C);
 
-		if (sig & SIGBREAKF_CTRL_C)
-			break;
+		if (sig & SIGBREAKF_CTRL_C)	break;
 
-//		D(bug("periodic_func/%ld: display_type=%ld  the_win=%08lx\n", __LINE__, drv->monitor.display_type, drv->the_win));
-
-		if (sig & timer_mask) {
-
+		if (sig & timer_mask)
+		{
 			MutexObtain(video_mutex);
 			error = drv->draw();
 			MutexRelease(video_mutex);
@@ -764,8 +753,6 @@ static void periodic_func(void)
 		{
 			bool que_emptied = false;
 
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- got event\n",__FUNCTION__,__LINE__);
-
 			// Handle window messages
 			while (msg = (struct IntuiMessage *)GetMsg( periodic_msgPort ))
 			{
@@ -775,7 +762,6 @@ static void periodic_func(void)
 				UWORD qualifier = msg->Qualifier;
 				WORD mouseX = msg -> MouseX;
 
-
 				if ( cl == IDCMP_GADGETUP) 
 				{
 					GadgetID = ((struct Gadget *) ( msg -> IAddress)) -> GadgetID ;
@@ -784,9 +770,6 @@ static void periodic_func(void)
 				{
 					GadgetID = 0;
 				}
-
-				Printf("GetEvent\n");
-
 
 				struct IntuiWheelData *mouse_wheel = (struct IntuiWheelData *) msg -> IAddress;
 
@@ -904,7 +887,6 @@ static void periodic_func(void)
 						}
 
 						break;
-
 				}
 
 				if (que_emptied) if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- brefore ReplyMsg\n",__FUNCTION__,__LINE__);

@@ -157,7 +157,7 @@ int16 ASERDPort::open(uint16 config)
 	err_mask = 0;
 
 	// Create message port
-	reply_port = CreateMsgPort();
+	reply_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	if (reply_port == NULL)
 		goto open_error;
 
@@ -187,8 +187,9 @@ int16 ASERDPort::open(uint16 config)
 
 open_error:
 	serial_proc = NULL;
-	if (reply_port) {
-		DeleteMsgPort(reply_port);
+	if (reply_port)
+	{
+		FreeSysObject(ASOT_PORT,reply_port);
 		reply_port = NULL;
 	}
 	return openErr;
@@ -392,7 +393,7 @@ int16 ASERDPort::close()
 
 	// Delete reply port
 	if (reply_port) {
-		DeleteMsgPort(reply_port);
+		FreeSysObject(ASOT_PORT,reply_port);
 		reply_port = NULL;
 	}
 	return noErr;
@@ -634,17 +635,17 @@ void ASERDPort::serial_func(void)
 	obj->proc_error = true;
 
 	// Create message port for communication with main task
-	proc_port = CreateMsgPort();
+	proc_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	if (proc_port == NULL)
 		goto quit;
 	proc_port_mask = 1 << proc_port->mp_SigBit;
 
 	// Create message ports for serial.device I/O
-	io_port = CreateMsgPort();
+	io_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	if (io_port == NULL)
 		goto quit;
 	io_mask = 1 << io_port->mp_SigBit;
-	control_port = CreateMsgPort();
+	control_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	if (control_port == NULL)
 		goto quit;
 
@@ -847,10 +848,9 @@ quit:
 		DeleteIORequest((struct IORequest*) write_io);
 	if (read_io)
 		DeleteIORequest((struct IORequest*) read_io);
-	if (control_port)
-		DeleteMsgPort(control_port);
-	if (io_port)
-		DeleteMsgPort(io_port);
+
+	if (control_port) FreeSysObject(ASOT_PORT,control_port);
+	if (io_port) FreeSysObject(ASOT_PORT,io_port);
 
 	// Send signal to main task to confirm termination
 	Forbid();

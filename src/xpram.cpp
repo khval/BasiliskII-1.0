@@ -56,3 +56,4 @@ void XPRAMExit(void)
 	// Save XPRAM to settings file
 	SaveXPRAM();
 }
+

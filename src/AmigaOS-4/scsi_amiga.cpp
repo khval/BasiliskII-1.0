@@ -64,7 +64,7 @@ void SCSIInit(void)
 
 
 	// Create port and buffers
-	the_port = CreateMsgPort();
+	the_port = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 
 	buffer_size = 0x10000;
 
@@ -135,7 +135,7 @@ void SCSIExit(void)
 	// Delete port and buffers
 	if (the_port)
 	{
-		DeleteMsgPort(the_port);
+		FreeSysObject(ASOT_PORT,the_port);
 		the_port = NULL;
 	}
 

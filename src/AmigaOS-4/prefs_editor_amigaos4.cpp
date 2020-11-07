@@ -1680,7 +1680,7 @@ bool RunPrefs(void)
 	bool		retval;
 	retval	= false;
 
-	appport = CreateMsgPort();
+	appport = (MsgPort *) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	if (!appport) return FALSE;
 
 	NewList( &list_files );
@@ -1731,7 +1731,7 @@ done:
 
 
 	for (n=0;n<win_end;n++) if (win[n]) close_window(n);
-	if (appport) DeleteMsgPort(appport);
+	if (appport) FreeSysObject(ASOT_PORT,appport);
 
 	if (last_asl_path) free(last_asl_path);
 	last_asl_path = NULL;
@@ -1750,11 +1750,10 @@ int runtime_gui_tread(void)
 	bool		retval;
 	retval	= false;
 
-	appport = CreateMsgPort();
+	appport = (MsgPort *) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	if (!appport) return FALSE;
 
 	NewList( &list_files );
-
 
 	for (n=1;n<win_end;n++)
 	{
@@ -1785,7 +1784,7 @@ int runtime_gui_tread(void)
 
 quit:
 	for (n=0;n<win_end;n++) if (win[n]) close_window(n);
-	if (appport) DeleteMsgPort(appport);
+	if (appport) FreeSysObject(ASOT_PORT,appport);
 
 
 	return retval;
