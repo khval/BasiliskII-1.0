@@ -165,7 +165,12 @@ int driver_window_comp::draw()
 
 	if (!the_bitmap)
 	{
-		the_bitmap =AllocBitMap( mode.x, mode.y, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
+		MutexObtain(video_mutex);
+		if (the_win)
+		{
+			the_bitmap =AllocBitMap( mode.x, mode.y, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
+		}
+		MutexRelease(video_mutex);
 	}
 
 	if (the_bitmap)
@@ -213,21 +218,24 @@ int driver_window_comp::draw()
 			break;
 	}
 
-	wx = the_win->BorderLeft + the_win -> LeftEdge;
-	wy = the_win->BorderTop + the_win -> TopEdge;
+	MutexObtain(video_mutex);
+	if (the_win)
+	{
+		wx = the_win->BorderLeft + the_win -> LeftEdge;
+		wy = the_win->BorderTop + the_win -> TopEdge;
 
-	ww = the_win->Width - the_win->BorderLeft - the_win->BorderRight;
-	wh = the_win->Height -  the_win->BorderTop - the_win->BorderBottom;
+		ww = the_win->Width - the_win->BorderLeft - the_win->BorderRight;
+		wh = the_win->Height -  the_win->BorderTop - the_win->BorderBottom;
 
-	STEP(0, wx, wy ,0 ,0 ,1);
-	STEP(1, wx+ww,wy,mode.x,0,1);
-	STEP(2, wx+ww,wy+wh,mode.x,mode.y,1);
+		STEP(0, wx, wy ,0 ,0 ,1);
+		STEP(1, wx+ww,wy,mode.x,0,1);
+		STEP(2, wx+ww,wy+wh,mode.x,mode.y,1);
 
-	STEP(3, wx,wy, 0,0,1);
-	STEP(4, wx+ww,wy+wh,mode.x,mode.y,1);
-	STEP(5, wx, wy+wh ,0 ,mode.y ,1);
+		STEP(3, wx,wy, 0,0,1);
+		STEP(4, wx+ww,wy+wh,mode.x,mode.y,1);
+		STEP(5, wx, wy+wh ,0 ,mode.y ,1);
 
-	error = CompositeTags(COMPOSITE_Src, 
+		error = CompositeTags(COMPOSITE_Src, 
 			the_bitmap, the_win->RPort -> BitMap,
 
 			COMPTAG_VertexArray, P, 
@@ -240,6 +248,9 @@ int driver_window_comp::draw()
 			COMPTAG_SrcAlpha, (uint32) (0x0010000 ),
 			COMPTAG_Flags, COMPFLAG_SrcAlphaOverride | COMPFLAG_HardwareOnly | COMPFLAG_SrcFilter ,
 			TAG_DONE);
+
+	}
+	MutexRelease(video_mutex);
 
 	return error;
 }
