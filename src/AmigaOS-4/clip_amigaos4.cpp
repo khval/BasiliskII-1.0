@@ -157,3 +157,4 @@ void GetScrap(void **handle, uint32 type, int32 offset)
 {
 	D(bug("GetScrap handle %p, type %08x, offset %d\n", handle, type, offset));
 }
+

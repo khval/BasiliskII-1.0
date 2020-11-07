@@ -60,8 +60,6 @@ struct List list_files;
 
 #define ScreenTitle "BasiliskII II 1.0"
 
-// Some dummy stuff!
-char *dummy_txt = "";
 
 #include "cdrom.h"
 
@@ -69,7 +67,7 @@ static void update_volume(int type, char *str, ULONG add_new_volume, ULONG read_
 
 struct MsgPort *appport;
 
-char	*window_depth_names[]=
+const char	*window_depth_names[]=
 {
 	"Default",
 	"Black & White",
@@ -77,7 +75,7 @@ char	*window_depth_names[]=
 	NULL
 };
 
-char	*window_render_method_names[]=
+const char	*window_render_method_names[]=
 {
 	"Internal convertion",
 	"System Write Pixel Array",
@@ -85,7 +83,7 @@ char	*window_render_method_names[]=
 	NULL
 };
 
-char	*device_names[]=
+const char	*device_names[]=
 {
 	"a1ide.device",
 	"sii0680ide.device",
@@ -302,11 +300,10 @@ STATIC CONST_STRPTR VolumeTypes[] =
 static void read_volumes_settings( void )
 {
 	int n;
-	char *str;
+	const char *str;
 
 	n = getv( obj[ ID_PREFS_CD_DEVICE_GAD], CHOOSER_Selected );
 	str = device_names[n];
-
 
 	printf("cdrom device: (%d) %s \n",n,str);
 
@@ -406,7 +403,7 @@ static void read_emulation_settings( void )
 {
 	char *str;
 	char buf[128];
-	char *opt[]={"win","wic","scr"};
+	const char *opt[]={"win","wic","scr"};
 	int mode;
 	int value;
 
@@ -473,7 +470,7 @@ void add_volume(struct List *list,char *str, LONG num)
 	long long int size;
 	char str_size[30];
 	int 	v_unit;
-	char *str_unit[]={"Byte","KByte","MByte","GByte"};
+	const char *str_unit[]={"Byte","KByte","MByte","GByte"};
 
 	size = 0;
 	v_unit = 0;
@@ -524,7 +521,7 @@ void edit_volume(struct Node *node,char *str)
 	long long int size;
 	char str_size[30];
 	int 	v_unit;
-	char *str_unit[]={"Byte","KByte","MByte","GByte"};
+	const char *str_unit[]={"Byte","KByte","MByte","GByte"};
 
 	size = 0;
 	v_unit = 0;
@@ -660,12 +657,12 @@ static void set_serial_settings( void )
 {
 	CONST_STRPTR str;
 
-	parse_ser_prefs("seriala", 
+	parse_ser_prefs( "seriala", 
 		obj[ ID_PREFS_MODEM_DEVICE_GAD ], 
 		obj[ ID_PREFS_MODEM_UNIT_GAD ],
 		obj[ ID_PREFS_MODEM_PARALLEL_GAD ] );
 
-	parse_ser_prefs("serialb", 
+	parse_ser_prefs( "serialb", 
 		obj[ ID_PREFS_PRINTER_DEVICE_GAD ], 
 		obj[ ID_PREFS_PRINTER_UNIT_GAD ],
 		obj[ ID_PREFS_PRINTER_PARALLEL_GAD ] );
@@ -939,7 +936,9 @@ void create_volume()
 static void add_or_update_volume(ULONG add_new_volume)
 {
 	ULONG	type, unit, read_only;
-	STRPTR	device, partition, diskimage;
+	const char *device;
+	const char *partition;
+	const char *diskimage;
 	char str[MAX_STRING_LENGTH + 128];
 	int i;
 	char *mstr = NULL;
@@ -1479,8 +1478,8 @@ int event(int id, int code)
 	return retval;
 }
 
-char *tablabels[]={"Disk","SCSI","IO","System",NULL};
-char *disk_tablabels[]={"Partition","Diskimage",NULL};
+const char *tablabels[]={"Disk","SCSI","IO","System",NULL};
+const char *disk_tablabels[]={"Partition","Diskimage",NULL};
 
 struct ColumnInfo volumes_ci[] =
 {
