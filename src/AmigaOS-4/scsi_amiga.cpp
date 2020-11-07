@@ -42,7 +42,6 @@ static struct MsgPort *the_port = NULL;	// Message port for device communication
 
 static ULONG buffer_size;				// Size of data buffer
 static UBYTE *buffer = NULL;			// Pointer to data buffer
-static ULONG buffer_memf;				// Buffer memory flags
 
 static UBYTE cmd_buffer[12];			// Buffer for SCSI command
 
@@ -56,28 +55,22 @@ static bool direct_transfers_supported = false; // Direct data transfers (bypass
  *  Initialization
  */
 
+#define AllocVecSharedClear(size) AllocVecTags( size, AVT_Type, MEMF_SHARED, AVT_ClearWithValue, 0, TAG_END );
+
+
 void SCSIInit(void)
 {
 	int id, lun;
 
-	int memtype = PrefsFindInt32("scsimemtype");
-	switch (memtype) {
-		case 1:
-			buffer_memf = MEMF_24BITDMA | MEMF_PUBLIC;
-			break;
-		case 2:
-			buffer_memf = MEMF_ANY | MEMF_PUBLIC;
-			direct_transfers_supported = true;
-			break;
-		default:
-			buffer_memf = MEMF_CHIP | MEMF_PUBLIC;
-			break;
-	}
 
 	// Create port and buffers
 	the_port = CreateMsgPort();
-	buffer = (UBYTE *)AllocMem(buffer_size = 0x10000, buffer_memf);
-	sense_buffer = (UBYTE *)AllocMem(SENSE_LENGTH, MEMF_CHIP | MEMF_PUBLIC);
+
+	buffer_size = 0x10000;
+
+	buffer = (UBYTE *) AllocVecSharedClear(buffer_size);
+	sense_buffer = (UBYTE *)AllocVecSharedClear(SENSE_LENGTH);
+
 	if (the_port == NULL || buffer == NULL || sense_buffer == NULL) {
 		ErrorAlert(STR_NO_MEM_ERR);
 		QuitEmulator();
@@ -135,16 +128,28 @@ void SCSIExit(void)
 			if (io) {
 				CloseDevice((struct IORequest *)io);
 				DeleteIORequest((IORequest*) io);
+				ios[i*8+j] = NULL;
 			}
 		}
 
 	// Delete port and buffers
 	if (the_port)
+	{
 		DeleteMsgPort(the_port);
+		the_port = NULL;
+	}
+
 	if (buffer)
-		FreeMem(buffer, buffer_size);
+	{
+		FreeVec(buffer);
+		buffer = NULL;
+	}
+
 	if (sense_buffer)
-		FreeMem(sense_buffer, SENSE_LENGTH);
+	{
+		FreeVec(sense_buffer);
+		sense_buffer = NULL;
+	}
 }
 
 
@@ -157,10 +162,11 @@ static bool try_buffer(int size)
 	if (size <= buffer_size)
 		return true;
 
-	UBYTE *new_buffer = (UBYTE *)AllocMem(size, buffer_memf);
+	UBYTE *new_buffer = (UBYTE *)AllocVecSharedClear(size);
 	if (new_buffer == NULL)
 		return false;
-	FreeMem(buffer, buffer_size);
+
+	FreeVec(buffer);
 	buffer = new_buffer;
 	buffer_size = size;
 	return true;
