@@ -39,6 +39,11 @@ extern void window_draw_internal_no_lock( driver_base *drv );
 extern void bitmap_draw_internal( driver_base *drv );
 extern void window_draw_wpa ( driver_base *drv );
 
+extern struct MsgPort *periodic_msgPort;
+
+#define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
+
+
 int driver_screen::draw()
 {
 	if (do_draw)
@@ -140,7 +145,9 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		WA_Activate, true,
 		WA_RMBTrap, true,
 		WA_ReportMouse, true,
+		WA_UserPort,  periodic_msgPort ,
 		WA_CustomScreen, (ULONG)the_screen,
+		WA_IDCMP, IDCMP_common,
 		TAG_END
 	);
 
