@@ -690,6 +690,28 @@ void TheCloseWindow(struct Window *win)
 	CloseWindow( win );
 }
 
+extern struct MsgPort *iconifyPort;
+
+void wait_for_uniconify()
+{
+	struct Message *msg;
+
+	SuspendTask(main_task,0);
+
+	if (iconifyPort)
+	{
+		 Wait(1 << iconifyPort->mp_SigBit);
+
+		// empty que.
+		while (msg = (Message *) GetMsg( iconifyPort ) )
+		{
+			ReplyMsg( (Message*) msg );
+		}
+	}
+
+	RestartTask(main_task,0);
+}
+
 
 static void periodic_func(void)
 {
@@ -788,7 +810,7 @@ static void periodic_func(void)
 									enable_Iconify( drv->the_win ); 	
 									drv -> kill_gfx_output();	// this will remove messages from queue...
 
-									Delay(200);
+									wait_for_uniconify();
 
 									dispose_Iconify(); 	
 									MutexObtain(video_mutex);	// try to prohibit nasty stuff...
