@@ -44,6 +44,8 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
 	video_convert.cpp \
 	window_icons.cpp \
 	iconify.cpp \
+	spawn.cpp \
+	init.cpp \
 	video_driver_screen.cpp \
 	video_driver_window.cpp \
 	video_driver_window_comp.cpp \
@@ -76,7 +78,7 @@ VPATH += $(addprefix :, $(subst  ,:, $(filter-out $($(subst, :, ,$(VPATH))), $(S
 
 $(APP): $(OBJ_DIR) $(OBJS)
 	$(LINKING)
-	$(CXX) -o $(APP).db $(LDFLAGS) $(OBJS) $(LIBS)  -lauto -lraauto -ggdb
+	$(CXX) -o $(APP).db $(LDFLAGS) $(OBJS) $(LIBS)  -ggdb
 	@;$(STRIPPING)
 	@;$(STRIP) --remove-section=.comment $(APP).db -o $(APP)
 	@;protect $(APP) +e

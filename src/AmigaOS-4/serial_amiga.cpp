@@ -117,7 +117,7 @@ private:
 
 // Global variables
 static void *proc_arg;						// Argument to process
-extern struct Task *MainTask;				// Pointer to main task (from main_amiga.cpp)
+extern struct Task *main_task;				// Pointer to main task (from main_amiga.cpp)
 
 
 /*
@@ -697,7 +697,7 @@ void ASERDPort::serial_func(void)
 	obj->proc_port = proc_port;
 	obj->control_io = control_io;
 	obj->proc_error = false;
-	Signal(MainTask, SIGF_SINGLE);
+	Signal(main_task, SIGF_SINGLE);
 
 	// Main loop
 	for (;;) {
@@ -854,5 +854,5 @@ quit:
 
 	// Send signal to main task to confirm termination
 	Forbid();
-	Signal(MainTask, SIGF_SINGLE);
+	Signal(main_task, SIGF_SINGLE);
 }

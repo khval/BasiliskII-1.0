@@ -9,7 +9,6 @@
 void	init_create_volume(int win_nr);
 void init_win_disks(int win_nr, LONG page);
 
-
 int add_vol_opt = 0;
 
 /*
@@ -1335,8 +1334,8 @@ void DO_ASL_MODE_ID(int win_id, int str_gad_id)
 		{
 			sprintf(tmpbuffer,"%X",(unsigned int) mreq -> sm_DisplayID);
 
-			width = p96GetModeIDAttr(mreq -> sm_DisplayID, P96IDA_WIDTH);
-			height = p96GetModeIDAttr(mreq -> sm_DisplayID, P96IDA_HEIGHT);
+//			width = p96GetModeIDAttr(mreq -> sm_DisplayID, P96IDA_WIDTH);
+//			height = p96GetModeIDAttr(mreq -> sm_DisplayID, P96IDA_HEIGHT);
 
 			RSetAttrO( win_id, ID_PREFS_GFX_MODE_ID_GAD,STRINGA_TextVal, tmpbuffer);
 			RSetAttrO( win_id, ID_PREFS_GFX_WIDTH_GAD,INTEGER_Number, width);

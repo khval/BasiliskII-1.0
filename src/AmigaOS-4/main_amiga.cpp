@@ -63,13 +63,14 @@
 #include "sys.h"
 #include "user_strings.h"
 #include "version.h"
+#include "spawn.h"
 
 #define DEBUG 0
 #include "debug.h"
 
 #define 	MaxROMSize 0x100000;
 
-#define 	safecloselib(a) { CloseLibrary(a); a = NULL; }
+
 
 #define FREE_STR(str) if (str) { free(str);str=NULL; }
 
@@ -98,20 +99,18 @@ bool CPUIs68060;
 int FPUType;
 bool TwentyFourBitAddressing;
 
-struct Library * AHIBase = NULL;
-struct AHIIFace *IAHI = NULL;
+extern struct Library * AHIBase ;
+extern struct AHIIFace *IAHI ;
 
 // Global variables
-struct Library *GfxBase = NULL;
-struct Library *IFFParseBase = NULL;
-struct Library *AslBase = NULL;
-// struct Library *CyberGfxBase = NULL;
+extern struct Library *GfxBase;
+extern struct Library *IFFParseBase;
+extern struct Library *AslBase;
 struct Library *TimerBase = NULL;
-// struct Library *MUIMasterBase;
-struct Library *IconBase;
-struct Library *LocaleBase;
+extern struct Library *IconBase;
+extern struct Library *LocaleBase;
 
-struct Task *MainTask;							// Our task
+extern struct Task *main_task;	
 uint8 *ScratchMem = NULL;						// Scratch memory for Mac ROM writes
 
 ULONG	SubTaskCount;
@@ -144,7 +143,7 @@ static bool ChoiceAlert2(const char *text, const char *pos, const char *neg);
 extern void ADBInit(void);
 extern void ADBExit(void);
 
-struct Catalog *catalog;
+extern struct Catalog *catalog;
 
  char *PREFS_FILE_NAME = NULL; 
  char *XPRAM_FILE_NAME = NULL; 
@@ -161,29 +160,15 @@ void print_sigs(const char *txt, uint32_t line)
 	printf("%s:%d --- tc_SigAlloc: %08x\n", txt, line, t->tc_SigAlloc);
 }
 
-static int openlibs(void)
-{
-	if ((GfxBase = OpenLibrary("graphics.library", 39)))
-	if ((IntuitionBase = OpenLibrary("intuition.library", 39)))
-	if ((IFFParseBase = OpenLibrary("iffparse.library", 39)))
-	if ((AslBase = OpenLibrary("asl.library", 36)))
-	if ((IconBase = OpenLibrary("icon.library", 0)))
-	if ((LocaleBase = OpenLibrary("locale.library", 0)))
-	{
-		catalog = OpenCatalog(NULL, "basilisk.catalog", OC_BuiltInLanguage, "english", TAG_DONE);
-		return 1;
-	}
-
-	return 0;
-}
 
 /*
  *  Main program
  */
 
-
 int MacAddressSpace = 0;
 
+extern BOOL openlibs();
+extern void closedown();
 
 void show_sigs(char *txt)
 {
@@ -267,7 +252,6 @@ int main(int argc, char **argv)
 	// Initialize variables
 	RAMBaseHost = NULL;
 	ROMBaseHost = NULL;
-	MainTask = FindTask(NULL);
 	struct DateStamp ds;
 	DateStamp(&ds);
 	srand(ds.ds_Tick);
@@ -277,10 +261,7 @@ int main(int argc, char **argv)
 
 	if (openlibs() == 0)
 	{
-//		if (MUIMasterBase == NULL)
-//			exit(1);
-//		else
-			QuitEmulator();
+		QuitEmulator();
 	}
 
 	// Find program icon
@@ -467,51 +448,23 @@ int main(int argc, char **argv)
 	msg2.mn_ReplyPort	= StartupMsgPort;
 	msg2.mn_Length		= sizeof(msg2);
 
-
 	ADBInit();	
 
-/*
-	// Start runtime gui
-	gui_proc = CreateNewProcTags(
-		NP_Entry, (ULONG) runtime_gui_tread,
-		NP_Name, (ULONG) "Basilisk II runtime gui tread",
-		NP_Priority, 0,
-		TAG_END
-	);
-*/
 	printf("Start XPRAM watchdog process\n");
 
-	// Start XPRAM watchdog process
-	xpram_proc = CreateNewProcTags(
-		NP_Entry, (ULONG)xpram_func,
-		NP_Name, (ULONG)"Basilisk II XPRAM Watchdog",
-		NP_Priority, 0,
-		TAG_END
-	);
-
-	if (xpram_proc)
-	{
-		SubTaskCount++;
-	}
+	xpram_proc = spawn( xpram_func, "Basilisk II XPRAM Watchdog", NULL );	
+	if (xpram_proc)	SubTaskCount++;
 
 	printf("Start 60Hz process\n");
 
-	// Start 60Hz process
-	tick_proc = CreateNewProcTags(
-		NP_Entry, (ULONG)tick_func,
-		NP_Name, (ULONG)"Basilisk II 60Hz",
-		NP_Priority, 5,
-		TAG_END
-	);
-
+	tick_proc = spawn( tick_func, "Basilisk II 60Hz", NULL );	
 	if (tick_proc)
 	{
+		SetTaskPri( (Task*) tick_proc, 5);
+
 		SubTaskCount++;
 
-		SetTaskPri(MainTask, -1);
-
-		// Jump to ROM boot routine
-		//VNewRawDoFmt("Start emulation\n", (APTR (*)(APTR, UBYTE))1, NULL, NULL);
+		SetTaskPri( (Task*) main_task, -1);
 
 		printf("main_amiga.cpp / Start680x0()\n");
 
@@ -545,12 +498,12 @@ void QuitEmulator(void)
 
 	if (xpram_proc)	Signal((struct Task *)xpram_proc, SIGBREAKF_CTRL_C);
 
+	if (gui_proc) Signal((struct Task *)gui_proc, SIGBREAKF_CTRL_C);
+
+	wait_spawns();	// wait for all spwans to die...
 
 	printf("** ADBExit()\n");
-
 	ADBExit();
-
-	if (gui_proc) Signal((struct Task *)gui_proc, SIGBREAKF_CTRL_C);
 
 	// Deinitialize everything
 	ExitAll();
@@ -579,27 +532,6 @@ void QuitEmulator(void)
 		StartupMsgPort = NULL;
 	}
 
-	// Close libraries
-
-	if (LocaleBase)
-	{
-		CloseCatalog(catalog);
-		CloseLibrary(LocaleBase);
-		LocaleBase = NULL;
-	}
-
-	if (IconBase)
-	{
-		FreeDiskObject(dobj);
-		CloseLibrary(IconBase);
-		IconBase = NULL;
-	}
-
-	safecloselib(AslBase);
-	safecloselib(IFFParseBase);
-	safecloselib(IntuitionBase);
-	safecloselib(GfxBase);
-
 	if (RAMBaseHost) 
 	{
 		FreeVec(RAMBaseHost);
@@ -608,6 +540,10 @@ void QuitEmulator(void)
 
 	FREE_STR(PREFS_FILE_NAME);
 	FREE_STR(XPRAM_FILE_NAME);
+
+	// Close libraries
+
+	closedown();
 
 	exit(0);
 }
@@ -716,8 +652,7 @@ static void tick_func(void)
 		FreeSysObject(ASOT_PORT,timer_port);
 
 	// Main task asked for termination, send signal
-	Forbid();
-	Signal(MainTask, SIGF_SINGLE);
+	Signal(main_task, SIGF_SINGLE);
 }
 
 /*

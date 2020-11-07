@@ -114,7 +114,7 @@ UWORD *current_pointer = (UWORD *)-1;		// Currently visible mouse pointer data
 struct MsgPort *periodic_msgPort = NULL;
 static struct Process *periodic_proc = NULL;		// Periodic process
 
-extern struct Task *MainTask;				// Pointer to main task (from main_amiga.cpp)
+extern struct Task *main_task;				// Pointer to main task (from main_amiga.cpp)
 BPTR video_debug_out = 0;
 
 // Amiga -> Mac raw keycode translation table
@@ -939,7 +939,7 @@ static void periodic_func(void)
 	if (periodic_msgPort)	FreeSysObject(ASOT_PORT,periodic_msgPort);
 	periodic_msgPort = NULL;
 
-	Signal(MainTask, SIGF_SINGLE);
+	Signal(main_task, SIGF_SINGLE);
 }
 
 
