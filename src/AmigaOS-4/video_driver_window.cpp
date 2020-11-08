@@ -81,7 +81,9 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 		WA_IDCMP, IDCMP_common,
 		TAG_END
 	);
-	if (the_win == NULL) {
+
+	if (the_win == NULL)
+	{
 		init_ok = false;
 		ErrorAlert(STR_OPEN_WINDOW_ERR);
 		return;
@@ -151,15 +153,15 @@ driver_window::~driver_window()
 {
 	MutexObtain(video_mutex);
 
-	// Window mode, free bitmap
-	if (the_bitmap) {
+	if (the_bitmap)
+	{
 		WaitBlit();
 		FreeBitMap(the_bitmap);
 		the_bitmap = NULL;
 	}
 
-	// Free pens and close window
-	if (the_win) {
+	if (the_win)
+	{
 		ReleasePen(the_win->WScreen->ViewPort.ColorMap, black_pen);
 		ReleasePen(the_win->WScreen->ViewPort.ColorMap, white_pen);
 

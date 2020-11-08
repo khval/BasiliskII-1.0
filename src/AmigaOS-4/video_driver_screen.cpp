@@ -41,11 +41,12 @@ extern void window_draw_wpa ( driver_base *drv );
 
 extern struct MsgPort *periodic_msgPort;
 
-#define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
+#define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | 		\
+		IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE	
 
 int driver_screen::draw()
 {
-	if (do_draw)
+	if ((do_draw) && (the_screen))
 	{
 		frame_dice ++;
 		if (frame_dice >  line_skip)  frame_dice = 0;
@@ -235,7 +236,7 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 
 void driver_screen::set_palette(uint8 *pal, int num)
 {
-	// Convert palette to 32 bits
+	int n;
 	ULONG table[2 + 256 * 3];
 	table[0] = num << 16;
 	table[num * 3 + 1] = 0;
