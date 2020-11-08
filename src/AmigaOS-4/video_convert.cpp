@@ -2,6 +2,7 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 
+extern BPTR video_debug_out;
 
 char convert_1bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  bytes )
 {
@@ -221,16 +222,36 @@ void convert_8bit_to_16bit( ULONG *pal, char *from, uint16 *to,int  pixels )
 	register unsigned int g;
 	register unsigned int b;
 
-
 	for (n=0; n<pixels;n++)
 	{
 		rgb = pal[from[n]];
 		r = (rgb & 0xF80000) >> 8;
 		g = (rgb & 0x00FC00) >> 5;
 		b = (rgb & 0x0000F8) >> 3;
-		to[n] = 0xFF000000 | r | g | b;
+		rgb =  r | g | b;
+
+		to[n] = ((rgb & 0xFF00) >> 8)  | ((rgb & 0xFF) << 8);
 	}
 }
+
+void convert_15bit_to_16bit( ULONG *pal, uint16 *from, uint16 *to,int  pixels )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int rg;
+	register unsigned int b;
+
+	for (n=0; n<pixels;n++)
+	{
+		rgb = from[n];
+		rg = (rgb & 0x007FC0) << 1;
+		b = (rgb & 0x00001F) ;
+		rgb =  rg | b;
+
+		to[n] = ((rgb & 0xFF00) >> 8)  | ((rgb & 0xFF) << 8);
+	}
+}
+
 
 void convert_32bit_to_16bit( ULONG *pal, uint32 *from, uint16 *to,int  pixels )
 {
@@ -246,7 +267,9 @@ void convert_32bit_to_16bit( ULONG *pal, uint32 *from, uint16 *to,int  pixels )
 		r = (rgb & 0xF80000) >> 8;
 		g = (rgb & 0x00FC00) >> 5;
 		b = (rgb & 0x0000F8) >> 3;
-		to[n] = 0xFF000000 | r | g | b;
+		rgb =  r | g | b;
+
+		to[n] = ((rgb & 0xFF00) >> 8)  | ((rgb & 0xFF) << 8);
 	}
 }
 
@@ -278,6 +301,25 @@ void convert_16bit_to_32bit( ULONG *pal, uint16 *from, uint32 *to,int  pixels )
 		to[n] = 0xFF000000 | r | g | b;
 	}
 }
+
+void convert_15bit_to_32bit( ULONG *pal, uint16 *from, uint32 *to,int  pixels )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	for (n=0; n<pixels;n++)
+	{
+		rgb = from[n];
+		r = (rgb & 0x007C00) << 9;
+		g = (rgb & 0x0003E0) << 6;
+		b = (rgb & 0x00001F) << 3;
+		to[n] = 0xFF000000 | r | g | b;
+	}
+}
+
 
 void convert_copy_8bit( ULONG *pal, char *from, char *to,int  pixels )
 {

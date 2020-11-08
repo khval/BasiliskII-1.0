@@ -22,4 +22,6 @@ extern bool open_engine_window( int window_left, int window_top, int window_widt
 
 extern void enable_Iconify( struct Window *My_Window );
 extern void dispose_Iconify();
+extern void empty_que(struct MsgPort *win_port);
 
+extern APTR video_mutex ;
