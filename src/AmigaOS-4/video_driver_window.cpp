@@ -54,9 +54,7 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 	: black_pen(-1), white_pen(-1), driver_base(m)
 {
 	const video_mode &mode = m.get_current_mode();
-
 	unsigned int vmem_size;
-
 	ULONG scr_depth;
 
 	depth = mode.depth;
@@ -151,8 +149,6 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 
 driver_window::~driver_window()
 {
-	Delay(1);
-
 	MutexObtain(video_mutex);
 
 	// Window mode, free bitmap

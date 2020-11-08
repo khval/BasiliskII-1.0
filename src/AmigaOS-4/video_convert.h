@@ -16,4 +16,3 @@ void convert_8bit_to_32bit( ULONG *pal, char *from, uint32 *to,int  pixels );
 void convert_16bit_to_32bit( ULONG *pal, uint16 *from, uint32 *to,int  pixels );
 
 
-

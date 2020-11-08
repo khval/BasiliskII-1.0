@@ -43,7 +43,6 @@ extern struct MsgPort *periodic_msgPort;
 
 #define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
-
 int driver_screen::draw()
 {
 	if (do_draw)
@@ -87,8 +86,6 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 	struct DisplayInfo dispi;
 	struct DimensionInfo dimInfo;
 
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
-
 	// Check if the mode is one we can handle
 
 	if ( ! (
@@ -99,8 +96,6 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		init_ok = false;
 		return;
 	}
-
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
 
 	switch ( dimInfo.MaxDepth )
 	{
@@ -129,8 +124,6 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		init_ok = false;
 		return;
 	}
-
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
 
 	// Open window
 	the_win = OpenWindowTags(NULL,
@@ -191,8 +184,6 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		UnlockBitMap(BMLock);
 	}
 
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
-
 	if (null_pointer)
 	{
 		// Hide mouse pointer inside window
@@ -231,22 +222,13 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 			break;
 	}
 
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
-
 	convert = (convert_type) get_convert( scr_depth, depth );
-
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
-
 	if (convert == NULL)
 	{
 		ErrorAlert(STR_OPEN_WINDOW_ERR);
 		init_ok = false;
 		return;
 	}
-
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
-
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
 
 	init_ok = true;
 }
@@ -257,23 +239,38 @@ void driver_screen::set_palette(uint8 *pal, int num)
 	ULONG table[2 + 256 * 3];
 	table[0] = num << 16;
 	table[num * 3 + 1] = 0;
+
 	for (int i=0; i<num; i++) {
 		table[i*3+1] = pal[i*3] * 0x01010101;
 		table[i*3+2] = pal[i*3+1] * 0x01010101;
 		table[i*3+3] = pal[i*3+2] * 0x01010101;
 	}
 
-	// And load it
-	LoadRGB32(&the_screen->ViewPort, table);
+	for (int i=0; i<num; i++) {
+		n = i *3;
+		vpal[i]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	}
+
+	if (the_screen) LoadRGB32(&the_screen->ViewPort, table);
 }
 
 driver_screen::~driver_screen()
 {
-	// Close window
+	MutexObtain(video_mutex);
+
 	if (the_win)
 	{
+		ModifyIDCMP( the_win, 0L );
+		empty_que( the_win -> UserPort );
+
 		CloseWindow(the_win);
 		the_win = NULL;
+	}
+
+	if (the_screen)
+	{
+		CloseScreen(the_screen);
+		the_screen = NULL;
 	}
 
 	if (VIDEO_BUFFER)
@@ -282,9 +279,6 @@ driver_screen::~driver_screen()
 		VIDEO_BUFFER = NULL;
 	}
 
-	// Close screen
-	if (the_screen) {
-		CloseScreen(the_screen);
-		the_screen = NULL;
-	}
+	MutexRelease(video_mutex);
 }
+
