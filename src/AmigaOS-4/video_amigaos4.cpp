@@ -65,6 +65,9 @@ extern bool quit_program_gui;
 int window_x = 0;
 int window_y = 0;
 
+extern int req(const char *title,const  char *body,const char *buttons, ULONG image);
+
+
 void (*do_draw) ( driver_base *drv ) = NULL;
 
 // ---- Default options!!! ----
@@ -805,6 +808,8 @@ static void periodic_func(void)
 								case GID_ICONIFY:
 
 									ReplyMsg((struct Message *)msg);
+
+									ModifyIDCMP( drv -> the_win, 0L );	// don't allow more messages from the window.
 									empty_que( drv -> the_win -> UserPort );
 
 									enable_Iconify( drv->the_win ); 	
@@ -827,7 +832,23 @@ static void periodic_func(void)
 
 
 					case IDCMP_CLOSEWINDOW:
-						quit_program_gui = true;
+
+						{						
+							ULONG opt =req(
+									"Do you really want-to quit",  
+									"Quiting this way can result\nin corrupt MacOS files or filesystem.", 
+									"Cancel|Quit", 2);
+
+							switch (opt)
+							{
+								case 0:
+
+									ModifyIDCMP( drv -> the_win, 0L );
+									empty_que( drv -> the_win -> UserPort );
+									quit_program_gui = true;
+									break;
+							}
+						}
 						break;
 
 					case IDCMP_MOUSEMOVE:

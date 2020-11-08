@@ -93,7 +93,7 @@ struct Library			*ListBrowserBase = NULL;
 struct Library			*ClickTabBase = NULL;
 struct Library			*WindowBase = NULL;
 struct Library			*CheckBoxBase = NULL;
-
+struct Library			*RequesterBase = NULL;
 
 struct StringIFace *IString = NULL;
 struct LayoutIFace *ILayout = NULL;
@@ -104,6 +104,7 @@ struct ListBrowserIFace *IListBrowser = NULL;
 struct ClickTabIFace *IClickTab = NULL;
 struct WindowIFace *IWindow = NULL;
 struct CheckBoxIFace *ICheckBox = NULL;
+struct RequesterIFace *IRequester = NULL;
 
 APTR engine_mx = 0;
 
@@ -184,6 +185,9 @@ BOOL openlibs()
 	if ( ! open_lib( "clicktab.gadget", 53, "main", 1, &ClickTabBase, (struct Interface **) &IClickTab) ) return FALSE;
 	if ( ! open_lib( "window.class", 53, "main", 1, &WindowBase, (struct Interface **) &IWindow) ) return FALSE;
 	if ( ! open_lib( "checkbox.gadget", 53, "main", 1, &CheckBoxBase, (struct Interface **) &ICheckBox) ) return FALSE;
+
+	if ( ! open_lib( "requester.class", 53, "main", 1, &RequesterBase, (struct Interface **) &IRequester) ) return FALSE;
+
 
 	_locale = (struct Locale *) OpenLocale(NULL);
 
@@ -283,6 +287,9 @@ void closedown()
 
 	if (CheckBoxBase) CloseLibrary(CheckBoxBase); GraphicsBase = 0;
 	if (ICheckBox) DropInterface((struct Interface*) IGraphics); ICheckBox = 0;
+
+	if (RequesterBase) CloseLibrary(RequesterBase); RequesterBase = 0;
+	if (IRequester) DropInterface((struct Interface*) IRequester); IRequester = 0;
 
 	if (engine_mx) 
 	{

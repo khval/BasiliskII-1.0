@@ -46,6 +46,7 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
 	iconify.cpp \
 	spawn.cpp \
 	init.cpp \
+	req.cpp \
 	video_driver_screen.cpp \
 	video_driver_window.cpp \
 	video_driver_window_comp.cpp \
