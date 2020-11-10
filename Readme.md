@@ -24,11 +24,11 @@ If you have 800 Mhz G4, the emulation speed will not feel great.
 * If you are using Fullscreen, make sure to enable "Screen Lock", if not basilisk II might crash.
 
 * Emulated CPU task priority, range from 0 to -128, the CPU emulation has a tendency to hog the CPU resources,
-as a result AmigaOS run into stall states and complete lock up, setting task priority of -1 for active window
-is recommended, if above 1, critical tasks like CPU, eventhandler and other system critical task,
-will be starved for CPU resources. (This is way it's limited to max 0.)
+as a result AmigaOS run into stall states and can completly lock up, setting task priority of -1 for active window
+is recommended, if above 1, critical tasks like eventhandlers and other system critical task,
+will be starved of CPU resources. (This is way it's limited to max 0.)
 
-* Creating when creating Mac partitions in media Tools box, its recommended that the partition is not above
+* When creating Mac partitions in media Tools box, its recommended that the partition is not above
 4Gbytes, if your emulating MacOS7.5.5, if the partition is too big you will get errors, when tying to
 copy files to it, under MacOS. If have lot space to share with Basilisk create many partitions instead.
 You are not supposed to be able to mount the partitions under AmigaOS, so disable automount in media tool box (AmigaOS4.1).
@@ -38,6 +38,9 @@ you can mount the CD ISO image on the Amiga side, and by using diskimagegui / di
 so you don’t need to transferee the files using HFS.
 
 * Virtual directory share is best avoided, it can be buggy some times.
+
+* Running Bailisk II on 16bit screen is not a bad idea, this version of basilisk uses lookup tables,
+as result 15bit to 16bit + endiness is done in one operation, 8bit to 16bit is also uses 16bit lookup palette table. 
 
 Best Regards
 Kjetil Hvalstrand 
