@@ -30,11 +30,11 @@ will be starved of CPU resources. (This is way it's limited to max 0.)
 
 * When creating Mac partitions in media Tools box, its recommended that the partition is not above
 4Gbytes, if your emulating MacOS7.5.5, if the partition is too big you will get errors, when tying to
-copy files to it, under MacOS. If have lot space to share with Basilisk create many partitions instead.
+copy files to it, under MacOS. If you have lot space to share with Basilisk create many partitions instead.
 You are not supposed to be able to mount the partitions under AmigaOS, so disable automount in media tool box (AmigaOS4.1).
 
 * For compressed cd iso images it’s best decompress it on the Amiga side,
-you can mount the CD ISO image on the Amiga side, and by using diskimagegui / diskimage.device, 
+you can mount the CD ISO image on the Amiga side, by using diskimagegui / diskimage.device, 
 so you don’t need to transferee the files using HFS.
 
 * Virtual directory share is best avoided, it can be buggy some times.
