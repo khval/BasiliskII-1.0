@@ -7,7 +7,7 @@ This version focusses on AmigaOS4.1, so is designed around AmigaOS4.1 native gra
 
 Please read the manual, if you like to mess around with thw configuration files, (you should not need to)
 
-# Requeued hardware specifications 
+# Recommended hardware specifications 
 
 680x0 interpreted emulation does requires a lot resources, sadly we do not support JIT (Even if it’s possible on EUAE), 
 as result. No one has investigated how to integrated it, and CPU emulation is most complicated part.
