@@ -9,10 +9,11 @@ Please read the manual, if you like to mess around with thw configuration files,
 
 # Recommended hardware specifications 
 
-680x0 interpreted emulation does requires a lot resources, sadly we do not support JIT (Even if it’s possible on EUAE), 
-as result. No one has investigated how to integrated it, and CPU emulation is most complicated part.
+680x0 interpreted emulation does requires a lot of resources, sadly we do not support JIT (Even if it’s possible on EUAE).
+No one has investigated how to integrated it, and the CPU emulation is most complicated part.
 We can sadly not expose Petunia (the AmigaOS4.1 integrated JIT) to Basilisk, MacOS needs some memory maps
-used by AmigaOS. It was suggesting using MMU trick it, but not sure how too.
+used by AmigaOS. It was suggesting using MMU to trick it, but not sure how too. Petunia has also limitations, 
+it might not be as advanced as it needs to be.
 
 A 1.8GHz PowerPC is will give a decent speed for most things.
 
