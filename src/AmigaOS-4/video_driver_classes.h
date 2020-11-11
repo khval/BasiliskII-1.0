@@ -37,7 +37,6 @@ class driver_base
 		Amiga_monitor_desc &monitor;	// Associated video monitor
 		const video_mode &mode;		// Video mode handled by the driver
 		BOOL init_ok;			// Initialization succeeded (we can't use exceptions because of -fomit-frame-pointer)
-		ULONG vpal[256];
 		struct Window *the_win;
 		char *VIDEO_BUFFER;
 		video_depth depth;
@@ -111,4 +110,5 @@ enum
 
 extern void *get_convert( uint32_t scr_depth, uint32_t depth );
 
-
+extern uint32 vpal32[256];
+extern uint16 vpal16[256];

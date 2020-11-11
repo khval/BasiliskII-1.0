@@ -225,7 +225,7 @@ void driver_window::set_palette(uint8 *pal, int num)
 
 	for (int i=0; i<num; i++) {
 		n = i *3;
-		vpal[i]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+		vpal32[i]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
 	}
 }
 

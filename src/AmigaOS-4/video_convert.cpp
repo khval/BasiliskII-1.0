@@ -4,7 +4,11 @@
 
 extern BPTR video_debug_out;
 
-char convert_1bit_to_32bit_asm( ULONG *pal, char *from, uint32 *to,int  bytes )
+uint16 *lookup16bit = NULL;
+
+extern uint16 vpal16[256];
+extern uint32 vpal32[256];
+
 {
 	asm
 	(

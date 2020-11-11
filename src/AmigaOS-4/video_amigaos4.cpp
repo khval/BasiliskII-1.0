@@ -60,6 +60,9 @@
 int last_wheel = 0;
 int delta_wheel = 0;
 
+uint32 vpal32[256];
+uint16 vpal16[256];
+
 extern bool quit_program_gui;
 
 int window_x = 0;
