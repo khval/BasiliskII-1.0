@@ -573,6 +573,10 @@ void Amiga_monitor_desc::video_close()
 		Signal(&periodic_proc->pr_Task, SIGBREAKF_CTRL_C);
 		Wait(SIGF_SINGLE);
 	}
+
+	// clean up if we used a lookup....
+	if (lookup16bit) free(lookup16bit);
+	lookup16bit = NULL;
 }
 
 
@@ -1173,7 +1177,7 @@ void window_draw_internal( driver_base *drv )
 		for (nn=0; nn<drv ->mode.y;nn++)
 		{
 			n = nn;
-			drv -> convert( drv -> vpal , (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 		}
 
 		UnlockBitMap(BMLock);
@@ -1203,7 +1207,7 @@ void window_draw_internal_no_lock( driver_base *drv )
 	for (nn=0; nn<drv ->mode.y;nn++)
 	{
 		n = nn;
-		drv -> convert( drv -> vpal , (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+		drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 	}
 }
 
@@ -1233,7 +1237,7 @@ void bitmap_draw_internal( driver_base *drv )
 		for (nn=0; nn<drv ->mode.y;nn++)
 		{
 			n = nn;
-			drv -> convert( drv -> vpal , (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 		}
 
 		UnlockBitMap(BMLock);
@@ -1265,7 +1269,7 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 	for (nn=0; nn<drv ->mode.y;nn++)
 	{
 		n = nn;
-		drv -> convert( drv -> vpal , (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+		drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 	}
 
 	BltBitMapRastPort( drv->get_bitmap(), 0, 0,drv->the_win->RPort, 

@@ -194,7 +194,7 @@ int driver_window_comp::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mode.y ? n : mode.y-1;
-				convert_1bit_to_32bit( vpal , (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
+				convert_1bit_to_32bit( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
 			}
 			break;
 
@@ -203,7 +203,7 @@ int driver_window_comp::draw()
 			{
 				n = frame_dice+(nn*line_skip);
 				n = n <= mode.y ? n : mode.y-1;
-				convert_8bit_to_32bit_asm( vpal , (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
+				convert_8bit_to_32bit( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
 			}
 			break;
 

@@ -41,7 +41,7 @@ class driver_base
 		char *VIDEO_BUFFER;
 		video_depth depth;
 
-		void (*convert)( ULONG *pal, char *from, char *to,int  bytes );
+		void (*convert)( char *from, char *to,int  bytes );
 		struct Screen *the_screen;
 		struct BitMap *the_bitmap;
 };
@@ -106,7 +106,7 @@ enum
 	rm_direct
 };
 
-#define convert_type void (*)(ULONG*, char*, char*, int)
+#define convert_type void (*)( char*, char*, int)
 
 extern void *get_convert( uint32_t scr_depth, uint32_t depth );
 
