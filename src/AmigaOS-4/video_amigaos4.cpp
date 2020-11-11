@@ -665,6 +665,8 @@ void VideoInterrupt(void)
 
 void set_mouse_window(int mx,int my)
 {
+	if (drv == NULL) return;
+	if (drv -> the_win == NULL) return;
 
 	int ww = (drv->the_win->Width - drv->the_win->BorderLeft - drv->the_win->BorderRight);
 	int wh = (drv->the_win->Height - drv->the_win->BorderTop - drv->the_win->BorderBottom);
@@ -783,7 +785,7 @@ static void periodic_func(void)
 		if (sig & timer_mask)
 		{
 			MutexObtain(video_mutex);
-			error = drv->draw();
+			if (drv) error = drv->draw();
 			MutexRelease(video_mutex);
 
 			// Restart timer
