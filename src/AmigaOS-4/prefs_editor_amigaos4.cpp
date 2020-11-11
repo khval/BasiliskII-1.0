@@ -447,6 +447,10 @@ static void read_emulation_settings( void )
 
 	PrefsReplaceBool("fpu",			getv( obj[ID_PREFS_SYSTEM_FPU_GAD], GA_Selected));
 	PrefsReplaceInt32("cpu",			getv( obj[ID_PREFS_SYSTEM_CPU_GAD], CHOOSER_Selected ) );
+
+	PrefsReplaceInt32("active_window_cpu_pri",		getv( obj[ID_CPU_ACTIVE_GAD], INTEGER_Number));
+	PrefsReplaceInt32("inactive_window_cpu_pri",		getv( obj[ID_CPU_INACTIVE_GAD], INTEGER_Number));
+
 	PrefsReplaceInt32("modelid",		getv( obj[ID_PREFS_SYSTEM_MODEL_GAD], CHOOSER_Selected) == 0 ? 5 : 14);
 	PrefsReplaceInt32("frameskip",	getv( obj[ID_PREFS_GFX_FRAMESKIP_GAD], INTEGER_Number));
 	PrefsReplaceInt32("lineskip",		getv( obj[ID_PREFS_GFX_LINESKIP_GAD], INTEGER_Number));
@@ -786,6 +790,14 @@ static void set_emulation_settings( void )
 
 	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_CPU_GAD,
 		CHOOSER_Selected, PrefsFindInt32("cpu") );
+
+
+	RSetAttrO( win_prefs, ID_CPU_ACTIVE_GAD,
+		INTEGER_Number, PrefsFindInt32("active_window_cpu_pri"));
+
+	RSetAttrO( win_prefs, ID_CPU_INACTIVE_GAD,
+		INTEGER_Number, PrefsFindInt32("inactive_window_cpu_pri"));
+
 
 	// Model
 
@@ -1478,7 +1490,7 @@ int event(int id, int code)
 	return retval;
 }
 
-const char *tablabels[]={"Disk","SCSI","IO","System",NULL};
+const char *tablabels[]={"Disk","SCSI","IO","CPU","Graphics",NULL};
 const char *disk_tablabels[]={"Partition","Diskimage",NULL};
 
 struct ColumnInfo volumes_ci[] =
@@ -1657,7 +1669,8 @@ void init_win_prefs(int win_nr)
 #include "gui_pages/page_disk.i"
 #include "gui_pages/page_scsi.i"
 #include "gui_pages/page_io.i"
-#include "gui_pages/page_sys.i"
+#include "gui_pages/page_cpu.i"
+#include "gui_pages/page_gfx.i"
 
 					PageEnd,
 				ClickTabEnd,

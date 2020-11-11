@@ -32,6 +32,11 @@ prefs_desc platform_prefs_items[] = {
 	{"windowdepth", TYPE_INT32, false, "Window depth" },
 	{"use_bitmap_lock", TYPE_BOOLEAN, false, "Use bitmap lock" },
 	{"render_method", TYPE_INT32, false, "how to render the gfx" },
+
+	{"active_window_cpu_pri", TYPE_INT32, false, "Active window" },
+	{"inactive_window_cpu_pri", TYPE_INT32, false, "Inactive window" },
+	{"iconify_cpu_suspend", TYPE_BOOLEAN, false, "Supend cpu on iconify" },
+
 	{NULL, TYPE_END, false, NULL} // End of list
 };
 

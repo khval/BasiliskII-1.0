@@ -120,7 +120,7 @@ protocal_api.o:
 
 ##	gcc protocal_api.c -o $(OBJ_DIR)/protocal_api.o -D__USE_INLINE__ -c
 
-obj/prefs_editor_amigaos4.o: prefs_editor_amigaos4.cpp gui_pages/page_disk.i gui_pages/page_add_diskimage.i gui_pages/page_sys.i  locale/locale.c
+obj/prefs_editor_amigaos4.o: prefs_editor_amigaos4.cpp gui_pages/page_disk.i gui_pages/page_add_diskimage.i gui_pages/page_cpu.i gui_pages/page_gfx.i locale/locale.c
 	$(COMPILING)
 	$(CXX) -dM $(CPPFLAGS) $(DEFS) $(CXXFLAGS)  -c $< -o $@
 
