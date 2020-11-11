@@ -1341,8 +1341,21 @@ void *get_convert( uint32_t scr_depth, uint32_t depth )
 			break;
 		case VDEPTH_16BIT:
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;
-			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_to_16bit;
-			if (depth == VDEPTH_16BIT)	convert = (void *) &convert_15bit_to_16bit;
+			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;
+
+			if (depth == VDEPTH_16BIT)
+			{
+				init_lookup_15bit_to_16bit();
+				if (lookup16bit)
+				{
+					convert = (void *) &convert_lookup_to_16bit;
+				}
+				else
+				{
+					convert = (void *) &convert_15bit_to_16bit;
+				} 
+			}
+
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit;
 			break;
 		case VDEPTH_32BIT:
