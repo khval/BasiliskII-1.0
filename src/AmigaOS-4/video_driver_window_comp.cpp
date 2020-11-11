@@ -207,6 +207,15 @@ int driver_window_comp::draw()
 			}
 			break;
 
+		case VDEPTH_16BIT:
+			for (nn=0; nn<(mode.y/line_skip);nn++)
+			{
+				n = frame_dice+(nn*line_skip);
+				n = n <= mode.y ? n : mode.y-1;
+				convert_15bit_to_32bit( (uint16 *) ((char *) VIDEO_BUFFER + (n*mode.bytes_per_row )), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
+			}
+			break;
+
 		case VDEPTH_32BIT:
 
 			for (nn=0; nn<(mode.y/ line_skip);nn++)
