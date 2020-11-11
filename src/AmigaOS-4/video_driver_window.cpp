@@ -50,6 +50,11 @@ extern struct MsgPort *periodic_msgPort;
 
 #define IDCMP_common IDCMP_INACTIVEWINDOW | IDCMP_ACTIVEWINDOW | IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
+void (*set_palette_fn)(uint8 *pal, int num) = NULL;
+
+static void set_palette_16bit_le(uint8 *pal, int num);
+static void set_palette_32bit(uint8 *pal, int num);
+
 driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 	: black_pen(-1), white_pen(-1), driver_base(m)
 {
@@ -112,12 +117,18 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 
 	switch ( GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_BITSPERPIXEL) )
 	{
-		case 1: scr_depth = VDEPTH_1BIT; break;
-		case 8: scr_depth = VDEPTH_8BIT; break;
+		case 1:	scr_depth = VDEPTH_1BIT;	break;
+		case 8: 	scr_depth = VDEPTH_8BIT; 	
+				set_palette_fn = NULL;		// not supported yet.
+				break;
 		case 15:
-		case 16: scr_depth = VDEPTH_16BIT; break;
+		case 16:	scr_depth = VDEPTH_16BIT; 
+				set_palette_fn = set_palette_16bit_le;	
+				break;
 		case 24:
-		case 32: scr_depth = VDEPTH_32BIT; break;
+		case 32: scr_depth = VDEPTH_32BIT; 
+				set_palette_fn = set_palette_32bit;
+				break;
 	}
 
 	convert = (convert_type) get_convert( scr_depth, mode.depth );
@@ -217,7 +228,29 @@ int driver_window::draw()
 
 #endif
 
-void driver_window::set_palette(uint8 *pal, int num)
+void set_palette_16bit_le(uint8 *pal, int num)
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	// Convert palette to 32 bits virtual buffer.
+
+	for (int i=0; i<num; i++)
+	{
+		n = i *3;
+		r = pal[n] & 0xF8;		// 4+1 = 5 bit
+		g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+		rgb = r << 8 | g << 3 | b >> 3;
+
+		vpal16[i] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+	}
+}
+
+void set_palette_32bit(uint8 *pal, int num)
 {
 	int n;
 
@@ -229,6 +262,10 @@ void driver_window::set_palette(uint8 *pal, int num)
 	}
 }
 
+void driver_window::set_palette(uint8 *pal, int num)
+{
+	if (set_palette_fn) set_palette_fn(pal, num);
+}
 
 void driver_window::kill_gfx_output()
 {
