@@ -111,6 +111,9 @@ enum {
 int32 frame_skip;
 int32 line_skip;
 
+int32 active_window_cpu_pri ;
+int32 inactive_window_cpu_pri ;
+
 UWORD *null_pointer = NULL;			// Blank mouse pointer data
 UWORD *current_pointer = (UWORD *)-1;		// Currently visible mouse pointer data
 
@@ -293,6 +296,11 @@ bool VideoInit(bool classic)
 	boot_depth = PrefsFindInt32("windowdepth");
 	use_lock = PrefsFindBool("use_bitmap_lock");
 	render_method = PrefsFindInt32("render_method");
+
+	active_window_cpu_pri = PrefsFindInt32("active_window_cpu_pri");
+	inactive_window_cpu_pri = PrefsFindInt32("inactive_window_cpu_pri");
+//	iconify_cpu_suspend = PrefsFindInt32("windowdepth");
+
 
 	printf("boot_depth %d\n",boot_depth);
 
@@ -804,6 +812,26 @@ static void periodic_func(void)
 
 				// Handle message according to class
 				switch (cl) {
+
+					case IDCMP_ACTIVEWINDOW:
+						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
+							if (main_task) 
+							{
+								Forbid();
+								SetTaskPri(main_task, active_window_cpu_pri );
+								Permit();
+							}
+							break;
+
+					case IDCMP_INACTIVEWINDOW:
+						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
+							if (main_task)
+							{
+								Forbid();
+								SetTaskPri(main_task, inactive_window_cpu_pri );
+								Permit();
+							}
+							break;
 
 					case IDCMP_GADGETUP:
 
