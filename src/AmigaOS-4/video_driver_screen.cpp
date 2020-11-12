@@ -234,25 +234,23 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 	init_ok = true;
 }
 
+ULONG amiga_color_table[2 + 256 * 3];
+
 void driver_screen::set_palette(uint8 *pal, int num)
 {
-	int n;
-	ULONG table[2 + 256 * 3];
-	table[0] = num << 16;
-	table[num * 3 + 1] = 0;
+	int byte_off = num *3;
+	vpal32[ num ]=0xFF000000 + (pal[byte_off] << 16) +  (pal[byte_off+1] << 8) + pal[byte_off+2]  ;
 
-	for (int i=0; i<num; i++) {
-		table[i*3+1] = pal[i*3] * 0x01010101;
-		table[i*3+2] = pal[i*3+1] * 0x01010101;
-		table[i*3+3] = pal[i*3+2] * 0x01010101;
+	if (the_screen) 
+	{
+		amiga_color_table[0] = num << 16;	// first color to be loaded...
+
+		amiga_color_table[num*3+1] = pal[num*3] * 0x01010101;
+		amiga_color_table[num*3+2] = pal[num*3+1] * 0x01010101;
+		amiga_color_table[num*3+3] = pal[num*3+2] * 0x01010101;
+
+		LoadRGB32(&the_screen->ViewPort, amiga_color_table);
 	}
-
-	for (int i=0; i<num; i++) {
-		n = i *3;
-		vpal32[i]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
-	}
-
-	if (the_screen) LoadRGB32(&the_screen->ViewPort, table);
 }
 
 driver_screen::~driver_screen()
