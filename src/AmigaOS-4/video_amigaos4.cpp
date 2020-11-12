@@ -303,11 +303,10 @@ bool VideoInit(bool classic)
 	active_window_cpu_pri = PrefsFindInt32("active_window_cpu_pri");
 	inactive_window_cpu_pri = PrefsFindInt32("inactive_window_cpu_pri");
 //	iconify_cpu_suspend = PrefsFindInt32("windowdepth");
-
-
-	printf("boot_depth %d\n",boot_depth);
-
-	show_sigs("START VideoInit(bool classic)\n");
+	frame_skip = PrefsFindInt32("frameskip");
+	line_skip = PrefsFindInt32("lineskip");
+	frame_skip ++;
+	line_skip ++;
 
 	// Allocate blank mouse pointer data
 
@@ -319,16 +318,6 @@ bool VideoInit(bool classic)
 	}
 
 	video_mutex = AllocSysObject(ASOT_MUTEX,TAG_END);
-
-	show_sigs("AFTER video_mutex = AllocSysObject(ASOT_MUTEX,TAG_END);)\n");
-
-	// Read frame skip prefs
-	frame_skip = PrefsFindInt32("frameskip");
-	line_skip = PrefsFindInt32("lineskip");
-
-	// in the gui its zero not in real life.
-	frame_skip ++;
-	line_skip ++;
 
 	// Get screen mode from preferences
 	const char *mode_str;
