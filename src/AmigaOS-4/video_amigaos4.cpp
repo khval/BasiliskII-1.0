@@ -34,7 +34,6 @@
 #include <proto/dos.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
-#include <graphics/composite.h>
 
 #include "sysdeps.h"
 #include "cpu_emulation.h"
@@ -148,7 +147,7 @@ static const uint8 keycode2mac[0x80] = {
 
 
 
-static driver_base *drv = NULL;	// Pointer to currently used driver object
+driver_base *drv = NULL;	// Pointer to currently used driver object
 
 
 // Prototypes

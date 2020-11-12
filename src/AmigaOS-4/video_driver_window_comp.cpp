@@ -1,9 +1,9 @@
 
-
 #include <exec/types.h>
 #include <intuition/intuition.h>
 #include <intuition/imageclass.h>
 #include <intuition/gadgetclass.h>
+
 #include <graphics/rastport.h>
 #include <graphics/gfx.h>
 #include <proto/exec.h>
@@ -46,27 +46,33 @@ extern struct kIcon iconifyIcon;
 extern struct kIcon zoomIcon;
 extern APTR video_mutex;
 
+extern void BackFill_Func(struct RastPort *ArgRP, struct BackFillArgs *MyArgs);
+
 extern struct MsgPort *periodic_msgPort;
 
-struct XYSTW_Vertex3D { 
-float x, y; 
-float s, t, w; 
-}; 
+#define IDCMP_common IDCMP_INACTIVEWINDOW | IDCMP_ACTIVEWINDOW | IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
-#define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
+extern void (*set_palette_fn)(uint8 *pal, int num) ;
 
+extern bool refreash_all_colors ;
+extern void set_fn_set_palette( uint32 PixelFormat);
+
+static void bitmap_comp_draw_internal( driver_base *drv );
 
 driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 	: black_pen(-1), white_pen(-1), driver_base(m)
 {
+	const video_mode &mode = m.get_current_mode();
+	unsigned int vmem_size;
+	struct DisplayInfo dispi;
 	struct Screen *src;
 	int ScreenW;
 	int ScreenH;
-	int vmem_size;
-
-	const video_mode &mode = m.get_current_mode();
 
 	depth = mode.depth;
+
+	// Set absolute mouse mode
+	ADBSetRelMouseMode(false);
 
 	if (src = LockPubScreen(NULL))
 	{
@@ -76,33 +82,31 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 		UnlockScreen(src);
 	}
 
-	// Set absolute mouse mode
-	ADBSetRelMouseMode(false);
-
 	// Open window
 	the_win = OpenWindowTags(NULL,
-			WA_Left, window_x, 
-			WA_Top, window_y,
-			WA_InnerWidth, mode.x, 
-			WA_InnerHeight, mode.y,
-			WA_MinWidth,	100,
-		 	WA_MinHeight,	100,	
-			WA_MaxWidth,		ScreenW,
-		 	WA_MaxHeight,	ScreenH,	
-			WA_SimpleRefresh, TRUE,
-			WA_NoCareRefresh, TRUE,
-			WA_Activate, TRUE,
-			WA_RMBTrap, TRUE,
-			WA_ReportMouse, TRUE,
-			WA_DragBar, TRUE,
-			WA_DepthGadget, TRUE,
-			WA_SizeGadget, TRUE,
-			WA_SizeBBottom, TRUE,
-			WA_CloseGadget, TRUE,
-			WA_UserPort,  periodic_msgPort ,
-			WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
-			WA_IDCMP, IDCMP_common,
-			TAG_END	);
+		WA_Left, window_x, 
+		WA_Top, window_y,
+		WA_InnerWidth, mode.x, 
+		WA_InnerHeight, mode.y,
+		WA_MinWidth,	100,
+	 	WA_MinHeight,	100,	
+		WA_MaxWidth,		ScreenW,
+		WA_MaxHeight,	ScreenH,	
+		WA_SimpleRefresh, true,
+		WA_NoCareRefresh, true,
+		WA_Activate, true,
+		WA_RMBTrap, true,
+		WA_ReportMouse, true,
+		WA_DragBar, true,
+		WA_DepthGadget, true,
+		WA_SizeGadget, TRUE,
+		WA_SizeBBottom, TRUE,
+		WA_CloseGadget, TRUE,
+		WA_UserPort,  periodic_msgPort ,
+		WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
+		WA_IDCMP, IDCMP_common,
+		TAG_END
+	);
 
 	if (the_win == NULL)
 	{
@@ -115,23 +119,54 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 		open_icon( the_win, ICONIFYIMAGE, GID_ICONIFY, &iconifyIcon );
 	}
 
-
-	the_bitmap =AllocBitMap( mode.x, mode.y, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
-	FreeBitMap(the_bitmap);
-	the_bitmap = NULL;
-
 	vmem_size = mode.bytes_per_row * (mode.y + 2);
 
-	VIDEO_BUFFER = (char *)  AllocVecTags( vmem_size , 
+	VIDEO_BUFFER = (char *)  AllocVecTags( vmem_size,
 			AVT_Type, MEMF_SHARED,
 			AVT_Contiguous, TRUE,
 			AVT_Lock,	TRUE,
 			AVT_PhysicalAlignment, TRUE,
 			TAG_END);
 
-	printf("Video mem %08X - %08X\n",VIDEO_BUFFER, VIDEO_BUFFER + vmem_size );
+	if ( VIDEO_BUFFER == NULL) {
+		init_ok = false;
+		ErrorAlert(STR_NO_MEM_ERR);
+		return;
+	}
 
-	monitor.set_mac_frame_base( (uint32) Host2MacAddr((uint8 *) VIDEO_BUFFER) ) ;
+	monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) VIDEO_BUFFER));
+
+	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
+
+	set_fn_set_palette( dispi.PixelFormat );
+
+	do_draw = window_draw_internal;
+	switch (render_method)
+	{
+		case rm_internal: 
+
+			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
+			if (  convert )
+			{
+				ULONG depth = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_DEPTH);
+				the_bitmap =AllocBitMap( mode.x, mode.y+2, depth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
+				do_draw = bitmap_comp_draw_internal;
+			}
+			else
+			{
+				init_ok = false;
+				ErrorAlert(STR_OPEN_WINDOW_ERR);
+				return;
+			}
+			break;
+
+		case rm_wpa:
+			do_draw = window_draw_wpa;
+			break;
+	}
+
+	// Add resolution and set VideoMonitor
+
 
 	// Set FgPen and BgPen
 	black_pen = ObtainBestPenA(the_win->WScreen->ViewPort.ColorMap, 0, 0, 0, NULL);
@@ -140,174 +175,145 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
 	SetBPen(the_win->RPort, white_pen);
 	SetDrMd(the_win->RPort, JAM2);
 
+	refreash_all_colors = true;
+
 	init_ok = true;
-}
-
-
-int driver_window_comp::draw()
-{
-	#define STEP(a,xx,yy,ss,tt,ww)   P[a].x= xx; P[a].y= yy; P[a].s= ss; P[a].t= tt; P[a].w= ww;  
-
-	float nw;
-	float nh;
-	int n,nn;
-	int ww,wh;
-
-	int error;
-	float sx;
-	float sy;
-
-	float wx;
-	float wy;
-
-	struct XYSTW_Vertex3D P[6];
-
-
-	if (!the_bitmap)
-	{
-		MutexObtain(video_mutex);
-		if (the_win)
-		{
-			the_bitmap =AllocBitMap( mode.x, mode.y, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);
-		}
-		MutexRelease(video_mutex);
-	}
-
-	if (the_bitmap)
-	{
-		to_bpr = the_bitmap -> BytesPerRow;	
-		to_mem = (char *) the_bitmap -> Planes[0];
-	}
-	
-
-	if (!the_bitmap) return 0xFFFFFF;
-	if (!VIDEO_BUFFER) return 0xFFFFFE;
-
-
-	frame_dice ++;
-	if (frame_dice >  line_skip)  frame_dice = 0;
-
-	switch (depth)
-	{
-		case VDEPTH_1BIT:
-			for (nn=0; nn<(mode.y/line_skip);nn++)
-			{
-				n = frame_dice+(nn*line_skip);
-				n = n <= mode.y ? n : mode.y-1;
-				convert_1bit_to_32bit( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
-			}
-			break;
-
-		case VDEPTH_8BIT:
-			for (nn=0; nn<(mode.y/line_skip);nn++)
-			{
-				n = frame_dice+(nn*line_skip);
-				n = n <= mode.y ? n : mode.y-1;
-				convert_8bit_to_32bit( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
-			}
-			break;
-
-		case VDEPTH_16BIT:
-			for (nn=0; nn<(mode.y/line_skip);nn++)
-			{
-				n = frame_dice+(nn*line_skip);
-				n = n <= mode.y ? n : mode.y-1;
-				convert_15bit_to_32bit( (uint16 *) ((char *) VIDEO_BUFFER + (n*mode.bytes_per_row )), (uint32 *)   ((char *) to_mem + (n*to_bpr)),  mode.x );
-			}
-			break;
-
-		case VDEPTH_32BIT:
-
-			for (nn=0; nn<(mode.y/ line_skip);nn++)
-			{
-				n = frame_dice+(nn*line_skip);
-				n = n <= mode.y ? n : mode.y-1;
-				CopyMemQuick( (char *) VIDEO_BUFFER + (n*mode.bytes_per_row ),   (char *) to_mem + (n*to_bpr),  mode.bytes_per_row );
-			}
-			break;
-	}
-
-	MutexObtain(video_mutex);
-	if (the_win)
-	{
-		wx = the_win->BorderLeft + the_win -> LeftEdge;
-		wy = the_win->BorderTop + the_win -> TopEdge;
-
-		ww = the_win->Width - the_win->BorderLeft - the_win->BorderRight;
-		wh = the_win->Height -  the_win->BorderTop - the_win->BorderBottom;
-
-		STEP(0, wx, wy ,0 ,0 ,1);
-		STEP(1, wx+ww,wy,mode.x,0,1);
-		STEP(2, wx+ww,wy+wh,mode.x,mode.y,1);
-
-		STEP(3, wx,wy, 0,0,1);
-		STEP(4, wx+ww,wy+wh,mode.x,mode.y,1);
-		STEP(5, wx, wy+wh ,0 ,mode.y ,1);
-
-		error = CompositeTags(COMPOSITE_Src, 
-			the_bitmap, the_win->RPort -> BitMap,
-
-			COMPTAG_VertexArray, P, 
-			COMPTAG_VertexFormat,COMPVF_STW0_Present,
-		    	COMPTAG_NumTriangles,2,
-
-			COMPTAG_ScaleX, (uint32) ( (float) 0x0010000 * sx ),
-			COMPTAG_ScaleY, (uint32) ( (float) 0x0010000 * sy ),
-
-			COMPTAG_SrcAlpha, (uint32) (0x0010000 ),
-			COMPTAG_Flags, COMPFLAG_SrcAlphaOverride | COMPFLAG_HardwareOnly | COMPFLAG_SrcFilter ,
-			TAG_DONE);
-
-	}
-	MutexRelease(video_mutex);
-
-	return error;
-}
-
-
-void driver_window_comp::set_palette(uint8 *pal, int num)
-{
-	int n;
-
-	// Convert palette to 32 bits virtual buffer.
-
-	for (int i=0; i<num; i++) {
-		n = i *3;
-		vpal32[i]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
-	}
 }
 
 driver_window_comp::~driver_window_comp()
 {
-	Delay(1);
-
 	MutexObtain(video_mutex);
 
-	// Window mode, free bitmap
-	if (the_bitmap) {
+	if (the_bitmap)
+	{
 		WaitBlit();
 		FreeBitMap(the_bitmap);
 		the_bitmap = NULL;
 	}
 
-	if (VIDEO_BUFFER) { FreeVec(VIDEO_BUFFER); VIDEO_BUFFER = NULL; }
-
-	// Free pens and close window
-	if (the_win) {
+	if (the_win)
+	{
 		ReleasePen(the_win->WScreen->ViewPort.ColorMap, black_pen);
 		ReleasePen(the_win->WScreen->ViewPort.ColorMap, white_pen);
 
 		window_x = the_win -> LeftEdge;
 		window_y = the_win -> TopEdge;
 
-		// just need this, or else the sig is not freed.
-		ModifyIDCMP(the_win, IDCMP_CLOSEWINDOW );
-
 		TheCloseWindow(the_win);
 		the_win = NULL;
 	}
 
+	if (VIDEO_BUFFER) 
+	{
+		FreeVec(VIDEO_BUFFER); 
+		VIDEO_BUFFER = NULL;
+	}
+
 	MutexRelease(video_mutex);
+}
+
+#if 1
+
+int driver_window_comp::draw()	// this should already be mutex protected.
+{
+	char *to_mem ;
+	int to_bpr;  
+	int n,nn;
+	int min_bpr;
+
+	frame_dice ++;
+	if (frame_dice >  line_skip)  frame_dice = 0;
+
+	if (do_draw)
+	{
+		frame_dice ++;
+		if (frame_dice >  line_skip)  frame_dice = 0;
+
+		do_draw(this);
+		WaitBOVP( &the_win -> WScreen -> ViewPort );
+	}
+
+	return 0;
+}
+#else
+
+int driver_window_comp::draw()
+{
+	return 0;
+}
+
+#endif
+
+void set_palette_16bit_le(uint8 *pal, int num)
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	// Convert palette to 32 bits virtual buffer.
+
+	if (num & 0xFFFFFF00) refreash_all_colors=true;
+
+	if (refreash_all_colors)
+	{
+		for (num=0;num<256;num++)
+		{
+			n = num *3;
+			r = pal[n] & 0xF8;		// 4+1 = 5 bit
+			g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+			b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+			rgb = r << 8 | g << 3 | b >> 3;	
+
+			vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+			refreash_all_colors = false;
+		}
+	}
+	else
+	{
+		n = num *3;
+		r = pal[n] & 0xF8;		// 4+1 = 5 bit
+		g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+		rgb = r << 8 | g << 3 | b >> 3;	
+
+		vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+	}
+}
+
+void set_palette_16bit_be(uint8 *pal, int num)
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	// Convert palette to 32 bits virtual buffer.
+
+	n = num *3;
+	r = pal[n] & 0xF8;		// 4+1 = 5 bit
+	g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+	b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+	vpal16[num] = r << 8 | g << 3 | b >> 3;
+}
+
+void set_palette_32bit_le(uint8 *pal, int num)
+{
+	int n = num *3;		// BGRA
+	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+}
+
+void set_palette_32bit_be(uint8 *pal, int num)
+{
+	int n = num *3;		// ARGB
+	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+}
+
+void driver_window_comp::set_palette(uint8 *pal, int num)
+{
+	if (set_palette_fn) set_palette_fn(pal, num);
 }
 
 void driver_window_comp::kill_gfx_output()
@@ -349,32 +355,67 @@ void driver_window_comp::restore_gfx_output()
 
 	// Open window
 	the_win = OpenWindowTags(NULL,
-			WA_Left, window_x, 
-			WA_Top, window_y,
-			WA_InnerWidth, mode.x, 
-			WA_InnerHeight, mode.y,
-			WA_MinWidth,	100,
-		 	WA_MinHeight,	100,	
-			WA_MaxWidth,		ScreenW,
-		 	WA_MaxHeight,	ScreenH,	
-			WA_SimpleRefresh, TRUE,
-			WA_NoCareRefresh, TRUE,
-			WA_Activate, TRUE,
-			WA_RMBTrap, TRUE,
-			WA_ReportMouse, TRUE,
-			WA_DragBar, TRUE,
-			WA_DepthGadget, TRUE,
-			WA_SizeBBottom, TRUE,
-			WA_SizeGadget, TRUE,
-			WA_CloseGadget, TRUE,
-			WA_UserPort,  periodic_msgPort ,
-			WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
-			WA_IDCMP, IDCMP_common,
-			TAG_END	);
+		WA_Left, window_x, 
+		WA_Top, window_y,
+		WA_InnerWidth, mode.x, 
+		WA_InnerHeight, mode.y,
+		WA_MinWidth,	100,
+	 	WA_MinHeight,	100,	
+		WA_MaxWidth,		ScreenW,
+	 	WA_MaxHeight,	ScreenH,	
+		WA_SimpleRefresh, true,
+		WA_NoCareRefresh, true,
+		WA_Activate, true,
+		WA_RMBTrap, true,
+		WA_ReportMouse, true,
+		WA_DragBar, true,
+		WA_DepthGadget, true,
+		WA_SizeGadget, TRUE,
+		WA_SizeBBottom, TRUE,
+		WA_CloseGadget, TRUE,
+		WA_UserPort,  periodic_msgPort ,
+		WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
+		WA_IDCMP, IDCMP_common ,
+		TAG_END
+	);
 
 	if (the_win)
 	{
 		open_icon( the_win, ICONIFYIMAGE, GID_ICONIFY, &iconifyIcon );
 	}
+}
+
+void bitmap_comp_draw_internal( driver_base *drv )
+{
+	int n,nn;
+	char *to_mem ;
+	int to_bpr;  
+	APTR BMLock;
+	uint32_t iw,ih;
+	uint32_t dx,dy;
+
+	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
+	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
+
+	dx = iw /2 - drv -> mode.x / 2;
+	dy = ih /2 - drv -> mode.y / 2;
+
+	BMLock = LockBitMapTags(drv->the_bitmap, 
+		LBM_BaseAddress, &to_mem,
+		LBM_BytesPerRow, &to_bpr,
+		TAG_END);
+
+	if (BMLock)
+	{
+		for (nn=0; nn<drv ->mode.y;nn++)
+		{
+			n = nn;
+			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+		}
+
+		UnlockBitMap(BMLock);
+	}
+
+	BackFill_Func(NULL,NULL);
 }
 
