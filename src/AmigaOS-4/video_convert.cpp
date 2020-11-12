@@ -258,7 +258,7 @@ void convert_8bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 	}
 }
 
-void convert_15bit_to_16bit(  uint16 *from, uint16 *to,int  pixels )
+void convert_15bit_to_16bit_le(  uint16 *from, uint16 *to,int  pixels )
 {
 	int n;
 	register unsigned int rgb;
@@ -276,7 +276,24 @@ void convert_15bit_to_16bit(  uint16 *from, uint16 *to,int  pixels )
 	}
 }
 
-void init_lookup_15bit_to_16bit(  )
+void convert_15bit_to_16bit_be(  uint16 *from, uint16 *to,int  pixels )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int rg;
+	register unsigned int b;
+
+	for (n=0; n<pixels;n++)
+	{
+		rgb = from[n];
+		rg = (rgb & 0x007FC0) << 1;
+		b = (rgb & 0x00001F) ;
+		to[n] =  rg | b;
+	}
+}
+
+
+void init_lookup_15bit_to_16bit_le(  )
 {
 	int n;
 	register unsigned int rgb;
@@ -296,7 +313,25 @@ void init_lookup_15bit_to_16bit(  )
 	}
 }
 
-void convert_lookup_to_16bit(  uint16 *from, uint16 *to,int  pixels )
+void init_lookup_15bit_to_16bit_be(  )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int rg;
+	register unsigned int b;
+
+	if (lookup16bit == NULL) lookup16bit = (uint16 *) malloc(65535 * sizeof(uint16));
+	if (lookup16bit == NULL) return;
+
+	for (n=0; n<65535;n++)
+	{
+		rg = (n & 0x007FC0) << 1;
+		b = (n & 0x00001F) ;
+		lookup16bit[n] = (rg | b);
+	}
+}
+
+void convert_16bit_lookup_to_16bit(  uint16 *from, uint16 *to,int  pixels )
 {
 	register int n;
 
@@ -308,7 +343,7 @@ void convert_lookup_to_16bit(  uint16 *from, uint16 *to,int  pixels )
 
 
 
-void convert_32bit_to_16bit( uint32 *from, uint16 *to,int  pixels )
+void convert_32bit_to_16bit_le( uint32 *from, uint16 *to,int  pixels )
 {
 	int n;
 	register unsigned int rgb;
@@ -327,6 +362,25 @@ void convert_32bit_to_16bit( uint32 *from, uint16 *to,int  pixels )
 		to[n] = ((rgb & 0xFF00) >> 8)  | ((rgb & 0xFF) << 8);
 	}
 }
+
+void convert_32bit_to_16bit_be( uint32 *from, uint16 *to,int  pixels )
+{
+	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	for (n=0; n<pixels;n++)
+	{
+		rgb = from[n];
+		r = (rgb & 0xF80000) >> 8;
+		g = (rgb & 0x00FC00) >> 5;
+		b = (rgb & 0x0000F8) >> 3;
+		to[n] =  r | g | b;
+	}
+}
+
 
 
 void convert_8bit_to_32bit(  char *from, uint32 *to,int  pixels )
