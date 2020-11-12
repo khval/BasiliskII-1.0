@@ -690,8 +690,8 @@ void set_mouse_window(int mx,int my)
 
 //		D(bug("%d,%d - %d,%d - %d, %d\n", mx, my, ww, wh ,drv->get_width(),drv->get_height() );
 
-		mx = ( mx * drv ->get_width() / ww );
-		my = ( my * drv -> get_height() / wh );
+		mx = ( mx * drv -> mode.x / ww );
+		my = ( my * drv -> mode.y / wh );
 
 		ADBMouseMoved(mx, my);
 	}
@@ -771,7 +771,7 @@ static void periodic_func(void)
 		}
 //	}
 
-	D(bug("periodic_func/%ld: \n", __LINE__));
+	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 	// Main loop
 	for (;;) {
@@ -1159,6 +1159,9 @@ void window_draw_internal( driver_base *drv )
 	uint32_t iw,ih;
 	uint32_t dx,dy;
 
+	if (drv == NULL) return;
+	if (drv -> convert == NULL) return;
+
 	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
 	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
 
@@ -1245,7 +1248,7 @@ void bitmap_draw_internal( driver_base *drv )
 		UnlockBitMap(BMLock);
 	}
 
-	BltBitMapRastPort( drv->get_bitmap(), 0, 0,drv->the_win->RPort, 
+	BltBitMapRastPort( drv->the_bitmap, 0, 0,drv->the_win->RPort, 
 		dx+drv->the_win->BorderLeft, 
 		dy+drv->the_win->BorderTop,
 		drv->mode.x, 
@@ -1274,7 +1277,7 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 		drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 	}
 
-	BltBitMapRastPort( drv->get_bitmap(), 0, 0,drv->the_win->RPort, 
+	BltBitMapRastPort( drv->the_bitmap, 0, 0,drv->the_win->RPort, 
 		dx+drv->the_win->BorderLeft + dx, 
 		dy+drv->the_win->BorderTop + dy,
 		drv->mode.x, 
@@ -1329,7 +1332,7 @@ void window_draw_wpa ( driver_base *drv )
 }
 
 
-void *get_convert( uint32_t scr_depth, uint32_t depth )
+void *get_convert( uint32_t scr_depth, uint32_t depth )	// this thing is stupid needs to be replaced.
 {
 	void *convert = NULL;
 
@@ -1345,18 +1348,18 @@ void *get_convert( uint32_t scr_depth, uint32_t depth )
 
 			if (depth == VDEPTH_16BIT)
 			{
-				init_lookup_15bit_to_16bit();
+				init_lookup_15bit_to_16bit_le();
 				if (lookup16bit)
 				{
-					convert = (void *) &convert_lookup_to_16bit;
+					convert = (void *) &convert_16bit_lookup_to_16bit;
 				}
 				else
 				{
-					convert = (void *) &convert_15bit_to_16bit;
+					convert = (void *) &convert_15bit_to_16bit_le;
 				} 
 			}
 
-			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit;
+			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit_le;
 			break;
 		case VDEPTH_32BIT:
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_32bit;

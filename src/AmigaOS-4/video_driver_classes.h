@@ -26,10 +26,7 @@ class driver_base
 		virtual ~driver_base();
 
 		virtual void set_palette(uint8 *pal, int num) {};
-		virtual struct BitMap *get_bitmap() { return NULL; };
 		virtual int draw() { return 1;}
-		virtual int get_width() { return mode.x; }
-		virtual int get_height() { return mode.y; }
 		virtual void kill_gfx_output();
 		virtual void restore_gfx_output();
 
@@ -52,7 +49,6 @@ public:
 	~driver_window();
 
 	virtual void set_palette(uint8 *pal, int num);
-	virtual struct BitMap *get_bitmap() { return the_bitmap; };
 	virtual int draw();
 	virtual void kill_gfx_output();
 	virtual void restore_gfx_output();
@@ -66,19 +62,14 @@ class driver_window_comp : public driver_base {
 public:
 	driver_window_comp(Amiga_monitor_desc &m, int width, int height);
 	~driver_window_comp();
-	virtual int draw();
 
 	virtual void set_palette(uint8 *pal, int num);
-	virtual struct BitMap *get_bitmap() { return the_bitmap; };
+	virtual int draw();
 	virtual void kill_gfx_output();
 	virtual void restore_gfx_output();
 
 private:
 	LONG black_pen, white_pen;
-	struct BitMap *the_bitmap;
-
-	char *to_mem;
-	int to_bpr;
 
 };
 
@@ -109,6 +100,7 @@ enum
 #define convert_type void (*)( char*, char*, int)
 
 extern void *get_convert( uint32_t scr_depth, uint32_t depth );
+extern void *get_convert_v2( uint32_t scr_depth, uint32_t depth );
 
 extern uint32 vpal32[256];
 extern uint16 vpal16[256];
