@@ -53,14 +53,55 @@ extern struct MsgPort *periodic_msgPort;
 void (*set_palette_fn)(uint8 *pal, int num) = NULL;
 
 static void set_palette_16bit_le(uint8 *pal, int num);
-static void set_palette_32bit(uint8 *pal, int num);
+static void set_palette_16bit_be(uint8 *pal, int num);
+static void set_palette_32bit_le(uint8 *pal, int num);
+static void set_palette_32bit_be(uint8 *pal, int num);
+
+bool refreash_all_colors = true;
+
+
+void set_fn_set_palette( uint32 PixelFormat)
+{
+	switch (PixelFormat)
+	{
+		case PIXF_NONE:	// not RTG format.
+		case PIXF_CLUT: 
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = NULL;		// not supported yet.
+				break;
+
+		case PIXF_R5G6B5:
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_palette_16bit_be;	
+				break;
+
+		case PIXF_R5G6B5PC:	
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_palette_16bit_le;	
+				break;
+
+		case PIXF_A8R8G8B8: 
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_palette_32bit_be;
+				break;
+
+		case PIXF_B8G8R8A8: 
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_palette_32bit_le;
+				break;
+
+		default:
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = NULL;
+	}
+}
 
 driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 	: black_pen(-1), white_pen(-1), driver_base(m)
 {
 	const video_mode &mode = m.get_current_mode();
 	unsigned int vmem_size;
-	ULONG scr_depth;
+	struct DisplayInfo dispi;
 
 	depth = mode.depth;
 
@@ -115,31 +156,28 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 
 	monitor.set_mac_frame_base ( (uint32)Host2MacAddr((uint8 *) VIDEO_BUFFER));
 
-	switch ( GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_BITSPERPIXEL) )
-	{
-		case 1:	scr_depth = VDEPTH_1BIT;	break;
-		case 8: 	scr_depth = VDEPTH_8BIT; 	
-				set_palette_fn = NULL;		// not supported yet.
-				break;
-		case 15:
-		case 16:	scr_depth = VDEPTH_16BIT; 
-				set_palette_fn = set_palette_16bit_le;	
-				break;
-		case 24:
-		case 32: scr_depth = VDEPTH_32BIT; 
-				set_palette_fn = set_palette_32bit;
-				break;
-	}
+	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
-	convert = (convert_type) get_convert( scr_depth, mode.depth );
+	set_fn_set_palette( dispi.PixelFormat );
 
 	do_draw = window_draw_internal;
 	switch (render_method)
 	{
 		case rm_internal: 
 
-			the_bitmap =AllocBitMap( mode.x, mode.y+2, 32, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
-			do_draw = bitmap_draw_internal;
+			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
+			if (  convert )
+			{
+				ULONG depth = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_DEPTH);
+				the_bitmap =AllocBitMap( mode.x, mode.y+2, depth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
+				do_draw = bitmap_draw_internal;
+			}
+			else
+			{
+				init_ok = false;
+				ErrorAlert(STR_OPEN_WINDOW_ERR);
+				return;
+			}
 			break;
 
 		case rm_wpa:
@@ -156,6 +194,8 @@ driver_window::driver_window(Amiga_monitor_desc &m, int w, int h)
 	SetAPen(the_win->RPort, black_pen);
 	SetBPen(the_win->RPort, white_pen);
 	SetDrMd(the_win->RPort, JAM2);
+
+	refreash_all_colors = true;
 
 	init_ok = true;
 }
@@ -194,14 +234,12 @@ driver_window::~driver_window()
 
 #if 1
 
-int driver_window::draw()
+int driver_window::draw()	// this should already be mutex protected.
 {
 	char *to_mem ;
 	int to_bpr;  
 	int n,nn;
 	int min_bpr;
-
-	MutexObtain(video_mutex);
 
 	frame_dice ++;
 	if (frame_dice >  line_skip)  frame_dice = 0;
@@ -214,8 +252,6 @@ int driver_window::draw()
 		do_draw(this);
 		WaitBOVP( &the_win -> WScreen -> ViewPort );
 	}
-
-	MutexRelease(video_mutex);
 
 	return 0;
 }
@@ -238,28 +274,61 @@ void set_palette_16bit_le(uint8 *pal, int num)
 
 	// Convert palette to 32 bits virtual buffer.
 
-	for (int i=0; i<num; i++)
+	if (num & 0xFFFFFF00) refreash_all_colors=true;
+
+	if (refreash_all_colors)
 	{
-		n = i *3;
+		for (num=0;num<256;num++)
+		{
+			n = num *3;
+			r = pal[n] & 0xF8;		// 4+1 = 5 bit
+			g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+			b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+			rgb = r << 8 | g << 3 | b >> 3;	
+
+			vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+			refreash_all_colors = false;
+		}
+	}
+	else
+	{
+		n = num *3;
 		r = pal[n] & 0xF8;		// 4+1 = 5 bit
 		g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
 		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-		rgb = r << 8 | g << 3 | b >> 3;
+		rgb = r << 8 | g << 3 | b >> 3;	
 
-		vpal16[i] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+		vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
 	}
 }
 
-void set_palette_32bit(uint8 *pal, int num)
+void set_palette_16bit_be(uint8 *pal, int num)
 {
 	int n;
+	register unsigned int rgb;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
 
 	// Convert palette to 32 bits virtual buffer.
 
-	for (int i=0; i<num; i++) {
-		n = i *3;
-		vpal32[i]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
-	}
+	n = num *3;
+	r = pal[n] & 0xF8;		// 4+1 = 5 bit
+	g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+	b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+	vpal16[num] = r << 8 | g << 3 | b >> 3;
+}
+
+void set_palette_32bit_le(uint8 *pal, int num)
+{
+	int n = num *3;		// BGRA
+	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+}
+
+void set_palette_32bit_be(uint8 *pal, int num)
+{
+	int n = num *3;		// ARGB
+	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
 }
 
 void driver_window::set_palette(uint8 *pal, int num)
