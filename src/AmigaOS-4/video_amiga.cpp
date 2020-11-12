@@ -748,9 +748,8 @@ static void periodic_func(void)
 
 //	D(bug("periodic_func task: %08x\n",win_mask);
 
-	if (win_port) {
-		win_mask = 1 << win_port->mp_SigBit;
-		drv->the_win->UserPort = win_port;
+
+	if (win_port) win_mask = 1 << win_port->mp_SigBit;
 
 		ModifyIDCMP(drv->the_win, IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE |
 			((drv->monitor.display_type == DISPLAY_SCREEN_P96) ? IDCMP_DELTAMOVE : 0));
