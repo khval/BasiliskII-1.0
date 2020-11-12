@@ -350,33 +350,13 @@ bool VideoInit(bool classic)
 		}
 	}
 
-	show_sigs("before Construct list of supported modes");
-
-	D(bug("default_display_type %08x, window_width %d, window_height %d\n", screen_mode_id, window_width, window_height));
-
 	// Construct list of supported modes
 
 	switch (default_display_type) {
 
 		case DISPLAY_WINDOW:
-			default_width = window_width;
-			default_height = window_height;
-
-			switch (boot_depth)
-			{
-				case 0: default_depth = VDEPTH_32BIT; break;
-				case 1: default_depth = VDEPTH_1BIT; break;
-				case 2: default_depth = VDEPTH_8BIT; break;
-				case 3: default_depth = VDEPTH_16BIT; break;
-			}
-
-			add_modes(window_width, window_height, VDEPTH_1BIT);
-			add_modes(window_width, window_height, VDEPTH_8BIT);
-			add_modes(window_width, window_height, VDEPTH_16BIT);
-			add_modes(window_width, window_height, VDEPTH_32BIT);
-			break;
-
 		case DISPLAY_WINDOW_COMP:
+
 			default_width = window_width;
 			default_height = window_height;
 
