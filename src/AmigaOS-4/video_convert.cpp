@@ -3,6 +3,7 @@
 
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include "video_convert.h"
 
 extern BPTR video_debug_out;
 
@@ -10,6 +11,38 @@ uint16 *lookup16bit = NULL;
 
 extern uint16 vpal16[256];
 extern uint32 vpal32[256];
+
+struct video_convert_names vcn[] =	{
+	{"convert_15bit_to_16bit_be",(void *) convert_15bit_to_16bit_be},
+	{"convert_15bit_to_16bit_le",(void *) convert_15bit_to_16bit_le},
+	{"convert_15bit_to_32bit",(void *) convert_15bit_to_32bit},
+	{"convert_16bit_lookup_to_16bit",(void *) convert_16bit_lookup_to_16bit},
+	{"convert_16bit_to_32bit",(void *) convert_16bit_to_32bit},
+	{"convert_1bit_to_16bit",(void *) convert_1bit_to_16bit},
+	{"convert_1bit_to_32bit",(void *) convert_1bit_to_32bit},
+	{"convert_1bit_to_8bit",(void *) convert_1bit_to_8bit},
+	{"convert_32bit_to_16bit_be",(void *) convert_32bit_to_16bit_be},
+	{"convert_32bit_to_16bit_le",(void *) convert_32bit_to_16bit_le},
+	{"convert_8bit_lookup_to_16bit",(void *) convert_8bit_lookup_to_16bit},
+	{"convert_8bit_to_32bit",(void *) convert_8bit_to_32bit},
+	{"convert_8bit_to_32bit_db",(void *) convert_8bit_to_32bit_db},
+	{"convert_copy_16bit",(void *) convert_copy_16bit},
+	{"convert_copy_32bit",(void *) convert_copy_32bit},
+	{"convert_copy_8bit",(void *) convert_copy_8bit},
+	{NULL,NULL}};
+
+
+const char *get_name_converter_fn_ptr( void *fn_ptr)
+{
+	struct video_convert_names *i = vcn;
+	while (i -> fn)
+	{
+		if (i -> fn == fn_ptr)	return i -> name;
+		i ++;
+	}
+	return NULL;
+}
+
 
 /*
 char convert_1bit_to_32bit_asm( char *from, uint32 *to,int  bytes )
@@ -446,3 +479,4 @@ void convert_copy_32bit( char *from, char *to,int  pixels )
 {
 	CopyMemQuick( from,  to,  pixels*4 );
 }
+
