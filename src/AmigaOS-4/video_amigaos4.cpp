@@ -305,6 +305,8 @@ bool VideoInit(bool classic)
 	int mode_id;
 	int boot_depth;
 
+	if (!video_debug_out ) video_debug_out = Open("CON:",MODE_NEWFILE);
+
 	boot_depth = PrefsFindInt32("windowdepth");
 	use_lock = PrefsFindBool("use_bitmap_lock");
 	render_method = PrefsFindInt32("render_method");
@@ -966,11 +968,11 @@ static void periodic_func(void)
 		DeleteIORequest( (IORequest *) timer_io);
 	}
 
-								D(bug("periodic_func/%ld: \n", __LINE__));
+	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 	if (timer_port)	FreeSysObject(ASOT_PORT,timer_port);
 
-								D(bug("periodic_func/%ld: \n", __LINE__));
+	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 	while (drv) Delay(1);	// wait for driver to close...
 
