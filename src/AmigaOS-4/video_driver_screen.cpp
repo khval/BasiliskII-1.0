@@ -44,6 +44,29 @@ extern struct MsgPort *periodic_msgPort;
 #define IDCMP_common IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | 		\
 		IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE	
 
+
+extern void (*set_palette_fn)(uint8 *pal, int num);
+
+extern void set_vpal_16bit_le(uint8 *pal, int num);
+extern void set_vpal_16bit_be(uint8 *pal, int num);
+extern void set_vpal_32bit_le(uint8 *pal, int num);
+extern void set_vpal_32bit_be(uint8 *pal, int num);
+void set_screen_palette_8bit(uint8 *pal, int num);
+
+static struct Screen *_the_screen = NULL;
+
+static bool refreash_all_colors = false;
+
+
+void window_draw_internal_nop( driver_base *drv )
+{
+	if (drv == NULL) return;
+
+	FPrintf( video_debug_out, "%s:%ld -- the_win %lx \n",__FUNCTION__,__LINE__, drv -> convert);
+	FPrintf( video_debug_out, "%s:%ld -- the_win %lx \n",__FUNCTION__,__LINE__, drv -> the_win);
+
+}
+
 int driver_screen::draw()
 {
 	if ((do_draw) && (the_screen))
@@ -58,17 +81,56 @@ int driver_screen::draw()
 	return 0;
 }
 
+static void set_fn_set_palette( uint32 PixelFormat)
+{
+	switch (PixelFormat)
+	{
+		case PIXF_NONE:	// not RTG format.
+		case PIXF_CLUT: 
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_screen_palette_8bit;	
+				break;
+
+		case PIXF_R5G6B5:
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_vpal_16bit_be;	
+				break;
+
+		case PIXF_R5G6B5PC:	
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_vpal_16bit_le;	
+				break;
+
+		case PIXF_A8R8G8B8: 
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_vpal_32bit_be;
+				break;
+
+		case PIXF_B8G8R8A8: 
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = set_vpal_32bit_le;
+				break;
+
+		default:
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+				set_palette_fn = NULL;
+	}
+}
+
+void convert_nop( char *from, char *to,int  pixels )
+{
+//	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+}
+
 // Open Picasso screen
-driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
+driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULONG mode_id)
 	: driver_base(m)
 {
-	int vsize;
-	const video_mode &mode = m.get_current_mode();
+	int vmem_size;
 	depth = mode.depth;
 
 	int scr_width;
 	int scr_height;
-	int scr_depth;
 	APTR BMLock;
 
 	bool bpr_is_same = false;
@@ -98,16 +160,6 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		return;
 	}
 
-	switch ( dimInfo.MaxDepth )
-	{
-		case 1: scr_depth = VDEPTH_1BIT; break;
-		case 8: scr_depth = VDEPTH_8BIT; break;
-		case 15:
-		case 16: scr_depth = VDEPTH_16BIT; break;
-		case 24:
-		case 32: scr_depth = VDEPTH_32BIT; break;
-	}
-
 	scr_width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
 	scr_height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
 
@@ -126,6 +178,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		return;
 	}
 
+	_the_screen = the_screen;	// make local copy out side of class....
+
 	// Open window
 	the_win = OpenWindowTags(NULL,
 		WA_Left, 0,
@@ -134,8 +188,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		WA_Height, scr_height,
 		WA_SimpleRefresh, true,
 		WA_NoCareRefresh, true,
-		WA_Borderless, true,
-		WA_CloseGadget,false,
+		WA_Borderless, false,
+		WA_CloseGadget,true,
 		WA_Activate, true,
 		WA_RMBTrap, true,
 		WA_ReportMouse, true,
@@ -152,19 +206,26 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		return;
 	}
 
-	switch ( GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_BITSPERPIXEL) )
+	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld -- mode %ld \n",__FUNCTION__,__LINE__, mode_id); 
+
+	switch (dispi.PixelFormat)
 	{
-		case 1: scr_depth = VDEPTH_1BIT; break;
-		case 8: scr_depth = VDEPTH_8BIT; break;
-		case 15:
-		case 16: scr_depth = VDEPTH_16BIT; break;
-		case 24:
-		case 32: scr_depth = VDEPTH_32BIT; break;
+		case PIXF_CLUT:
+			SetAPen( the_win -> RPort, 2 );
+			RectFill(the_win -> RPort, 0, 0, the_win -> Width, the_win -> Height);		// need a green screen to see the screen.
+
+			SetAPen( the_win -> RPort, 1 );
+			SetBPen( the_win -> RPort, 0 );
+			Move ( the_win -> RPort, 10,10);
+			Text(  the_win -> RPort, "CLUT", 4);
+			break;
+
+		case PIXF_R5G6B5:
+		case PIXF_R5G6B5PC:
+		case PIXF_A8R8G8B8:
+			RectFillColor(the_win -> RPort, 0, 0, the_win -> Width, the_win -> Height, 0xFF0000FF);		// need a green screen to see the screen.
+			break;
 	}
-
-	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld\n",__FUNCTION__,__LINE__); 
-
-	RectFillColor(the_win -> RPort, 0, 0, the_win -> Width, the_win -> Height, 0x00000000);
 
 	BMLock = LockBitMapTags(&(the_screen -> BitMap), 
 		LBM_BaseAddress, &to_mem,
@@ -192,30 +253,62 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 		current_pointer = null_pointer;
 	}
 
-	if ((bpr_is_same == true) || (render_method == rm_direct))
-	{
-		VIDEO_BUFFER = NULL;
-		monitor.set_mac_frame_base( (uint32) Host2MacAddr((uint8 *) to_mem) ) ;
-	}
-	else
-	{
-		vsize = mode.bytes_per_row  * (mode.y + 2);
+	vmem_size = mode.bytes_per_row  * (mode.y + 2);
 
-		VIDEO_BUFFER = (char *) AllocVecTags(  vsize , 
+	VIDEO_BUFFER = (char *) AllocVecTags(  vmem_size , 
 			AVT_Type, MEMF_SHARED,
 			AVT_Contiguous, TRUE,
 			AVT_Lock,	TRUE,
 			AVT_PhysicalAlignment, TRUE,
 			TAG_END);
 
-		monitor.set_mac_frame_base( (uint32) Host2MacAddr((uint8 *) VIDEO_BUFFER) ) ;
+	monitor.set_mac_frame_base( (uint32) Host2MacAddr((uint8 *) VIDEO_BUFFER) ) ;
+
+	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
+
+	set_fn_set_palette( dispi.PixelFormat );
+
+	if (( dispi.PixelFormat == PIXF_CLUT ) && (mode.depth == VDEPTH_1BIT))
+	{
+		SetRGB32( &_the_screen->ViewPort, 0, 0x00000000, 0x00000000, 0x00000000 );
+		SetRGB32( &_the_screen->ViewPort, 1, 0xFFFFFFFF , 0xFFFFFFFF, 0xFFFFFFFF );
+		SetRGB32( &_the_screen->ViewPort, 2, 0xFFFFFFFF , 0x0000000, 0x0000000 );
+		SetRGB32( &_the_screen->ViewPort, 3,  0x0000000, 0xFFFFFFFF, 0x0000000 );
+		SetRGB32( &_the_screen->ViewPort, 4, 0x0000000 , 0x0000000, 0xFFFFFFFF );
+		SetRGB32( &_the_screen->ViewPort, 5, 0x0000000 , 0x0000000, 0x5555555 );
+		SetRGB32( &_the_screen->ViewPort, 6, 0x0000000 , 0xFFFFFFFF, 0xFFFFFFFF );
+		SetRGB32( &_the_screen->ViewPort, 7, 0xFFFFFFFF , 0x0000000 , 0xFFFFFFFF );
 	}
 
-	do_draw = NULL;
+	convert = NULL;
+	do_draw = window_draw_internal;
 	switch (render_method)
 	{
 		case rm_internal: 
-			do_draw = window_draw_internal;
+
+			convert = convert_nop;	// do nothing safe...
+
+			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
+			if (  convert )
+			{
+				const char *name;
+				ULONG depth = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_DEPTH);
+				the_bitmap =AllocBitMap( mode.x, mode.y+2, depth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
+				do_draw = window_draw_internal;
+
+				name = get_name_converter_fn_ptr( (void *) convert );
+
+				if (video_debug_out) FPrintf(video_debug_out,"converter used : %s\n", name ? name : "<no name found>"); 
+
+			}
+			else
+			{
+				init_ok = false;
+				ErrorAlert(STR_OPEN_WINDOW_ERR);
+				return;
+			}
+
+
 			break;
 
 		case rm_wpa:
@@ -223,34 +316,46 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w,int h)
 			break;
 	}
 
-	convert = (convert_type) get_convert( scr_depth, depth );
-	if (convert == NULL)
-	{
-		ErrorAlert(STR_OPEN_WINDOW_ERR);
-		init_ok = false;
-		return;
-	}
-
+	refreash_all_colors = true;
 	init_ok = true;
 }
 
-ULONG amiga_color_table[2 + 256 * 3];
+ULONG amiga_color_table[2 + 256 * 3];	
+
+inline void set_screen_color(uint8 *pal, int num)
+{
+	register int byte_off = num *3;
+
+	amiga_color_table[byte_off+1] = pal[byte_off] * 0x01010101;
+	amiga_color_table[byte_off+2] = pal[byte_off+1] * 0x01010101;
+	amiga_color_table[byte_off+3] = pal[byte_off+2] * 0x01010101;
+}
+
+void set_screen_palette_8bit(uint8 *pal, int num)
+{
+	if (_the_screen) 
+	{
+		if (num & 0xFFFFFF00)		// bad ramge
+		{
+			for (num = 0; num<256 ; num++) set_screen_color(pal,  num);
+
+			amiga_color_table[0] = (256L << 16) + 0;	// load 256 colors, first colors is 0
+//			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
+		}
+	}
+	else
+	{
+		set_screen_color(pal,  num);
+		amiga_color_table[0] = 1 << 16 | num;	// load 1 color, first colors number is [num]
+//		LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
+
+		SetRGB32( &_the_screen->ViewPort, num, pal[num*3] * 0x01010101 , pal[num*3+1] * 0x01010101 , pal[num*3+2] * 0x01010101 );
+	}
+}
 
 void driver_screen::set_palette(uint8 *pal, int num)
 {
-	int byte_off = num *3;
-	vpal32[ num ]=0xFF000000 + (pal[byte_off] << 16) +  (pal[byte_off+1] << 8) + pal[byte_off+2]  ;
-
-	if (the_screen) 
-	{
-		amiga_color_table[0] = num << 16;	// first color to be loaded...
-
-		amiga_color_table[num*3+1] = pal[num*3] * 0x01010101;
-		amiga_color_table[num*3+2] = pal[num*3+1] * 0x01010101;
-		amiga_color_table[num*3+3] = pal[num*3+2] * 0x01010101;
-
-		LoadRGB32(&the_screen->ViewPort, amiga_color_table);
-	}
+	if (set_palette_fn) set_palette_fn(pal, num);
 }
 
 driver_screen::~driver_screen()
@@ -270,6 +375,7 @@ driver_screen::~driver_screen()
 	{
 		CloseScreen(the_screen);
 		the_screen = NULL;
+		_the_screen = NULL;	// local copy, outside of class...
 	}
 
 	if (VIDEO_BUFFER)
