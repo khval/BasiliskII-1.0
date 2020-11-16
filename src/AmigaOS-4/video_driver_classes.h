@@ -45,7 +45,7 @@ class driver_base
 
 class driver_window : public driver_base {
 public:
-	driver_window(Amiga_monitor_desc &m, int width, int height);
+	driver_window(Amiga_monitor_desc &m, const video_mode &mode);
 	~driver_window();
 
 	virtual void set_palette(uint8 *pal, int num);
@@ -60,7 +60,7 @@ private:
 
 class driver_window_comp : public driver_base {
 public:
-	driver_window_comp(Amiga_monitor_desc &m, int width, int height);
+	driver_window_comp(Amiga_monitor_desc &m, const video_mode &mode );
 	~driver_window_comp();
 
 	virtual void set_palette(uint8 *pal, int num);
@@ -75,7 +75,7 @@ private:
 
 class driver_screen : public driver_base {
 public:
-	driver_screen(Amiga_monitor_desc &m, ULONG mode_id, int w, int h);
+	driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULONG mode_id);
 	~driver_screen();
 	virtual int draw();
 

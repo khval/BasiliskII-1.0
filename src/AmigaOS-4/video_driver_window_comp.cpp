@@ -59,10 +59,9 @@ extern void set_fn_set_palette( uint32 PixelFormat);
 
 static void bitmap_comp_draw_internal( driver_base *drv );
 
-driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, int w, int h)
+driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &mode)
 	: black_pen(-1), white_pen(-1), driver_base(m)
 {
-	const video_mode &mode = m.get_current_mode();
 	unsigned int vmem_size;
 	struct DisplayInfo dispi;
 	struct Screen *src;

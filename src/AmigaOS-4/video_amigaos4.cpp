@@ -495,15 +495,15 @@ bool Amiga_monitor_desc::video_open()
 	// Open display
 	switch (display_type) {
 		case DISPLAY_WINDOW:
-			drv = new driver_window(*this, mode.x, mode.y);
+			drv = new driver_window(*this, mode);
 			break;
 
 		case DISPLAY_WINDOW_COMP:
-			drv = new driver_window_comp(*this, mode.x, mode.y);
+			drv = new driver_window_comp(*this, mode);
 			break;
 
 		case DISPLAY_SCREEN:
-			drv = new driver_screen(*this, ID, mode.x, mode.y);
+			drv = new driver_screen(*this, mode, ID);
 			break;
 	}
 
