@@ -165,23 +165,23 @@ bool check_modeid(ULONG mode_id);
  */
 
 
-uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
+uint32 find_mode_for_depth( int get_w, int get_h , uint32 get_depth)
 {
 	ULONG ID;
 	struct DisplayInfo dispi;
 	struct DimensionInfo di;
 	uint32_t w,h;
-	uint32_t dx=~0,dy=~0;
-	uint32_t last_dx=~0,last_dy=~0;
+	uint32_t dx=~0,dy=~0,dz=~0,dd=~0;
+	uint32_t last_dz=~0,last_dd=~0;
 
-	uint64 a,get_a, diff_a, found_a, found_better_a;
-	uint32 found_mode;
+	uint32 found_mode, closed_match_found_mode;
 
-	get_a = get_w * get_h;
+	if (get_depth==32) get_depth = 24;
+
+ 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- looking for w %ld h %ld d %ld \n",__FUNCTION__,__LINE__, get_w,get_h, get_depth );
 
 	found_mode = INVALID_ID;
-
-	depth_bits = depth_bits == 32 ? 24 : depth_bits;
+	closed_match_found_mode = INVALID_ID;
 
 	for( ID = NextDisplayInfo( INVALID_ID ) ; ID !=INVALID_ID ;  ID = NextDisplayInfo( ID ) )
 	{
@@ -190,26 +190,35 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
 			(GetDisplayInfoData( NULL, &dispi, sizeof(dispi) ,  DTAG_DISP, ID))
 		)
 		{
-			if (depth_bits == di.MaxDepth )
-			{
-				w =  di.Nominal.MaxX -di.Nominal.MinX +1;
-				h =  di.Nominal.MaxY -di.Nominal.MinY +1;
 
+			if (dispi.PixelFormat == PIXF_NONE) continue;
+
+			w =  di.Nominal.MaxX -di.Nominal.MinX +1;
+			h =  di.Nominal.MaxY -di.Nominal.MinY +1;
+
+		 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- w %ld h %ld d %ld \n",__FUNCTION__,__LINE__, w,h, di.MaxDepth );
+
+
+			if (get_depth <= di.MaxDepth )
+			{
 				if ((get_w <= w) && (get_h <= h))
 				{
 					dx = w - get_w;
 					dy = h - get_h;
+					dz=dx+dy;
+					dd = di.MaxDepth - get_depth;
 
-					if ((dx<last_dx) &&(dy<last_dy))
+					if ((dz<=last_dz) && (dd<=last_dd))
 					{
-						found_mode = ID;
+						closed_match_found_mode = ID;
+						last_dz = dz;
+						last_dd =dd;
 
-						last_dx = dx;
-						last_dy = dy;
+					 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- w %ld h %ld d %ld -- best match \n",__FUNCTION__,__LINE__, w,h, di.MaxDepth );
 					}
 				}
 
-				if ((get_w == w) && (get_h == h))
+				if ((get_w == w) && (get_h == h) && (get_depth == di.MaxDepth)) // perfect match....
 				{
 					found_mode = ID;
 					break;
@@ -218,7 +227,7 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 depth_bits)
 		}
 	}
 
-	return  found_mode ;
+	return  found_mode != INVALID_ID ? found_mode : closed_match_found_mode  ;
 }
 
 int add_modes(int mode_id, video_depth depth)
