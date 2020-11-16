@@ -418,9 +418,6 @@ bool VideoInit(bool classic)
 	}
 #endif
 
-	show_sigs("before (VideoModes.size() == 1) in VideoInit(bool classic) \n");
-
-
 	D(bug("VideoInit/%ld: def_width=%ld  def_height=%ld  def_depth=%ld\n", \
 		__LINE__, default_width, default_height, default_depth));
 
@@ -464,8 +461,6 @@ bool VideoInit(bool classic)
 		// Open display
 		return monitor->video_open();
 	}
-
-	show_sigs("END VideoInit(bool classic)\n");
 
 	return true;
 }
@@ -880,8 +875,6 @@ static void periodic_func(void)
 
 								mx = msg->MouseX;
 								my = msg->MouseY;
-
-								D(bug("periodic_func/%ld: IDCMP_MOUSEMOVE mx=%ld  my=%ld\n", __LINE__, mx, my));
 								ADBMouseMoved(mx, my);
 								break;
 
