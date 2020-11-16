@@ -52,10 +52,10 @@ extern struct MsgPort *periodic_msgPort;
 
 void (*set_palette_fn)(uint8 *pal, int num) = NULL;
 
-static void set_palette_16bit_le(uint8 *pal, int num);
-static void set_palette_16bit_be(uint8 *pal, int num);
-static void set_palette_32bit_le(uint8 *pal, int num);
-static void set_palette_32bit_be(uint8 *pal, int num);
+ void set_vpal_16bit_le(uint8 *pal, int num);
+ void set_vpal_16bit_be(uint8 *pal, int num);
+ void set_vpal_32bit_le(uint8 *pal, int num);
+ void set_vpal_32bit_be(uint8 *pal, int num);
 
 bool refreash_all_colors = true;
 
@@ -72,22 +72,22 @@ void set_fn_set_palette( uint32 PixelFormat)
 
 		case PIXF_R5G6B5:
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_palette_16bit_be;	
+				set_palette_fn = set_vpal_16bit_be;	
 				break;
 
 		case PIXF_R5G6B5PC:	
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_palette_16bit_le;	
+				set_palette_fn = set_vpal_16bit_le;	
 				break;
 
 		case PIXF_A8R8G8B8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_palette_32bit_be;
+				set_palette_fn = set_vpal_32bit_be;
 				break;
 
 		case PIXF_B8G8R8A8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_palette_32bit_le;
+				set_palette_fn = set_vpal_32bit_le;
 				break;
 
 		default:
@@ -263,7 +263,7 @@ int driver_window::draw()
 
 #endif
 
-void set_palette_16bit_le(uint8 *pal, int num)
+void set_vpal_16bit_le(uint8 *pal, int num)
 {
 	int n;
 	register unsigned int rgb;
@@ -301,7 +301,7 @@ void set_palette_16bit_le(uint8 *pal, int num)
 	}
 }
 
-void set_palette_16bit_be(uint8 *pal, int num)
+void set_vpal_16bit_be(uint8 *pal, int num)
 {
 	int n;
 	register unsigned int rgb;
@@ -318,13 +318,13 @@ void set_palette_16bit_be(uint8 *pal, int num)
 	vpal16[num] = r << 8 | g << 3 | b >> 3;
 }
 
-void set_palette_32bit_le(uint8 *pal, int num)
+void set_vpal_32bit_le(uint8 *pal, int num)
 {
 	int n = num *3;		// BGRA
 	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
 }
 
-void set_palette_32bit_be(uint8 *pal, int num)
+void set_vpal_32bit_be(uint8 *pal, int num)
 {
 	int n = num *3;		// ARGB
 	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
