@@ -155,7 +155,8 @@ static void periodic_func(void);
 static void add_mode(uint32 width, uint32 height, uint32 resolution_id, uint32 bytes_per_row, video_depth depth);
 static void add_modes(uint32 width, uint32 height, video_depth depth);
 //static ULONG find_mode_for_depth(uint32 width, uint32 height, uint32 depth);
-static ULONG bits_from_depth(video_depth depth);
+static ULONG mac_depth_from_amiga_depth(video_depth depth);
+static ULONG amiga_depth_from_mac_depth(video_depth depth);
 static bool is_valid_modeid(int display_type, ULONG mode_id);
 bool check_modeid(ULONG mode_id);
 
@@ -491,7 +492,7 @@ bool Amiga_monitor_desc::video_open()
 	while ( periodic_msgPort ==  NULL) Delay(1);	// wait for a public window msgport...
 
 	const video_mode &mode = get_current_mode();
-	ULONG depth_bits = bits_from_depth(mode.depth);
+	ULONG depth_bits = amiga_depth_from_mac_depth(mode.depth);
 	ULONG ID = find_mode_for_depth(mode.x, mode.y, depth_bits);
 
 	if ((ID == INVALID_ID) && ( display_type == DISPLAY_SCREEN))
@@ -1038,15 +1039,33 @@ static void add_modes(uint32 width, uint32 height, video_depth depth)
 }
 
 
-static ULONG bits_from_depth(video_depth depth)
+static ULONG mac_depth_from_amiga_depth(video_depth vdepth)
 {
-	int bits = 1 << depth;
-	if (bits == 16)
-		bits = 15;
-	else if (bits == 32)
-		bits = 24;
+	uint32 depth = 1 << vdepth;
 
-	return bits;
+	switch (depth)
+	{
+		case 8:	return 8;
+		case 16:	return 15;
+		case 24:	return 32;
+	}
+
+	return depth;
+}
+
+static ULONG amiga_depth_from_mac_depth(video_depth mac_depth)
+{
+	uint32 depth = 1 << mac_depth;
+
+	switch (depth)
+	{
+		case 1:	return 8;
+		case 8:	return 8;
+		case 15:	return 16;
+		case 32:	return 24;
+	}
+
+	return depth;
 }
 
 
