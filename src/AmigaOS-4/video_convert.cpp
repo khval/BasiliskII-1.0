@@ -116,18 +116,20 @@ char convert_1bit_to_32bit_asm( char *from, uint32 *to,int  bytes )
 void convert_1bit_to_8bit(  char *from, char *to,int  pixels )
 {
 	register int n;
+	register char source;
 	int bytes = pixels / 8;
 
 	for (n=0; n<bytes;n++)
 	{
-		*to++ = (from[n] & 128) >>7;
-		*to++ = (from[n] & 64)>>6;
-		*to++ = (from[n] & 32)>>5;
-		*to++ = (from[n] & 16)>>4;
-		*to++ = (from[n] & 8)>>3;
-		*to++ = (from[n] & 4)>>2;
-		*to++ = (from[n] & 2)>>1;
-		*to++ = (from[n] & 1);
+		source = from[n];
+		*to++ = (source & 128)>>6;
+		*to++ = (source & 64)>>6 ;
+		*to++ = (source & 32)>>5;
+		*to++ = (source & 16)>>4;
+		*to++ = (source & 8)>>3 ;
+		*to++ = (source & 4)>>2;
+		*to++ = (source & 2)>>1;
+		*to++ = (source & 1);
 	}
 }
 
