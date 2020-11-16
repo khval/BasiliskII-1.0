@@ -44,8 +44,8 @@ int add_vol_opt = 0;
 #include <reaction/reaction.h>
 #include <reaction/reaction_macros.h>
 #include <proto/intuition.h>
+#include <proto/graphics.h>
 #include <proto/icon.h>
-#include <proto/Picasso96API.h>
 
 struct List list_files;
 
@@ -1343,10 +1343,14 @@ void DO_ASL_MODE_ID(int win_id, int str_gad_id)
 
 		if (rc)
 		{
+			struct DimensionInfo dimInfo;
+
 			sprintf(tmpbuffer,"%X",(unsigned int) mreq -> sm_DisplayID);
 
-//			width = p96GetModeIDAttr(mreq -> sm_DisplayID, P96IDA_WIDTH);
-//			height = p96GetModeIDAttr(mreq -> sm_DisplayID, P96IDA_HEIGHT);
+			GetDisplayInfoData( NULL, &dimInfo, sizeof(dimInfo) , DTAG_DIMS, (unsigned int) mreq -> sm_DisplayID );
+
+			width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
+			height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
 
 			RSetAttrO( win_id, ID_PREFS_GFX_MODE_ID_GAD,STRINGA_TextVal, tmpbuffer);
 			RSetAttrO( win_id, ID_PREFS_GFX_WIDTH_GAD,INTEGER_Number, width);
