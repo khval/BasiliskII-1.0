@@ -767,6 +767,8 @@ static void periodic_func(void)
 		{
 			bool que_emptied = false;
 
+			MutexObtain(video_mutex);		// we can't risk window being closed, while we are reading events.
+
 			// Handle window messages
 			while (msg = (struct IntuiMessage *)GetMsg( periodic_msgPort ))
 			{
@@ -877,11 +879,7 @@ static void periodic_func(void)
 
 								mx = drv->the_win->MouseX;
 								my = drv->the_win->MouseY;
-
-								MutexObtain(video_mutex);
 								set_mouse_window( mx, my);
-								MutexRelease(video_mutex);
-
 								break;
 						}
 						break;
@@ -948,6 +946,9 @@ static void periodic_func(void)
 				if (que_emptied) if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 			}
 			if (que_emptied) if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+
+
+			MutexRelease(video_mutex);
 		}
 	}
 
