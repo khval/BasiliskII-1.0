@@ -57,6 +57,7 @@ static struct Screen *_the_screen = NULL;
 
 static bool refreash_all_colors = false;
 
+uint32 amiga_color_table[2 + 256 * 3];	
 
 void window_draw_internal_nop( driver_base *drv )
 {
@@ -117,6 +118,19 @@ static void set_fn_set_palette( uint32 PixelFormat)
 	}
 }
 
+void show_set_palette_fn()
+{
+	const char *name = "<none>";
+
+	if (set_palette_fn == set_screen_palette_8bit) name = "set_screen_palette_8bit";
+	if (set_palette_fn == set_vpal_16bit_be) name = "set_vpal_16bit_be";
+	if (set_palette_fn == set_vpal_16bit_le) name = "set_vpal_16bit_le";	
+	if (set_palette_fn == set_vpal_32bit_be) name = "set_vpal_32bit_be";
+	if (set_palette_fn == set_vpal_32bit_le) name ="set_vpal_32bit_le";
+
+	if (video_debug_out) FPrintf( video_debug_out, "set_palette_fn is %s\n",name);
+}
+
 void convert_nop( char *from, char *to,int  pixels )
 {
 //	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
@@ -163,13 +177,17 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	scr_width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
 	scr_height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
 
+	amiga_color_table[0] = (256L << 16) + 0;	// load 256 colors, first colors is 0
+
 	// Open screen
 	the_screen = OpenScreenTags(
 		NULL,
 		SA_DisplayID, mode_id,
 		SA_Title, (ULONG)GetString(STR_WINDOW_TITLE),
-		SA_Quiet, true,
-		SA_Exclusive, true,
+//		SA_Quiet, true,
+//		SA_Exclusive, true,
+//		SA_Colors32, amiga_color_table ,
+		SA_LikeWorkbench, TRUE,
 		TAG_END);
 
 	if (the_screen == NULL) {
@@ -188,8 +206,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 		WA_Height, scr_height,
 		WA_SimpleRefresh, true,
 		WA_NoCareRefresh, true,
-		WA_Borderless, false,
-		WA_CloseGadget,true,
+		WA_Borderless, TRUE,
+		WA_CloseGadget,FALSE,
 		WA_Activate, true,
 		WA_RMBTrap, true,
 		WA_ReportMouse, true,
@@ -300,6 +318,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 
 				if (video_debug_out) FPrintf(video_debug_out,"converter used : %s\n", name ? name : "<no name found>"); 
 
+				show_set_palette_fn();
+
 			}
 			else
 			{
@@ -320,7 +340,18 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	init_ok = true;
 }
 
-ULONG amiga_color_table[2 + 256 * 3];	
+
+void print_color(uint8 *pal, int num)
+{
+	register int byte_off = num *3;
+
+	if (video_debug_out)
+		 FPrintf(video_debug_out,"%ld: %08lx, %08lx, %08lx\n",
+			num,
+			amiga_color_table[byte_off+1] ,
+			amiga_color_table[byte_off+2] ,
+			amiga_color_table[byte_off+3] );
+}
 
 inline void set_screen_color(uint8 *pal, int num)
 {
@@ -329,27 +360,28 @@ inline void set_screen_color(uint8 *pal, int num)
 	amiga_color_table[byte_off+1] = pal[byte_off] * 0x01010101;
 	amiga_color_table[byte_off+2] = pal[byte_off+1] * 0x01010101;
 	amiga_color_table[byte_off+3] = pal[byte_off+2] * 0x01010101;
+
+//	print_color(pal, num);
 }
 
 void set_screen_palette_8bit(uint8 *pal, int num)
 {
+	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- _the_screen is %lx\n",__FUNCTION__,__LINE__,_the_screen);
+
 	if (_the_screen) 
 	{
 		if (num & 0xFFFFFF00)		// bad ramge
 		{
 			for (num = 0; num<256 ; num++) set_screen_color(pal,  num);
-
 			amiga_color_table[0] = (256L << 16) + 0;	// load 256 colors, first colors is 0
-//			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
+			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
 		}
-	}
-	else
-	{
-		set_screen_color(pal,  num);
-		amiga_color_table[0] = 1 << 16 | num;	// load 1 color, first colors number is [num]
-//		LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
-
-		SetRGB32( &_the_screen->ViewPort, num, pal[num*3] * 0x01010101 , pal[num*3+1] * 0x01010101 , pal[num*3+2] * 0x01010101 );
+		else
+		{
+			set_screen_color(pal,  num);
+			amiga_color_table[0] = (1 << 16) | num;	// load 1 color, first colors number is [num]
+			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
+		}
 	}
 }
 
