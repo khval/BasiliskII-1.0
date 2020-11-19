@@ -377,33 +377,40 @@ bool VideoInit(bool classic)
 		case DISPLAY_SCREEN:
 
 			struct DimensionInfo dimInfo;
+
 			DisplayInfoHandle handle = FindDisplayInfo(screen_mode_id);
-
 			if (handle == NULL) return false;
-
 			if (GetDisplayInfoData(handle, (UBYTE *) &dimInfo, sizeof(dimInfo), DTAG_DIMS, 0) <= 0)	return false;
 
 			default_width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
 			default_height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
 
-//			D(bug("default %08lx: %d x %d\n",screen_mode_id, default_width , default_height );
+			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- default w %ld h %ld \n",__FUNCTION__,__LINE__, default_width,default_height);
 
-			switch (dimInfo.MaxDepth)
+			switch (boot_depth)
 			{
-				case 8: 
-					default_depth = (boot_depth == 1) ? VDEPTH_1BIT : VDEPTH_8BIT;
-					break;
-				case 15:
-				case 16: default_depth = VDEPTH_16BIT; break;
-				case 24:
-				case 32: default_depth = VDEPTH_32BIT; break;
+				case 0: default_depth = VDEPTH_32BIT; break;
+				case 1: default_depth = VDEPTH_1BIT; break;
+				case 2: default_depth = VDEPTH_8BIT; break;
+				case 3: default_depth = VDEPTH_16BIT; break;
 			}
 
-			mode_id = add_modes(0x80 , VDEPTH_1BIT);
-			mode_id = add_modes(0x80 , VDEPTH_8BIT);
-			mode_id = add_modes(0x80 , VDEPTH_16BIT);
-			mode_id = add_modes(0x80 , VDEPTH_32BIT);
+#if 1
+			add_modes(0x80, VDEPTH_1BIT);
+			add_modes(0x80, VDEPTH_8BIT);
+			add_modes(0x80, VDEPTH_16BIT);
+			add_modes(0x80, VDEPTH_32BIT);
+#endif
 
+
+#if 0
+			// don't know way this don't work.
+
+			add_modes(default_width, default_height, VDEPTH_1BIT);
+			add_modes(default_width, default_height, VDEPTH_8BIT);
+			add_modes(default_width, default_height, VDEPTH_16BIT);
+			add_modes(default_width, default_height, VDEPTH_32BIT);
+#endif
 			break;
 	}
 
