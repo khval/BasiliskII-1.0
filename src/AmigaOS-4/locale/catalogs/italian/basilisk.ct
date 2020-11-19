@@ -1,0 +1,319 @@
+## version $VER: basilisk.catalog 1.6 (16.11.2020)
+## codeset 0
+## language italiano
+## chunk AUTH Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
+;
+; ATO Italia
+; Compiled with FlexCat 2.18 PPC (AmigaOS4)
+; flexcat basilisk.cd basilisk.ct catalog=basilisk.catalog
+;
+; $VER: basilisk.cd 1.0
+;
+; Italian translation of Basilisk II (ReAction GUI)
+;
+; Traduzione italiana di Basilisk II (ReAction GUI)
+;
+MSG_OK_GAD
+_OK
+; _Ok
+;
+MSG_CANCEL_GAD
+_Annulla
+; _Cancel
+;
+MSG_PREFS_TYPE_GAD
+_Tipo
+; _Type
+;
+MSG_PREFS_READ_ONLY_GAD
+Sola _Lettura
+; _Read Only
+;
+MSG_PREFS_FILE_GAD
+_File
+; _File
+;
+MSG_PREFS_DEVICE_GAD
+_Dispositivo
+; _Device
+;
+MSG_PREFS_CREATE_GAD
+_Crea
+; Create
+;
+MSG_PREFS_UNIT_GAD
+_Unità
+; _Unit
+;
+MSG_PREFS_FLAGS_GAD
+_Flags
+; _Flags
+;
+MSG_PREFS_START_BLOCK_GAD
+_Avvia Blocco
+; _Start Block
+;
+MSG_PREFS_BLOCKS_GAD
+_Blocchi
+; _Blocks
+;
+MSG_PREFS_BLOCK_SIZE_GAD
+Dimensione Blocco
+; Block Size
+;
+MSG_PREFS_RAMSIZE_GAD
+%ldMB
+; %ldMB
+;
+MSG_PREFS_ADD_GAD
+_Aggiungi...
+; _Add...
+;
+MSG_PREFS_EDIT_GAD
+_Modifica...
+; _Edit...
+;
+MSG_PREFS_REMOVE_GAD
+_Rimuovi
+; _Remove
+;
+MSG_PREFS_CD_DEVICE_GAD
+_Dispositivo
+; _Device
+;
+MSG_PREFS_CD_UNIT_GAD
+_Unità
+; _Unit
+;
+MSG_PREFS_CD_BOOT_GAD
+_Boot da CD
+; _Boot from CD
+;
+MSG_PREFS_CD_DISABLE_DRIVER_GAD
+Disattiva driver CD-ROM
+; Disable CD-ROM driver
+;
+MSG_PREFS_MORPHOS_ROOT_GAD
+Roo_t AmigaOS
+; AmigaOS root
+;
+MSG_PREFS_VOLUMETYPE_FILE_GAD
+File
+; File
+;
+MSG_PREFS_VOLUMETYPE_DEVICE_GAD
+Dispositivo
+; Device
+;
+MSG_PREFS_ID_0_DEVICE_GAD
+Dispositivo ID _0
+; ID _0 Device
+;
+MSG_PREFS_ID_1_DEVICE_GAD
+Dispositivo ID _1
+; ID _1 Device
+;
+MSG_PREFS_ID_2_DEVICE_GAD
+Dispositivo ID _2
+; ID _2 Device
+;
+MSG_PREFS_ID_3_DEVICE_GAD
+Dispositivo ID _3
+; ID _3 Device
+;
+MSG_PREFS_ID_4_DEVICE_GAD
+Dispositivo ID _4
+; ID _4 Device
+;
+MSG_PREFS_ID_5_DEVICE_GAD
+Dispositivo ID _5
+; ID _5 Device
+;
+MSG_PREFS_ID_6_DEVICE_GAD
+Dispositivo ID _6
+; ID _6 Device
+;
+MSG_PREFS_SCSI_UNIT_GAD
+Unità
+; Unit
+;
+MSG_PREFS_MODEM_DEVICE_GAD
+Dispositivo
+; Device
+;
+MSG_PREFS_MODEM_UNIT_GAD
+Unità
+; Unit
+;
+MSG_PREFS_MODEM_PARALLEL_GAD
+Dispositivo Parallela
+; Parallel device
+;
+MSG_PREFS_ETHERNET_DEVICE_GAD
+Dispositivo
+; Device
+;
+MSG_PREFS_ETHERNET_UNIT_GAD
+Unità
+; Unit
+;
+MSG_PREFS_PRINTER_DEVICE_GAD
+Dispositivo
+; Device
+;
+MSG_PREFS_PRINTER_UNIT_GAD
+Unità
+; Unit
+;
+MSG_PREFS_PRINTER_PARALLEL_GAD
+Dispositivo Parallela
+; Parallel device
+;
+MSG_PREFS_GFX_WIDTH_GAD
+Lar_ghezza
+; _Width
+;
+MSG_PREFS_GFX_HEIGHT_GAD
+Al_tezza
+; _Height
+;
+MSG_PREFS_GFX_FULLSCREEN_GAD
+_Schermo intero
+; _Full screen
+;
+MSG_PREFS_GFX_8BIT_GAD
+Modalità _8bit
+; _8bit mode
+;
+MSG_PREFS_GFX_FRAMESKIP_GAD
+_Frame skip
+; _Frame skip
+;
+MSG_PREFS_DISABLE_SOUND
+Disattiva au_dio
+; _Disable sound
+;
+MSG_PREFS_SYSTEM_RAM_GAD
+RAM MacOS
+; MacOS RAM
+;
+MSG_PREFS_SYSTEM_MODEL_GAD
+Modello Mac
+; Mac Model
+;
+MSG_PREFS_SYSTEM_ROM_GAD
+Fi_le ROM
+; _ROM File
+;
+MSG_PREFS_START_GAD
+_Avvia
+; Start
+;
+MSG_PREFS_QUIT_GAD
+_Esci
+; Quit
+;
+MSG_MAC_VOLUMES
+Volumi Mac
+; Mac Volumes
+;
+MSG_CDROM
+CD-ROM
+; CD-ROM
+;
+MSG_VIRTUAL_SCSI_DEVICES
+Dispositivi SCSI virtuali
+; Virtual SCSI devices
+;
+MSG_MODEM
+Modem
+; Modem
+;
+MSG_ETHERNET
+Ethernet
+; Ethernet
+;
+MSG_PRINTER
+Stampante
+; Printer
+;
+MSG_GRAPHICS
+Video
+; Graphics
+;
+MSG_SOUND
+Audio
+; Sound
+;
+MSG_SYSTEM
+Sistema
+; System
+;
+MSG_SIZE
+Dimensione
+; Size
+;
+MSG_MB
+MB
+; MB
+;
+MSG_TITLE_BASILISK_SETTINGS
+Impostazioni Basilisk II
+; Basilisk II Settings
+;
+MSG_TITLE_ADD_VOLUME
+Aggiungi volume
+; Add Volume
+;
+MSG_TITLE_EDIT_VOLUME
+Modifica volume
+; Edit Volume
+;
+MSG_PAGE_VOLUMES
+Volumi
+; Volumes
+;
+MSG_PAGE_SCSI
+SCSI
+; SCSI
+;
+MSG_PAGE_COMMUNICATION
+Comunicazione
+; Communication
+;
+MSG_PAGE_EMULATION
+Emulazione
+; Emulation
+;
+MSG_MENU_TITLE_BASILISK
+Basilisk
+; Basilisk
+;
+MSG_MENU_BASILISK_ABOUT
+?\0Informazioni...
+; ?\0About...
+;
+MSG_MENU_BASILISK_START
+S\0Avvia
+; S\0Start
+;
+MSG_MENU_BASILISK_QUIT
+Q\0Esci
+; Q\0Quit
+;
+MSG_AUTHOR_INFORMATION
+\33cBasilisk II 1.0 di Christian Bauer\n© Copyright 1997-2008\n\nDistribuito secondo i termini della licenza General Public License (GPL)
+; \33cBasilisk II 1.0 by Christian Bauer\n© Copyright 1997-2001\nDistribtion under General Public License (GPL)
+;
+MSG_PORT_INFORMATION
+Versione AmigaOS4 PPC a cura di Kjetil Hvalstrand, 2007-2020
+; AmigaOS port by Kjetil Hvalstrand, 2007-2014
+;
+MSG_GFX_INFORMATION
+Icone realizzate da Christian Rosentreter\nTraduzione italiana a cura di Samir Hawamdeh
+; Basilisk icons by Christian Rosentereter
+;
+MSG_DESCRIPTION
+Emulatore Macintosh 68k
+; 68k MacIntosh emulator
+;
