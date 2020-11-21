@@ -179,7 +179,7 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 get_depth)
 
 	if (get_depth==32) get_depth = 24;
 
- 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- looking for w %ld h %ld d %ld \n",__FUNCTION__,__LINE__, get_w,get_h, get_depth );
+ //	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- looking for w %ld h %ld d %ld \n",__FUNCTION__,__LINE__, get_w,get_h, get_depth );
 
 	found_mode = INVALID_ID;
 	closed_match_found_mode = INVALID_ID;
@@ -197,7 +197,7 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 get_depth)
 			w =  di.Nominal.MaxX -di.Nominal.MinX +1;
 			h =  di.Nominal.MaxY -di.Nominal.MinY +1;
 
-		 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- w %ld h %ld d %ld \n",__FUNCTION__,__LINE__, w,h, di.MaxDepth );
+//		 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- w %ld h %ld d %ld \n",__FUNCTION__,__LINE__, w,h, di.MaxDepth );
 
 
 			if (get_depth <= di.MaxDepth )
@@ -215,7 +215,7 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 get_depth)
 						last_dz = dz;
 						last_dd =dd;
 
-					 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- w %ld h %ld d %ld -- best match \n",__FUNCTION__,__LINE__, w,h, di.MaxDepth );
+//					 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- w %ld h %ld d %ld -- best match \n",__FUNCTION__,__LINE__, w,h, di.MaxDepth );
 					}
 				}
 
@@ -243,7 +243,7 @@ int add_modes(int mode_id, video_depth depth)
 	int lw=0,lh=0;
 	int w,h;
 
-	if ( !video_debug_out ) video_debug_out = Open("CON:",MODE_NEWFILE);
+	if ( !video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
 
 	for( DisplayID = NextDisplayInfo( INVALID_ID ) ; DisplayID !=INVALID_ID ;  DisplayID = NextDisplayInfo( DisplayID ) )
 	{
@@ -305,7 +305,7 @@ bool VideoInit(bool classic)
 	int mode_id;
 	int boot_depth;
 
-	if (!video_debug_out ) video_debug_out = Open("CON:",MODE_NEWFILE);
+	if (!video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
 
 	boot_depth = PrefsFindInt32("windowdepth");
 	use_lock = PrefsFindBool("use_bitmap_lock");
