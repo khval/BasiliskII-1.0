@@ -21,8 +21,10 @@ struct video_convert_names vcn[] =	{
 	{"convert_1bit_to_16bit",(void *) convert_1bit_to_16bit},
 	{"convert_1bit_to_32bit",(void *) convert_1bit_to_32bit},
 	{"convert_1bit_to_8bit",(void *) convert_1bit_to_8bit},
+	{"convert_4bit_to_8bit",(void *) convert_4bit_to_8bit},
 	{"convert_32bit_to_16bit_be",(void *) convert_32bit_to_16bit_be},
 	{"convert_32bit_to_16bit_le",(void *) convert_32bit_to_16bit_le},
+	{"convert_4bit_lookup_to_16bit",(void *) convert_4bit_lookup_to_16bit},
 	{"convert_8bit_lookup_to_16bit",(void *) convert_8bit_lookup_to_16bit},
 	{"convert_8bit_to_32bit",(void *) convert_8bit_to_32bit},
 	{"convert_8bit_to_32bit_db",(void *) convert_8bit_to_32bit_db},
@@ -159,12 +161,27 @@ void convert_1bit_to_8bit(  char *from, char *to,int  pixels )
 		*to++ = (source & 64)>>6 ;
 		*to++ = (source & 32)>>5;
 		*to++ = (source & 16)>>4;
-		*to++ = (source & 8)>>3 ;
+		*to++ = (source & 8)>>3;
 		*to++ = (source & 4)>>2;
 		*to++ = (source & 2)>>1;
 		*to++ = (source & 1);
 	}
 }
+
+void convert_4bit_to_8bit(  char *from, char *to,int  pixels )
+{
+	register int n;
+	register char source;
+	int bpr = pixels / 2;
+
+	for (n=0; n<bpr;n++)
+	{
+		source = from[n];
+		*to++ = (source & 0xF0)>>4;
+		*to++ = (source & 0xF);
+	}
+}
+
 
 void convert_1bit_to_16bit( char *from, uint16 *to,int  pixels )
 {
@@ -279,13 +296,29 @@ void convert_8bit_to_16bit( char *from, uint16 *to,int  pixels )
 	}
 }
 
+void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
+{
+	int bpr = pixels/2;
+	int n;
+	register unsigned int source;
+
+	for (n=0; n<bpr;n++)
+	{
+		source = from[n];
+#if 1
+		*to++ = vpal16[ (source & 0xF0) >>4];
+		*to++ = vpal16[ source & 0x0F];
+#else
+		*to++ = 0x11111111 * ((source & 0xF0) >>4);
+		*to++ =  0x11111111 * ( source & 0x0F);
+#endif
+	}
+}
+
+
 void convert_8bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 {
 	int n;
-	register unsigned int rgb;
-	register unsigned int r;
-	register unsigned int g;
-	register unsigned int b;
 
 	for (n=0; n<pixels;n++)
 	{

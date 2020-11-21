@@ -352,8 +352,8 @@ bool VideoInit(bool classic)
 
 	// Construct list of supported modes
 
-	switch (default_display_type) {
-
+	switch (default_display_type)
+	{
 		case DISPLAY_WINDOW:
 		case DISPLAY_WINDOW_COMP:
 
@@ -370,6 +370,7 @@ bool VideoInit(bool classic)
 			}
 
 			add_modes(window_width, window_height, VDEPTH_1BIT);
+			add_modes(window_width, window_height, VDEPTH_4BIT);
 			add_modes(window_width, window_height, VDEPTH_8BIT);
 			add_modes(window_width, window_height, VDEPTH_16BIT);
 			add_modes(window_width, window_height, VDEPTH_32BIT);
@@ -399,6 +400,7 @@ bool VideoInit(bool classic)
 
 #if 1
 			add_modes(0x80, VDEPTH_1BIT);
+			add_modes(0x80, VDEPTH_4BIT);
 			add_modes(0x80, VDEPTH_8BIT);
 			add_modes(0x80, VDEPTH_16BIT);
 			add_modes(0x80, VDEPTH_32BIT);
@@ -1064,6 +1066,7 @@ static ULONG amiga_depth_from_mac_depth(video_depth mac_depth)
 	switch (depth)
 	{
 		case 1:	return 8;
+		case 4:	return 8;
 		case 8:	return 8;
 		case 15:	return 16;
 		case 32:	return 24;
@@ -1383,12 +1386,14 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 		case PIXF_CLUT:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_8bit;
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_to_8bit;
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_copy_8bit;
 			break;
 
 		case PIXF_R5G6B5:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in vpal16
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in vpal16
 
 			if (depth == VDEPTH_16BIT)
@@ -1410,6 +1415,7 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 		case PIXF_R5G6B5PC:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in vpal16
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in vpal16
 
 			if (depth == VDEPTH_16BIT)

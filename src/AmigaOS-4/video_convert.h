@@ -15,6 +15,7 @@ void convert_copy_16bit( char *from, char *to,int  pixels );
 void convert_copy_32bit( char *from, char *to,int  pixels );
 
 void convert_1bit_to_8bit( char *from, char *to,int  pixels );
+void convert_4bit_to_8bit( char *from, char *to,int  pixels );
 
 void convert_15bit_to_16bit_le( uint16 *from, uint16 *to,int  pixels );
 void convert_32bit_to_16bit_le( uint32 *from, uint16 *to,int  pixels );
@@ -23,6 +24,7 @@ void convert_15bit_to_16bit_be( uint16 *from, uint16 *to,int  pixels );
 void convert_32bit_to_16bit_be( uint32 *from, uint16 *to,int  pixels );
 
 void convert_1bit_to_16bit( char *from, uint16 *to,int  pixels );
+void convert_4bit_lookup_to_16bit( char *from, uint16 *to,int  pixels );
 void convert_8bit_lookup_to_16bit( char *from, uint16 *to,int  pixels );
 void convert_16bit_lookup_to_16bit( uint16 *from, uint16 *to,int  pixels );
 
