@@ -1215,7 +1215,7 @@ void imagefile_asl( int win_id, int str_gad_id, BOOL opt )
 {
 	struct FileRequester *freq;
 	BOOL rc;
-	char *name_whit_path = NULL;
+
 	char *str = NULL;
 	char *path = NULL;
 	int i;
@@ -1229,8 +1229,7 @@ void imagefile_asl( int win_id, int str_gad_id, BOOL opt )
 
 		if (rc)
 		{
-			name_whit_path = (char *) AllocVec(strlen(freq->fr_Drawer)+strlen(freq->fr_File)+2,MEMF_ANY);
-
+			char *name_whit_path = name_whit_path = (char *) malloc(strlen(freq->fr_Drawer)+strlen(freq->fr_File)+2);
 
 			if (last_asl_path) free (last_asl_path);
 			last_asl_path = strdup(freq->fr_Drawer);
@@ -1255,7 +1254,7 @@ void imagefile_asl( int win_id, int str_gad_id, BOOL opt )
 				}
 
 				RSetAttrO( win_id, str_gad_id, STRINGA_TextVal, name_whit_path);
-				FreeVec(name_whit_path);
+				free(name_whit_path);
 			}
 		}
 		else	Printf ("requester was cancelled\n");
@@ -1269,7 +1268,6 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 {
 	struct FileRequester *freq;
 	BOOL rc;
-	char *name_whit_path = NULL;
 	char *str = NULL;
 	char *path = NULL;
 	int i;
@@ -1291,7 +1289,8 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 
 		if (rc)
 		{
-			name_whit_path = (char *) AllocVec(strlen(freq->fr_Drawer)+strlen(freq->fr_File)+2,MEMF_ANY);
+			char *name_whit_path = NULL;
+			name_whit_path = (char *) malloc(strlen(freq->fr_Drawer)+strlen(freq->fr_File)+2);
 
 			if (name_whit_path) 
 			{
@@ -1313,7 +1312,7 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 				}
 
 				RSetAttrO( win_id, str_gad_id, STRINGA_TextVal, name_whit_path);
-				FreeVec(name_whit_path);
+				free(name_whit_path);
 			}
 		}
 		else	Printf ("requester was cancelled\n");
