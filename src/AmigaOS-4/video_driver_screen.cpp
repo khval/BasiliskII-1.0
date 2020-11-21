@@ -288,14 +288,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 
 	if (( dispi.PixelFormat == PIXF_CLUT ) && (mode.depth == VDEPTH_1BIT))
 	{
-		SetRGB32( &_the_screen->ViewPort, 0, 0x00000000, 0x00000000, 0x00000000 );
-		SetRGB32( &_the_screen->ViewPort, 1, 0xFFFFFFFF , 0xFFFFFFFF, 0xFFFFFFFF );
-		SetRGB32( &_the_screen->ViewPort, 2, 0xFFFFFFFF , 0x0000000, 0x0000000 );
-		SetRGB32( &_the_screen->ViewPort, 3,  0x0000000, 0xFFFFFFFF, 0x0000000 );
-		SetRGB32( &_the_screen->ViewPort, 4, 0x0000000 , 0x0000000, 0xFFFFFFFF );
-		SetRGB32( &_the_screen->ViewPort, 5, 0x0000000 , 0x0000000, 0x5555555 );
-		SetRGB32( &_the_screen->ViewPort, 6, 0x0000000 , 0xFFFFFFFF, 0xFFFFFFFF );
-		SetRGB32( &_the_screen->ViewPort, 7, 0xFFFFFFFF , 0x0000000 , 0xFFFFFFFF );
+		SetRGB32( &_the_screen->ViewPort, 0, 0xFFFFFFFF , 0xFFFFFFFF, 0xFFFFFFFF );
+		SetRGB32( &_the_screen->ViewPort, 1, 0x00000000, 0x00000000, 0x00000000 );
 	}
 
 	convert = NULL;
