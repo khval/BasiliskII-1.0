@@ -922,7 +922,7 @@ static void set_hardfile(void)
 				size	= 2047;
 			}
 
-			SetFileSize(fh, size * 1024 * 1024, OFFSET_BEGINNING);
+			ChangeFileSize(fh, size * 1024 * 1024, OFFSET_BEGINNING);
 
 			ret = 1;
 		}
