@@ -364,8 +364,9 @@ bool VideoInit(bool classic)
 			{
 				case 0: default_depth = VDEPTH_32BIT; break;
 				case 1: default_depth = VDEPTH_1BIT; break;
-				case 2: default_depth = VDEPTH_8BIT; break;
-				case 3: default_depth = VDEPTH_16BIT; break;
+				case 2: default_depth = VDEPTH_4BIT; break;
+				case 3: default_depth = VDEPTH_8BIT; break;
+				case 4: default_depth = VDEPTH_16BIT; break;
 			}
 
 			add_modes(window_width, window_height, VDEPTH_1BIT);
@@ -391,8 +392,9 @@ bool VideoInit(bool classic)
 			{
 				case 0: default_depth = VDEPTH_32BIT; break;
 				case 1: default_depth = VDEPTH_1BIT; break;
-				case 2: default_depth = VDEPTH_8BIT; break;
-				case 3: default_depth = VDEPTH_16BIT; break;
+				case 2: default_depth = VDEPTH_4BIT; break;
+				case 3: default_depth = VDEPTH_8BIT; break;
+				case 4: default_depth = VDEPTH_16BIT; break;
 			}
 
 #if 1
