@@ -703,20 +703,28 @@ static void set_serial_settings( void )
 	}
 }
 
+void get_width_and_height_from_modeid( ULONG DisplayID, ULONG *width, ULONG *height )
+{
+	struct DimensionInfo dimInfo;
+	GetDisplayInfoData( NULL, &dimInfo, sizeof(dimInfo) , DTAG_DIMS, (unsigned int) DisplayID );
+	*width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
+	*height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
+}
+
 static void set_emulation_settings( void )
 {
 	CONST_STRPTR str;
 	ULONG ramsize_mb, value, width = 800, height = 600;
 	LONG		id;
 	char			opt[4];
-	char			*mode = NULL; 
+	char			*DisplayIDStr = NULL; 
 
 	// Window width and height
 
-	mode = (char *) AllocVec(50,MEMF_SHARED);
-	if (!mode) return;
+	DisplayIDStr = (char *) malloc(50);
+	if (!DisplayIDStr) return;
 
-	sprintf(mode,"50051102");
+	sprintf(DisplayIDStr,"50051102");
 	sprintf(opt,"win");
 
 	value = 0; // window
@@ -727,14 +735,25 @@ static void set_emulation_settings( void )
 		sscanf(str, "%c%c%c",&opt[0],&opt[1],&opt[2]);
 
 		if (strcasecmp( (char *) &opt,"win")==0)
-		{ sscanf(str,"win/%ld/%ld", (long int*) &width,(long int*) &height); value = 0; }
+		{
+			 sscanf(str,"win/%ld/%ld", (long int*) &width,(long int*) &height); value = 0;
+		}
 
 		if (strcasecmp( (char *) &opt,"wic")==0)
-		{ sscanf(str,"winc/%ld/%ld", (long int*) &width,(long int*) &height); value = 1; }
+		{
+			 sscanf(str,"winc/%ld/%ld", (long int*) &width,(long int*) &height); value = 1;
+		}
 
 		if (strcasecmp( (char *) &opt,"scr")==0)
 		{
-			sscanf(str,"scr/%d/%s",&value, (char *) mode); 
+			ULONG	DisplayID;
+
+			sscanf(str,"scr/%d/%s",&value, (char *) DisplayIDStr); 
+			
+			sscanf(DisplayIDStr,"%x", &DisplayID);	
+
+			get_width_and_height_from_modeid(  DisplayID, &width, &height );
+
 		}
 	}
 
