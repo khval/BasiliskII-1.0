@@ -435,33 +435,48 @@ bool VideoInit(bool classic)
 		__LINE__, default_width, default_height, default_depth));
 
 	// Find requested default mode and open display
-	if (VideoModes.size() == 1) {
+	if (VideoModes.size() == 1)
+	{
 		uint32 default_id ;
+
+		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - VideoModes size is 1 \n",__FUNCTION__,__LINE__);
 
 		// Create Amiga_monitor_desc for this (the only) display
 		default_id = VideoModes[0].resolution_id;
 		D(bug("VideoInit/%ld: default_id=%ld\n", __LINE__, default_id));
-		Amiga_monitor_desc *monitor = new Amiga_monitor_desc(VideoModes, default_depth, default_id, default_display_type);
-		VideoMonitors.push_back(monitor);
 
-		// Open display
-		return monitor->video_open();
+		Amiga_monitor_desc *monitor = new Amiga_monitor_desc(VideoModes, default_depth, default_id, default_display_type);
+		if (monitor)
+		{
+			VideoMonitors.push_back(monitor);
+
+			// Open display
+			return monitor->video_open();
+		}
+		else return false;
 
 	} else {
 
+		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - VideoModes size is not 1 \n",__FUNCTION__,__LINE__);
+
 		// Find mode with specified dimensions
 		std::vector<video_mode>::const_iterator i, end = VideoModes.end();
-		for (i = VideoModes.begin(); i != end; ++i) {
+		for (i = VideoModes.begin(); i != end; ++i)
+		{
 			D(bug("VideoInit/%ld: w=%ld  h=%ld  d=%ld\n", __LINE__, i->x, i->y, bits_from_depth(i->depth)));
-			if (i->x == default_width && i->y == default_height && i->depth == default_depth) {
+			if (i->x == default_width && i->y == default_height && i->depth == default_depth)
+			{
 				// Create Amiga_monitor_desc for this (the only) display
 				uint32 default_id = i->resolution_id;
 				D(bug("VideoInit/%ld: default_id=%ld default display type %d\n", __LINE__, default_id, default_display_type));
-				Amiga_monitor_desc *monitor = new Amiga_monitor_desc(VideoModes, default_depth, default_id, default_display_type);
-				VideoMonitors.push_back(monitor);
 
-				// Open display
-				return monitor->video_open();
+				Amiga_monitor_desc *monitor = new Amiga_monitor_desc(VideoModes, default_depth, default_id, default_display_type);
+				if (monitor)
+				{
+					VideoMonitors.push_back(monitor);
+					// Open display
+					return monitor->video_open();
+				}
 			}
 		}
 
@@ -469,10 +484,15 @@ bool VideoInit(bool classic)
 		uint32 default_id = VideoModes[0].resolution_id;
 		D(bug("VideoInit/%ld: default_id=%ld\n", __LINE__, default_id));
 		Amiga_monitor_desc *monitor = new Amiga_monitor_desc(VideoModes, default_depth, default_id, default_display_type);
-		VideoMonitors.push_back(monitor);
 
-		// Open display
-		return monitor->video_open();
+		if (monitor)
+		{
+			VideoMonitors.push_back(monitor);
+
+			// Open display
+			return monitor->video_open();
+		}
+		else return false;
 	}
 
 	return true;
