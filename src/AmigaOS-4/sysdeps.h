@@ -111,12 +111,12 @@ extern void do_put_mem_word(uae_u16 *a, uae_u32 v) ;
 */
 
 
-
-/*
 extern  uae_u32 do_get_mem_long(uae_u32 *a) ;
 extern  uae_u32 do_get_mem_word(uae_u16 *a) ;
-*/
 
+
+
+#if 0
 
 #define  do_get_mem_long_asm( adr, out) \
 	asm \
@@ -148,6 +148,7 @@ extern  uae_u32 do_get_mem_word(uae_u16 *a) ;
 		:: "r" (adr), "r" (v) : "r0"	\
 	) 						
 
+#endif
 
 //extern uae_u32 do_get_mem_long(uae_u32 *a);
 //extern uae_u32 do_get_mem_word(uae_u16 *a);
