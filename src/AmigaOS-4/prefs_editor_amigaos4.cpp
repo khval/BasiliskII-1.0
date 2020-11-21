@@ -352,7 +352,7 @@ static void read_scsi_settings( void )
 	}
 }
 
-static void make_serial_prefs(char *prefs, Object *str_name, Object *str_unit, Object *ch_ispar)
+static void make_serial_prefs( const char *prefs, Object *str_name, Object *str_unit, Object *ch_ispar)
 {
 	CONST_STRPTR dev;
 
@@ -374,12 +374,12 @@ static void read_serial_settings( void )
 {
 	CONST_STRPTR ether_dev;
 
-	make_serial_prefs("seriala", 
+	make_serial_prefs( "seriala", 
 		obj[ ID_PREFS_MODEM_DEVICE_GAD ], 
 		obj[ ID_PREFS_MODEM_UNIT_GAD ],
 		obj[ ID_PREFS_MODEM_PARALLEL_GAD ] );
 
-	make_serial_prefs("serialb", 
+	make_serial_prefs( "serialb", 
 		obj[ ID_PREFS_PRINTER_DEVICE_GAD ], 
 		obj[ ID_PREFS_PRINTER_UNIT_GAD ],
 		obj[ ID_PREFS_PRINTER_PARALLEL_GAD ] );
@@ -632,7 +632,7 @@ static void set_scsi_settings( void )
 	}
 }
 
-static void parse_ser_prefs( char *prefs, Object *str_devname, Object *str_unit, Object *ch_ispar)
+static void parse_ser_prefs( const char *prefs, Object *str_devname, Object *str_unit, Object *ch_ispar)
 {
 	LONG	unit, ispar;
 	UBYTE	dev[MAX_STRING_LENGTH];
