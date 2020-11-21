@@ -767,9 +767,9 @@ static void set_emulation_settings( void )
 		INTEGER_Number, height);
 
 	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_ID_GAD,
-		STRINGA_TextVal, mode);
+		STRINGA_TextVal, DisplayIDStr);
 
-	if (mode)	{ FreeVec(mode); mode=NULL; }
+	if (DisplayIDStr)	{ free(DisplayIDStr); DisplayIDStr=NULL; }
 
 
 	RSetAttrO( win_prefs, ID_PREFS_GFX_WINDOW_DEPTH_GAD, 
