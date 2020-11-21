@@ -52,12 +52,16 @@ extern struct MsgPort *periodic_msgPort;
 
 #define IDCMP_common IDCMP_INACTIVEWINDOW | IDCMP_ACTIVEWINDOW | IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
-extern void (*set_palette_fn)(uint8 *pal, int num) ;
+extern void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) ;
 
-extern bool refreash_all_colors ;
+static bool refreash_all_colors = true;
 extern void set_fn_set_palette( uint32 PixelFormat);
+extern int get_max_palette_colors( int vdepth );
 
 static void bitmap_comp_draw_internal( driver_base *drv );
+
+
+static int maxpalcolors = 0;
 
 driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &mode)
 	: black_pen(-1), white_pen(-1), driver_base(m)
@@ -138,6 +142,8 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
 	set_fn_set_palette( dispi.PixelFormat );
+
+	maxpalcolors =	get_max_palette_colors( mode.depth );
 
 	do_draw = window_draw_internal;
 	switch (render_method)
@@ -312,7 +318,7 @@ void set_palette_32bit_be(uint8 *pal, int num)
 
 void driver_window_comp::set_palette(uint8 *pal, int num)
 {
-	if (set_palette_fn) set_palette_fn(pal, num);
+	if (set_palette_fn) set_palette_fn(pal, num, maxpalcolors);
 }
 
 void driver_window_comp::kill_gfx_output()

@@ -45,19 +45,21 @@ extern struct MsgPort *periodic_msgPort;
 		IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE	
 
 
-extern void (*set_palette_fn)(uint8 *pal, int num);
+extern void (*set_palette_fn)(uint8 *pal, uint32 num , int maxcolors);
 
-extern void set_vpal_16bit_le(uint8 *pal, int num);
-extern void set_vpal_16bit_be(uint8 *pal, int num);
-extern void set_vpal_32bit_le(uint8 *pal, int num);
-extern void set_vpal_32bit_be(uint8 *pal, int num);
-void set_screen_palette_8bit(uint8 *pal, int num);
+extern void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors);
+extern void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
+extern void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors );
+extern void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors);
+void set_screen_palette_8bit(uint8 *pal, uint32 num, int maxcolors);
 
 static struct Screen *_the_screen = NULL;
 
-static bool refreash_all_colors = false;
+static bool refreash_all_colors = true;
+extern int get_max_palette_colors( int vdepth );
 
-uint32 amiga_color_table[2 + 256 * 3];	
+uint32 amiga_color_table[2 + 256 * 3];
+static int maxpalcolors = 0;
 
 void window_draw_internal_nop( driver_base *drv )
 {
@@ -285,6 +287,9 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
 	set_fn_set_palette( dispi.PixelFormat );
+	show_set_palette_fn();
+
+	maxpalcolors =	get_max_palette_colors( mode.depth );
 
 	if (( dispi.PixelFormat == PIXF_CLUT ) && (mode.depth == VDEPTH_1BIT))
 	{
@@ -347,7 +352,7 @@ void print_color(uint8 *pal, int num)
 			amiga_color_table[byte_off+3] );
 }
 
-inline void set_screen_color(uint8 *pal, int num)
+inline void set_screen_color(uint8 *pal, uint32 num)
 {
 	register int byte_off = num *3;
 
@@ -358,16 +363,16 @@ inline void set_screen_color(uint8 *pal, int num)
 //	print_color(pal, num);
 }
 
-void set_screen_palette_8bit(uint8 *pal, int num)
+void set_screen_palette_8bit(uint8 *pal, uint32 num, int maxcolors)
 {
 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- _the_screen is %lx\n",__FUNCTION__,__LINE__,_the_screen);
 
 	if (_the_screen) 
 	{
-		if (num & 0xFFFFFF00)		// bad ramge
+		if (num >= maxcolors)		// bad ramge
 		{
-			for (num = 0; num<256 ; num++) set_screen_color(pal,  num);
-			amiga_color_table[0] = (256L << 16) + 0;	// load 256 colors, first colors is 0
+			for (num = 0; num<maxcolors ; num++) set_screen_color(pal,  num);
+			amiga_color_table[0] = (maxcolors << 16) + 0;	// load 256 colors, first colors is 0
 			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
 		}
 		else
@@ -381,7 +386,7 @@ void set_screen_palette_8bit(uint8 *pal, int num)
 
 void driver_screen::set_palette(uint8 *pal, int num)
 {
-	if (set_palette_fn) set_palette_fn(pal, num);
+	if (set_palette_fn) set_palette_fn(pal, num, maxpalcolors);
 }
 
 driver_screen::~driver_screen()

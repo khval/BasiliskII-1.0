@@ -50,15 +50,16 @@ extern struct MsgPort *periodic_msgPort;
 
 #define IDCMP_common IDCMP_INACTIVEWINDOW | IDCMP_ACTIVEWINDOW | IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
-void (*set_palette_fn)(uint8 *pal, int num) = NULL;
+void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) = NULL;
 
- void set_vpal_16bit_le(uint8 *pal, int num);
- void set_vpal_16bit_be(uint8 *pal, int num);
- void set_vpal_32bit_le(uint8 *pal, int num);
- void set_vpal_32bit_be(uint8 *pal, int num);
+ void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors);
 
-bool refreash_all_colors = true;
+static bool refreash_all_colors = true;
 
+static int maxpalcolors = 0;
 
 void set_fn_set_palette( uint32 PixelFormat)
 {
@@ -96,6 +97,19 @@ void set_fn_set_palette( uint32 PixelFormat)
 	}
 }
 
+extern void show_set_palette_fn();
+
+int get_max_palette_colors( int vdepth )
+{
+	switch (vdepth)
+	{
+		case VDEPTH_1BIT: return 2;
+		case VDEPTH_4BIT: return 16;
+	}
+
+	return 256;
+}
+
 driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 	: black_pen(-1), white_pen(-1), driver_base(m)
 {
@@ -126,10 +140,10 @@ driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 		WA_IDCMP, IDCMP_common,
 		TAG_END
 	);
-
+ 
 	if (the_win == NULL)
 	{
-		init_ok = false;
+ 		init_ok = false;
 		ErrorAlert(STR_OPEN_WINDOW_ERR);
 		return;
 	}
@@ -158,18 +172,25 @@ driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
 	set_fn_set_palette( dispi.PixelFormat );
+	show_set_palette_fn();
+
+	maxpalcolors =	get_max_palette_colors( mode.depth );
 
 	do_draw = window_draw_internal;
 	switch (render_method)
 	{
 		case rm_internal: 
 
-			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
+ 			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
 			if (  convert )
 			{
+				const char *name;
 				ULONG depth = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_DEPTH);
 				the_bitmap =AllocBitMap( mode.x, mode.y+2, depth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
 				do_draw = bitmap_draw_internal;
+
+				name = get_name_converter_fn_ptr( (void *) convert );
+				if (video_debug_out) FPrintf(video_debug_out,"converter used : %s\n", name ? name : "<no name found>"); 
 			}
 			else
 			{
@@ -263,7 +284,7 @@ int driver_window::draw()
 
 #endif
 
-void set_vpal_16bit_le(uint8 *pal, int num)
+void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors)
 {
 	int n;
 	register unsigned int rgb;
@@ -273,7 +294,7 @@ void set_vpal_16bit_le(uint8 *pal, int num)
 
 	// Convert palette to 32 bits virtual buffer.
 
-	if (num & 0xFFFFFF00) refreash_all_colors=true;
+	if (num >= maxcolors) refreash_all_colors=true;
 
 	if (refreash_all_colors)
 	{
@@ -301,7 +322,7 @@ void set_vpal_16bit_le(uint8 *pal, int num)
 	}
 }
 
-void set_vpal_16bit_be(uint8 *pal, int num)
+void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors)
 {
 	int n;
 	register unsigned int rgb;
@@ -311,20 +332,37 @@ void set_vpal_16bit_be(uint8 *pal, int num)
 
 	// Convert palette to 32 bits virtual buffer.
 
-	n = num *3;
-	r = pal[n] & 0xF8;		// 4+1 = 5 bit
-	g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
-	b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-	vpal16[num] = r << 8 | g << 3 | b >> 3;
+	if (num >= maxcolors) refreash_all_colors=true;
+
+	if (refreash_all_colors)
+	{
+		for (num=0;num<256;num++)
+		{
+			n = num *3;
+			r = pal[n] & 0xF8;		// 4+1 = 5 bit
+			g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+			b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+			vpal16[num] = r << 8 | g << 3 | b >> 3;
+			refreash_all_colors = false;
+		}
+	}
+	else
+	{
+		n = num *3;
+		r = pal[n] & 0xF8;		// 4+1 = 5 bit
+		g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+		vpal16[num] = r << 8 | g << 3 | b >> 3;
+	}
 }
 
-void set_vpal_32bit_le(uint8 *pal, int num)
+void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors)
 {
 	int n = num *3;		// BGRA
 	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
 }
 
-void set_vpal_32bit_be(uint8 *pal, int num)
+void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors)
 {
 	int n = num *3;		// ARGB
 	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
@@ -332,7 +370,9 @@ void set_vpal_32bit_be(uint8 *pal, int num)
 
 void driver_window::set_palette(uint8 *pal, int num)
 {
-	if (set_palette_fn) set_palette_fn(pal, num);
+	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - color num %ld\n",__FUNCTION__,__LINE__,num);
+
+	if (set_palette_fn) set_palette_fn(pal, num, maxpalcolors);
 }
 
 void driver_window::kill_gfx_output()
