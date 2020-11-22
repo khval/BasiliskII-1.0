@@ -71,6 +71,7 @@ const char	*window_depth_names[]=
 {
 	"Default",
 	"Black & White",
+	"4 colors (2bit)",
 	"16 colors (4bit)",
 	"256 colors (8bit)",
 	"32 767 colors (15bit)",

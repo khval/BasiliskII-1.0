@@ -104,7 +104,9 @@ int get_max_palette_colors( int vdepth )
 	switch (vdepth)
 	{
 		case VDEPTH_1BIT: return 2;
+		case VDEPTH_2BIT: return 4;
 		case VDEPTH_4BIT: return 16;
+		case VDEPTH_8BIT: return 256;
 	}
 
 	return 256;

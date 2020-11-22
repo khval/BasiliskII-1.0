@@ -291,7 +291,7 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 
 	maxpalcolors =	get_max_palette_colors( mode.depth );
 
-	if (( dispi.PixelFormat == PIXF_CLUT ) && (mode.depth == VDEPTH_1BIT))
+	if (( dispi.PixelFormat == PIXF_CLUT ) && ((mode.depth == VDEPTH_1BIT) || (mode.depth == VDEPTH_2BIT)) )
 	{
 		SetRGB32( &_the_screen->ViewPort, 0, 0xFFFFFFFF , 0xFFFFFFFF, 0xFFFFFFFF );
 		SetRGB32( &_the_screen->ViewPort, 1, 0x00000000, 0x00000000, 0x00000000 );
@@ -365,11 +365,11 @@ inline void set_screen_color(uint8 *pal, uint32 num)
 
 void set_screen_palette_8bit(uint8 *pal, uint32 num, int maxcolors)
 {
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- _the_screen is %lx\n",__FUNCTION__,__LINE__,_the_screen);
+	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- _the_screen is %lx -- num %ld -- max colors %ld\n",__FUNCTION__,__LINE__,_the_screen,num,maxcolors);
 
 	if (_the_screen) 
 	{
-		if (num >= maxcolors)		// bad ramge
+		if (num >= maxcolors)		// bad range
 		{
 			for (num = 0; num<maxcolors ; num++) set_screen_color(pal,  num);
 			amiga_color_table[0] = (maxcolors << 16) + 0;	// load 256 colors, first colors is 0

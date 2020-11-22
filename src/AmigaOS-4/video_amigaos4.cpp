@@ -364,12 +364,15 @@ bool VideoInit(bool classic)
 			{
 				case 0: default_depth = VDEPTH_32BIT; break;
 				case 1: default_depth = VDEPTH_1BIT; break;
-				case 2: default_depth = VDEPTH_4BIT; break;
-				case 3: default_depth = VDEPTH_8BIT; break;
-				case 4: default_depth = VDEPTH_16BIT; break;
+				case 2: default_depth = VDEPTH_2BIT; break;
+				case 3: default_depth = VDEPTH_4BIT; break;
+				case 4: default_depth = VDEPTH_8BIT; break;
+				case 5: default_depth = VDEPTH_16BIT; break;
+				case 6: default_depth = VDEPTH_32BIT; break;
 			}
 
 			add_modes(window_width, window_height, VDEPTH_1BIT);
+			add_modes(window_width, window_height, VDEPTH_2BIT);
 			add_modes(window_width, window_height, VDEPTH_4BIT);
 			add_modes(window_width, window_height, VDEPTH_8BIT);
 			add_modes(window_width, window_height, VDEPTH_16BIT);
@@ -393,13 +396,16 @@ bool VideoInit(bool classic)
 			{
 				case 0: default_depth = VDEPTH_32BIT; break;
 				case 1: default_depth = VDEPTH_1BIT; break;
-				case 2: default_depth = VDEPTH_4BIT; break;
-				case 3: default_depth = VDEPTH_8BIT; break;
-				case 4: default_depth = VDEPTH_16BIT; break;
+				case 2: default_depth = VDEPTH_2BIT; break;
+				case 3: default_depth = VDEPTH_4BIT; break;
+				case 4: default_depth = VDEPTH_8BIT; break;
+				case 5: default_depth = VDEPTH_16BIT; break;
+				case 6: default_depth = VDEPTH_32BIT; break;
 			}
 
 #if 1
 			add_modes(0x80, VDEPTH_1BIT);
+			add_modes(0x80, VDEPTH_2BIT);
 			add_modes(0x80, VDEPTH_4BIT);
 			add_modes(0x80, VDEPTH_8BIT);
 			add_modes(0x80, VDEPTH_16BIT);
@@ -411,15 +417,14 @@ bool VideoInit(bool classic)
 			// don't know way this don't work.
 
 			add_modes(default_width, default_height, VDEPTH_1BIT);
+			add_modes(default_width, default_height, VDEPTH_2BIT);
+			add_modes(default_width, default_height, VDEPTH_4BIT);
 			add_modes(default_width, default_height, VDEPTH_8BIT);
 			add_modes(default_width, default_height, VDEPTH_16BIT);
 			add_modes(default_width, default_height, VDEPTH_32BIT);
 #endif
 			break;
 	}
-
-
-
 
 
 #if DEBUG
@@ -1086,6 +1091,7 @@ static ULONG amiga_depth_from_mac_depth(video_depth mac_depth)
 	switch (depth)
 	{
 		case 1:	return 8;
+		case 2:	return 8;
 		case 4:	return 8;
 		case 8:	return 8;
 		case 15:	return 16;
@@ -1405,14 +1411,18 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 	{
 		case PIXF_CLUT:
 
+
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_8bit;
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_to_8bit;
 			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_to_8bit;
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_copy_8bit;
 			break;
 
 		case PIXF_R5G6B5:
 
+
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in vpal16
 			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in vpal16
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in vpal16
 
@@ -1432,9 +1442,11 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit_be;
 			break;
 
+
 		case PIXF_R5G6B5PC:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in vpal16
 			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in vpal16
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in vpal16
 
@@ -1454,9 +1466,12 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit_le;
 			break;
 
+
 		case PIXF_A8R8G8B8:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_32bit;
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_to_32bit;
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_to_32bit;
 			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_to_32bit;
 			if (depth == VDEPTH_16BIT)	convert = (void *) &convert_15bit_to_32bit;
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_copy_32bit;
