@@ -379,7 +379,11 @@ void convert_15bit_to_16bit_le(  uint16 *from, uint16 *to,int  pixels )
 	for (n=0; n<pixels;n++)
 	{
 		rgb = from[n];
-		rg = (rgb & 0x007FC0) << 1;
+		
+		//        R          G         B
+		// %11111 11111 00000
+
+		rg = (rgb & 0x007FE0) << 1;
 		b = (rgb & 0x00001F) ;
 		rgb =  rg | b;
 
