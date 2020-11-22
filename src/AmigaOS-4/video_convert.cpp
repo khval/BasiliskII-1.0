@@ -416,7 +416,7 @@ void init_lookup_15bit_to_16bit_le(  )
 
 	for (n=0; n<65535;n++)
 	{
-		rg = (n & 0x007FC0) << 1;
+		rg = (n & 0x007FE0) << 1;
 		b = (n & 0x00001F) ;
 		rgb =  (rg | b); 
 
@@ -436,7 +436,7 @@ void init_lookup_15bit_to_16bit_be(  )
 
 	for (n=0; n<65535;n++)
 	{
-		rg = (n & 0x007FC0) << 1;
+		rg = (n & 0x007FE0) << 1;
 		b = (n & 0x00001F) ;
 		lookup16bit[n] = (rg | b);
 	}
