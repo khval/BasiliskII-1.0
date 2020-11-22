@@ -165,7 +165,7 @@ void convert_1bit_to_8bit(  char *from, char *to,int  pixels )
 	for (n=0; n<bytes;n++)
 	{
 		source = from[n];
-		*to++ = (source & 128)>>6;
+		*to++ = (source & 128)>>7;
 		*to++ = (source & 64)>>6 ;
 		*to++ = (source & 32)>>5;
 		*to++ = (source & 16)>>4;
