@@ -58,6 +58,8 @@ so AmigaOS is not staved from CPU cycles, when your trying to do stuff on Amiga 
 * Added some code to force CPU emulation to quit (as it got stuck).
 * Buggy exit code fixed, did not set NULL after freeing devices, resulting bad things.
 * -lauto removed, bad OpenLibrart / CloseLibrary code replaced.
+* Prefs files now stored in program directory, makes it easier when you backup, 
+or upgrade the OS, (no lost prefs files anymore.)
 
 Changes in Basilisk II 1.0.4 AmigaOS4 03.01.2014 (Kjetil Hvalstrand)
 
