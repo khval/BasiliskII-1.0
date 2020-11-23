@@ -36,7 +36,7 @@ You are not supposed to be able to mount the partitions under AmigaOS, so disabl
 
 * When selecting partiton in Basilisk II.
 DO NOT use Amiga partitions, DH0, DH1, if you do this will be overwritten.
-Create new portions, I will suggest calling this partitions device names MAC0, MAC1, etc.  
+Create new partitions, I will suggest calling this partitions device names MAC0, MAC1, etc.  
 
 * For compressed cd iso images it’s best decompress it on the Amiga side,
 you can mount the CD ISO image on the Amiga side, by using diskimagegui / diskimage.device, 
