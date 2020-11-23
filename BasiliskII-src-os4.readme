@@ -35,6 +35,30 @@ IT IS PROBABLY BETTER RUN SHAPESHIFTER OR FUSION ON
 THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
 BPPC/CSPPC IS TOO SLOW.
 
+Changes in Basilisk II 1.0.5 AmigaOS4 23.11.2020 (Kjetil Hvalstrand)
+
+* Removed all Picasso96 code, its no longer native to AmigaOS4.1 Final update 1
+* AmigaOS 16 bit LE Screen Mode now supported.
+* Mac 2bit, 4bit modes now supported.
+* 15bit BE to 16bit LE conversion code now use lookup table. (makes this really fast)
+* B/W, 2bit, 4bit graphics can now be displayed on 16 modes.
+* Iconificaton of window support for composition and normal window.
+* Iconificaton will suspend CPU emulation while iconified freeing up the CPU.
+* Composition code rewritten.
+* Window active / inactive event will regulate cpu task emulation priority. 
+so AmigaOS is not staved from CPU cycles, when your trying to do stuff on Amiga side.
+* Samo79 provided italien catalog file.
+* GUI: Will correly display width and height if fullscreen is selected.
+* GUI: CPU info moved to its own TAB/Page
+* Updated the make_lha script, to include locale files.
+* A lot obsolete warnings fixed.
+* Now uses 64bit Seek instead old 32bit Seek for disk images 
+* You can now create large disk images >4Gbytes
+(Note this does not automatic allow you to use large disk images, MacOS also needs to support it.).
+* Added some code to force CPU emulation to quit (as it got stuck).
+* Buggy exit code fixed, did not set NULL after freeing devices, resulting bad things.
+* -lauto removed, bad OpenLibrart / CloseLibrary code replaced.
+
 Changes in Basilisk II 1.0.4 AmigaOS4 03.01.2014 (Kjetil Hvalstrand)
 
 * Added "Uae lock on screens bitmap" in GUI for AGP/PCI graphic cards.
