@@ -46,6 +46,7 @@ so you don’t need to transferee the files using HFS.
 
 * Running Bailisk II on 16bit screen is not a bad idea, this version of basilisk uses lookup tables,
 as result 15bit to 16bit + endiness is done in one operation, 8bit to 16bit is also uses 16bit lookup palette table. 
+16bit is 1/2 of data to transferee to the graphic card vs 32bit graphics.
 
 Best Regards
 Kjetil Hvalstrand 
