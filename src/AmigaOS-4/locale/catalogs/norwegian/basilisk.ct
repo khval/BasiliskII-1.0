@@ -1,0 +1,652 @@
+## version $VER: 01.catalog 01.01 (24.11.2020)
+## codeset 0
+## language Norwegian
+;
+MSG_AUTHOR_INFORMATION
+\33cBasilisk II 1.0 av Christian Bauer\nCopyright 1997-2001\nDistribusjon under General Public License (GPL)
+; \33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
+;
+MSG_PORT_INFORMATION
+AmigaOS 4.X (PowerPC) port av Kjetil Hvalstrand, 2007-2020
+; AmigaOS 4.X (PowerPC) port by Kjetil Hvalstrand, 2007-2020
+;
+MSG_GFX_INFORMATION
+Basilisk ikoner av Christian Rosentereter
+; Basilisk icons by Christian Rosentereter
+;
+MSG_TRANSLATION_INFORMATION
+Oversettelse av: Kjetil Hvalstrand
+; Translation by: xxxxx
+;
+MSG_DESCRIPTION
+68k MacIntosh-emulator
+; 68k MacIntosh emulator
+;
+MSG_QUIT_WHILE_RUNING_INFORMATION
+Hvis du avslutter på denne måten, kan det føre til korrupte MacOS-filer eller filsystem.\nDette er det samme som å trekke i strømkontakten mens datamaskinen kjører.
+; Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
+;
+MSG_OK_GAD
+_Ok
+; _Ok
+;
+MSG_CANCEL_GAD
+_Avbryt
+; _Cancel
+;
+MSG_PREFS_TYPE_GAD
+_Type
+; _Type
+;
+MSG_PREFS_READ_ONLY_GAD
+_Kun lese rettighet
+; _Read Only
+;
+MSG_PREFS_FILE_GAD
+_Fil
+; _File
+;
+MSG_PREFS_DEVICE_GAD
+_Enhet
+; _Device
+;
+MSG_PREFS_CREATE_GAD
+Opprett
+; Create
+;
+MSG_PREFS_UNIT_GAD
+_Enhet
+; _Unit
+;
+MSG_PREFS_FLAGS_GAD
+_Flagg
+; _Flags
+;
+MSG_PREFS_START_BLOCK_GAD
+_Start blokk
+; _Start Block
+;
+MSG_PREFS_BLOCKS_GAD
+_Blokker
+; _Blocks
+;
+MSG_PREFS_BLOCK_SIZE_GAD
+Blokkstørrelse
+; Block Size
+;
+MSG_PREFS_RAMSIZE_GAD
+% ldMB
+; %ldMB
+;
+MSG_PREFS_ADD_GAD
+_Legge til...
+; _Add...
+;
+MSG_PREFS_EDIT_GAD
+_Redigere...
+; _Edit...
+;
+MSG_PREFS_REMOVE_GAD
+_Ta vekk
+; _Remove
+;
+MSG_PREFS_CD_DEVICE_GAD
+_Enhet
+; _Device
+;
+MSG_PREFS_CD_UNIT_GAD
+_Enhet id
+; _Unit
+;
+MSG_PREFS_CD_BOOT_GAD
+Start fra cdrom
+; _Boot from CD
+;
+MSG_PREFS_CD_DISABLE_DRIVER_GAD
+Deaktiver CD-ROM-driveren
+; Disable CD-ROM driver
+;
+MSG_PREFS_MORPHOS_ROOT_GAD
+AmigaOS rot skuff
+; AmigaOS root
+;
+MSG_PREFS_VOLUMETYPE_FILE_GAD
+Fil
+; File
+;
+MSG_PREFS_VOLUMETYPE_DEVICE_GAD
+Enhet
+; Device
+;
+MSG_PREFS_ID_0_DEVICE_GAD
+Enhet id _0
+; ID _0 Device
+;
+MSG_PREFS_ID_1_DEVICE_GAD
+Enhet id _1
+; ID _1 Device
+;
+MSG_PREFS_ID_2_DEVICE_GAD
+Enhet id _2
+; ID _2 Device
+;
+MSG_PREFS_ID_3_DEVICE_GAD
+Enhet id _3
+; ID _3 Device
+;
+MSG_PREFS_ID_4_DEVICE_GAD
+Enhet id _4
+; ID _4 Device
+;
+MSG_PREFS_ID_5_DEVICE_GAD
+Enhet id _5
+; ID _5 Device
+;
+MSG_PREFS_ID_6_DEVICE_GAD
+Enhet id _6
+; ID _6 Device
+;
+MSG_PREFS_SCSI_UNIT_GAD
+Scsi enhet
+; Unit
+;
+MSG_PREFS_MODEM_DEVICE_GAD
+Enhet
+; Device
+;
+MSG_PREFS_MODEM_UNIT_GAD
+Enhet id
+; Unit
+;
+MSG_PREFS_MODEM_PARALLEL_GAD
+Parallel enhet
+; Parallel device
+;
+MSG_PREFS_ETHERNET_DEVICE_GAD
+Enthernet
+; Device
+;
+MSG_PREFS_ETHERNET_UNIT_GAD
+Enhet id
+; Unit
+;
+MSG_PREFS_PRINTER_DEVICE_GAD
+Parallel enhet
+; Device
+;
+MSG_PREFS_PRINTER_UNIT_GAD
+Enhet
+; Unit
+;
+MSG_PREFS_PRINTER_PARALLEL_GAD
+Parallel enhet
+; Parallel device
+;
+MSG_PREFS_GFX_WIDTH_GAD
+_Bredde
+; _Width
+;
+MSG_PREFS_GFX_HEIGHT_GAD
+_Høyde
+; _Height
+;
+MSG_PREFS_GFX_FULLSCREEN_GAD
+_Full skjerm
+; _Full screen
+;
+MSG_PREFS_GFX_8BIT_GAD
+_8bit-modus
+; _8bit mode
+;
+MSG_PREFS_GFX_FRAMESKIP_GAD
+_Hopp over bilder
+; _Frame skip
+;
+MSG_PREFS_DISABLE_SOUND
+_Deaktiver lyd
+; _Disable sound
+;
+MSG_PREFS_SYSTEM_RAM_GAD
+MacOS RAM
+; MacOS RAM
+;
+MSG_PREFS_SYSTEM_MODEL_GAD
+Mac-modell
+; Mac Model
+;
+MSG_PREFS_SYSTEM_ROM_GAD
+_ROM-fil
+; _ROM File
+;
+MSG_PREFS_START_GAD
+Start
+; Start
+;
+MSG_PREFS_QUIT_GAD
+Avslutt
+; Quit
+;
+MSG_MAC_VOLUMES
+Mac Volumes
+; Mac Volumes
+;
+MSG_CDROM
+CDROM
+; CD-ROM
+;
+MSG_VIRTUAL_SCSI_DEVICES
+SCSI Enheter
+; Virtual SCSI devices
+;
+MSG_MODEM
+Modem
+; Modem
+;
+MSG_ETHERNET
+Ethernet
+; Ethernet
+;
+MSG_PRINTER
+Printer
+; Printer
+;
+MSG_GRAPHICS
+Grafikk
+; Graphics
+;
+MSG_SOUND
+Lyd
+; Sound
+;
+MSG_SYSTEM
+Systemmelding
+; System message
+;
+MSG_SIZE
+Størrelse
+; Size
+;
+MSG_MB
+MB
+; MB
+;
+MSG_TITLE_BASILISK_SETTINGS
+Basilisk II-innstillinger
+; Basilisk II Settings
+;
+MSG_TITLE_ADD_VOLUME
+Legg til disk
+; Add Volume
+;
+MSG_TITLE_EDIT_VOLUME
+Rediger disk
+; Edit Volume
+;
+MSG_PAGE_VOLUMES
+Disker
+; Volumes
+;
+MSG_PAGE_SCSI
+SCSI
+; SCSI
+;
+MSG_PAGE_COMMUNICATION
+Kommunikasjon
+; Communication
+;
+MSG_PAGE_EMULATION
+Emulering
+; Emulation
+;
+MSG_MENU_TITLE_BASILISK
+Basilisk
+; Basilisk
+;
+MSG_MENU_BASILISK_ABOUT
+\0Om...
+; ?\0About...
+;
+MSG_MENU_BASILISK_START
+S\0Start
+; S\0Start
+;
+MSG_MENU_BASILISK_QUIT
+Q\0Avslutt
+; Q\0Quit
+;
+ID_GRAPHICS
+Grafikk
+; Graphics
+;
+ID_PREFS_GFX_MODE_GAD
+Gfx-modus
+; Gfx mode
+;
+ID_PREFS_GFX_WIDTH_GAD
+Gfx bredde
+; Gfx Width
+;
+ID_PREFS_GFX_HEIGHT_GAD
+Gfx høyde
+; Gfx height
+;
+ID_PREFS_GFX_MODE_ID_SELECT_GAD
+Velg skjermmodus
+; Select screen mode
+;
+ID_PREFS_GFX_MODE_ID_GAD
+Skjermmodus-ID
+; Screen mode id
+;
+ID_PREFS_GFX_WINDOW_DEPTH_GAD
+Vindusdybde
+; Window depth
+;
+ID_PREFS_GFX_RENDER_METHOD_GAD
+Visings modus.
+; Render mode
+;
+ID_PREFS_GFX_LOCK_GAD
+Skrellås
+; Screem lock
+;
+ID_PREFS_GFX_FRAMESKIP_GAD
+Bilde hopp
+; Frame skip
+;
+ID_PREFS_GFX_LINESKIP_GAD
+Linje hopp
+; Lineskip
+;
+ID_SOUND
+Lyd
+; Sound
+;
+ID_PREFS_DISABLE_SOUND
+Deaktiver lyd
+; Disable sound
+;
+ID_VIRTUAL_SCSI_DEVICES
+Scsi-enheter
+; Scsi devices
+;
+ID_PREFS_ID_0_DEVICE_GAD
+Enhet 0
+; Device 0
+;
+ID_PREFS_ID_0_UNIT_GAD
+Enhet id 0
+; Unit 0
+;
+ID_PREFS_ID_1_DEVICE_GAD
+Enhet 1
+; Device 1
+;
+ID_PREFS_ID_1_UNIT_GAD
+Enhet id 1
+; Unit 1
+;
+ID_PREFS_ID_2_DEVICE_GAD
+Enhet 2
+; Device 2
+;
+ID_PREFS_ID_2_UNIT_GAD
+Enhet id 2
+; Unit 2
+;
+ID_PREFS_ID_3_DEVICE_GAD
+Enhet 3
+; Device 3
+;
+ID_PREFS_ID_3_UNIT_GAD
+Enhet id 3
+; Uinit 3
+;
+ID_PREFS_ID_4_DEVICE_GAD
+Enhet 4
+; Device 4
+;
+ID_PREFS_ID_4_UNIT_GAD
+Enhet id 4
+; unit 4
+;
+ID_PREFS_ID_5_DEVICE_GAD
+Enhet 5
+; Device 5
+;
+ID_PREFS_ID_5_UNIT_GAD
+Enhet id 5
+; unit 5
+;
+ID_PREFS_ID_6_DEVICE_GAD
+Enhet 6
+; Device 6
+;
+ID_PREFS_ID_6_UNIT_GAD
+Enhet id 6
+; Unit 6
+;
+ID_PREFS_START_GAD
+Start
+; Start
+;
+ID_PREFS_QUIT_GAD
+Avslutt
+; Quit
+;
+ID_PREFS_EDIT_GAD
+Redigere
+; Edit
+;
+ID_PREFS_REMOVE_GAD
+Ta vekk
+; Remove
+;
+ID_HARDWARE
+Maskinvare
+; Hardware
+;
+ID_CPU
+Prosessor
+; CPU
+;
+ID_PREFS_SYSTEM_CPU_GAD
+Prosessor
+; CPU
+;
+ID_PREFS_SYSTEM_FPU_GAD
+FPU
+; FPU
+;
+ID_CPU_PRI
+CPU-prioritet
+; CPU priority
+;
+ID_CPU_ACTIVE_GAD
+CPU-aktivt vindu
+; CPU active window
+;
+ID_CPU_INACTIVE_GAD
+CPU inaktivt vindu
+; CPU inactive window
+;
+ID_RAM
+RAM
+; RAM
+;
+ID_PREFS_SYSTEM_RAM_GAD
+RAM
+; RAM
+;
+ID_SYSTEM
+System
+; System
+;
+ID_PREFS_SYSTEM_MODEL_GAD
+Mac-modell
+; Mac model
+;
+ID_PREFS_SYSTEM_ROM_SELECT_GAD
+Velg rom
+; Select rom
+;
+ID_PREFS_SYSTEM_ROM_GAD
+Rom
+; Rom
+;
+ID_MODEM
+Modem
+; Modem
+;
+ID_PREFS_MODEM_DEVICE_GAD
+Modem enhet
+; Modem device
+;
+ID_PREFS_MODEM_UNIT_GAD
+Modem enhet id
+; Modem unit
+;
+ID_PREFS_MODEM_PARALLEL_GAD
+Modem parallel
+; Modem parallel
+;
+ID_PREFS_PRINTER_DEVICE_GAD
+
+; Printer device
+;
+ID_PREFS_PRINTER_UNIT_GAD
+
+; Printer unit
+;
+ID_PREFS_PRINTER_PARALLEL_GAD
+
+; Printer parallel
+;
+ID_ETHERNET
+Ethernet
+; Ethernet
+;
+ID_PREFS_ETHERNET_DEVICE_SELECT_GAD
+Velg ethernet driver
+; Select ethernet device
+;
+ID_PREFS_ETHERNET_DEVICE_GAD
+Ethernet enhet
+; Ethernet device
+;
+ID_PREFS_ETHERNET_UNIT_GAD
+Ethernet enhet id
+; Ethernet unit
+;
+ID_MAC_VOLUMES
+Mac disks
+; Volumes
+;
+ID_PREFS_ADD_BOOTDISK_GAD
+Mac boot disk
+; Boot disk
+;
+ID_PREFS_ADD_GAD
+Legg til
+; Add
+;
+ID_PREFS_CREATE_GAD
+Opprett
+; Create
+;
+ID_CDROM
+cdrom
+; Cdrom
+;
+ID_PREFS_CD_DEVICE_GAD
+CDROM
+; Cd device
+;
+ID_PREFS_CD_UNIT_GAD
+CDROM enhet
+; Cd unit
+;
+ID_PREFS_CD_BOOT_GAD
+Start fra cdrom
+; Cd boot
+;
+ID_PREFS_CD_DISABLE_DRIVER_GAD
+Deaktiver cdrom enhet
+; Disable cd device
+;
+ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD
+Delt skuff
+; Shared directory
+;
+ID_PREFS_AMIGAOS4_ROOT_GAD
+Delt skuff
+; Shared directory
+;
+ID_PREFS_VOLUMETYPE_FILE_GAD
+Enhet fil type
+; File volume type
+;
+ID_PREFS_VOLUMETYPE_DEVICE_GAD
+Enhet disk type
+; Device volume type
+;
+ID_PREFS_TYPE_GAD
+Type
+; Type
+;
+ID_PREFS_DEVICE_GAD
+Enhet
+; Device
+;
+ID_PREFS_UNIT_GAD
+Enhet id
+; Unit
+;
+ID_PREFS_PARTITION_NAME_GAD
+Partition navn
+; Partition name
+;
+ID_PREFS_READ_ONLY_GAD
+Kun lese rettighet
+; Read only
+;
+ID_PREFS_FILE_GAD
+Fil
+; File
+;
+ID_PREFS_FILE_SELECT_GAD
+Fil
+; File
+;
+ID_CREATE_NAME_ASL_GAD
+Navn
+; Name
+;
+ID_CREATE_NAME_GAD
+Navn
+; Name
+;
+ID_CREATE_OK_GAD
+Ok
+; Ok
+;
+ID_CREATE_CANCEL_GAD
+Avbyrt
+; Cancel
+;
+ID_CREATE_SIZE_GAD
+Størrelse
+; Size
+;
+ID_OK_GAD
+Ok
+; Ok
+;
+ID_CANCEL_GAD
+Avbyrt
+; Cancel
+;
+ID_END
+EOL
+; --- EOF ---
+;
