@@ -6,68 +6,65 @@
 			delete {target_lha} all
 		endif
 
-	sleep 2
+	sleep 1
 
 		echo "check if {target_lha}_V1_0.lha exists"
 		if exists {target_lha}_V1_0.lha
 			delete {target_lha}_V1_0.lha
 		endif
 
-	sleep 2
+	sleep 1
 
 		echo "check if {target_lha}_src_V1_0.lha exists"
 		if exists {target_lha}_src_V1_0.lha
 			delete {target_lha}_src_V1_0.lha
 		endif
 
-	sleep 2
+	sleep 1
 
 		echo "check if t:obj exists"
 		if exists t:obj
 			delete t:obj all
 		endif
 
-	sleep 2
+	sleep 1
 
 		echo "check if t:BasiliskII.db exists"
 		if exists t:BasiliskII.db
 			delete t:BasiliskII.db 
 		endif
 
-	sleep 2
+	sleep 1
 
 
 		makedir {target_lha}
+
+		makedir "{target_lha}/locale"
+		makedir "{target_lha}/locale/catalogs"
+		copy locale/#? "{target_lha}/locale" all
+
+		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "basilisk.cd" >> t:cleanup
+		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "basilisk.ct" >> t:cleanup
+		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "update" >> t:cleanup
+		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "makefile" >> t:cleanup
+		delete "{target_lha}/locale/#?(.c|.h)" 
+
+		if exists t:cleanup
+			protect t:cleanup +s
+			t:cleanup
+			delete t:cleanup
+		endif
+
 		Copy BasiliskII.db {target_lha}/BasiliskII
 		Copy icons/BasiliskII.db.info {target_lha}/BasiliskII.info
 		Copy //BasiliskII-src-os4.readme {target_lha}
 		Copy //BasiliskII-src-os4.readme ram:
-		Copy //README {target_lha}
+		Copy //README.md {target_lha}
+		Copy //Manual.txt {target_lha}
 		Copy //INSTALL {target_lha}
 		copy //COPYING {target_lha}
 		copy //TECH {target_lha}
+
 		lha -er a {target_lha}_V1_0.lha {target_lha} 
 		delete {target_lha} all
 
-		if not exists t:obj
-			mkdir t:obj
-
-			copy FROM obj/#?.o TO t:obj/ >NIL:
-			delete obj/#?.o >NIL:
-
-			if exists BasiliskII.db
-				copy BasiliskII.db t: >NIL:
-				delete BasiliskII.db >NIL:
-			endif
-
-			cd > env:old_path
-			cd ///
-			lha -er a {target_lha}_src_V1_0.lha BasiliskII-1.0
-			cd $old_path
-			delete env:old_path
-			copy t:obj obj >NIL:
-			copy t:BasiliskII.db "" >NIL:
-
-			delete t:obj all >NIL:
-			delete T:BasiliskII.db >NIL:
-		endif
