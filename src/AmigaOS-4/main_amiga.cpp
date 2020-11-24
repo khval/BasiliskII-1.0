@@ -68,9 +68,15 @@
 #define DEBUG 0
 #include "debug.h"
 
-#define 	MaxROMSize 0x100000;
+#define 	MaxROMSize 0x100000
 
+#ifdef _L 
+#warning wtf...
+#undef _L
+#endif
 
+extern const char *_L_catalog(unsigned int num) ;
+extern const char *(*_L) (unsigned int num) ;
 
 #define FREE_STR(str) if (str) { free(str);str=NULL; }
 
@@ -86,7 +92,6 @@ extern int runtime_gui_tread ();
 
 // Options for libnix
 const int __nocommandline = 1;			// Disable command line parsing
-
 
 // Constants
 static const char ROM_FILE_NAME[] = "ROM";
@@ -262,6 +267,11 @@ int main(int argc, char **argv)
 	if (openlibs() == 0)
 	{
 		QuitEmulator();
+	}
+
+	if (catalog)		// set default catalog function
+	{
+		_L = _L_catalog;
 	}
 
 	// Find program icon

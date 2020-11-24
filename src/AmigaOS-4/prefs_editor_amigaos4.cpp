@@ -31,7 +31,6 @@ int add_vol_opt = 0;
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include <dos/filehandler.h>
 #include <libraries/asl.h>
 #include <libraries/gadtools.h>
@@ -46,6 +45,7 @@ int add_vol_opt = 0;
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/icon.h>
+#include <proto/locale.h>
 
 struct List list_files;
 
@@ -57,6 +57,7 @@ struct List list_files;
 #include "../include/prefs.h"
 #include "main.h"
 
+extern struct Catalog *catalog;
 
 #define ScreenTitle "BasiliskII II 1.0"
 
@@ -126,7 +127,7 @@ Object *			layout[win_end];
 Object *			refresh[win_end];
 Object *			obj[ID_END];
 
-char *_L(unsigned int num) 
+const char *_L_default(unsigned int num) 
 {
 	unsigned int n;
 	char ret = 0;
@@ -136,8 +137,18 @@ char *_L(unsigned int num)
 		if (CatCompArray[n].cca_ID == num) { ret = n; break; }
 	}
 
-	return (char *) CatCompArray[ret].cca_Str ;
+	return CatCompArray[ret].cca_Str ;
 }
+
+const char *_L_catalog(unsigned int num) 
+{
+	const char *str;
+	str = GetCatalogStr(catalog, num, NULL);
+	if (!str) return _L_default(num) ;
+	return str;
+}
+
+const char *(*_L)(unsigned int num) = _L_default;
 
 // define SetListBrowserNodeAttrsA(node, tags) IListBrowser->SetListBrowserNodeAttrsA(node, tags) 
 

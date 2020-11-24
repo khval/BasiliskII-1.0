@@ -13,4 +13,3 @@ extern struct AslIFace 		 *IAsl ;
 extern BOOL init();
 extern void closedown();
 
-

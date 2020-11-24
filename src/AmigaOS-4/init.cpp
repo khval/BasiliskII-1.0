@@ -194,9 +194,15 @@ BOOL openlibs()
 	if (_locale)
 	{
 		codeset_page = (ULONG *) ObtainCharsetInfo(DFCS_NUMBER, (ULONG) _locale -> loc_CodeSet , DFCS_MAPTABLE);
+		printf("codeset is %d\n",_locale -> loc_CodeSet);
 	}
 
 	catalog = OpenCatalog(NULL, "basilisk.catalog", OC_BuiltInLanguage, "english", TAG_DONE);
+
+	if (catalog == NULL)
+	{
+		printf("failed to open catalog... maybe not installed\n");
+	}
 //	if (! catalog) return FALSE;
 
 //	engine_mx = (APTR) AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
