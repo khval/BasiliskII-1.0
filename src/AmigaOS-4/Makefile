@@ -6,7 +6,10 @@ STRIP = echo
 CC = g++ -noixemul -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
 CXX = g++ -noixemul -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
 CXXFLAGS = -g  -funroll-loops -finline-functions -ffast-math -mcpu=740 -mstring -mmultiple ## -Wall -Wno-multichar
-CPPFLAGS = -I../include -I../uae_cpu -I.
+
+CPUDIR = ../uae_cpu
+
+CPPFLAGS = -I../include -I${CPUDIR} -I.
 DEFS = -DUSE_SDL
 LDFLAGS = -noixemul
 LIBS = -lsdl 
@@ -21,15 +24,14 @@ ECHE = echo -e
 BOLD = *"*E[1m*
 NRML = *"*E[0m*
 
-
 COMPILING = @$(ECHE) "compiling $(BOLD)$@$(NRML)..."
 LINKING = @$(ECHE) "linking $(BOLD)$@$(NRML)..."
 STRIPPING = @$(ECHE) "stripping $(BOLD)$@$(NRML)..."
 ARCHIVING = @$(ECHE) "archiving $(BOLD)$@$(NRML)..."
 
 ## Files
-CPUSRCS = ../uae_cpu/basilisk_glue.cpp ../uae_cpu/newcpu.cpp ../uae_cpu/memory.cpp	\
-	../uae_cpu/readcpu.cpp ../uae_cpu/fpu/fpu_uae.cpp cpustbl.cpp cpudefs.cpp cpuemu.cpp
+CPUSRCS = $(CPUDIR)/basilisk_glue.cpp $(CPUDIR)/newcpu.cpp $(CPUDIR)/memory.cpp	\
+	$(CPUDIR)/readcpu.cpp $(CPUDIR)/fpu/fpu_uae.cpp cpustbl.cpp cpudefs.cpp cpuemu.cpp
 
 #CPUSRCS = ../powerrom_cpu/powerrom_cpu.cpp
 
