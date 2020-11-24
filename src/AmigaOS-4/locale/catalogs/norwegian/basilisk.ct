@@ -1,5 +1,5 @@
 ## version $VER: 01.catalog 01.01 (24.11.2020)
-## codeset 0
+## codeset 8859
 ## language Norwegian
 ;
 MSG_AUTHOR_INFORMATION
@@ -75,7 +75,7 @@ Blokkstørrelse
 ; Block Size
 ;
 MSG_PREFS_RAMSIZE_GAD
-% ldMB
+%ldMB
 ; %ldMB
 ;
 MSG_PREFS_ADD_GAD
@@ -511,15 +511,15 @@ Modem parallel
 ; Modem parallel
 ;
 ID_PREFS_PRINTER_DEVICE_GAD
-
+Printer driver
 ; Printer device
 ;
 ID_PREFS_PRINTER_UNIT_GAD
-
+Printer enhet
 ; Printer unit
 ;
 ID_PREFS_PRINTER_PARALLEL_GAD
-
+printer parallel
 ; Printer parallel
 ;
 ID_ETHERNET
@@ -647,6 +647,5 @@ Avbyrt
 ; Cancel
 ;
 ID_END
-EOL
+End Of File
 ; --- EOF ---
-;
