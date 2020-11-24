@@ -154,10 +154,10 @@ extern  uae_u32 do_get_mem_word(uae_u16 *a) ;
 //extern uae_u32 do_get_mem_word(uae_u16 *a);
 
 #define do_get_mem_long(a) ((uae_u32)*((uae_u32 *)(a)))
-//define do_put_mem_long(a, v) (*(uae_u32 *)(a) = (v))
+#define do_put_mem_long(a, v) (*(uae_u32 *)(a) = (v))
 
 #define do_get_mem_word(a) ((uae_u32)*((uae_u16 *)(a)))
-//define do_put_mem_word(a, v) (*(uae_u16 *)(a) = (v))
+#define do_put_mem_word(a, v) (*(uae_u16 *)(a) = (v))
 
 #define do_get_mem_byte(a) ((uae_u32)*((uae_u8 *)(a)))
 #define do_put_mem_byte(a, v) (*(uae_u8 *)(a) = (v))
