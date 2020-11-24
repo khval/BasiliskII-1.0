@@ -1,6 +1,30 @@
-## version $VER: XX.catalog XX.XX (XX.XX.XX)
+## version $VER: XX.catalog XX.XX (XX.XX.20XX)
 ## codeset X
 ## language X
+;
+MSG_AUTHOR_INFORMATION
+
+; \33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
+;
+MSG_PORT_INFORMATION
+
+; AmigaOS 4.X (PowerPC) port by Kjetil Hvalstrand, 2007-2020
+;
+MSG_GFX_INFORMATION
+
+; Basilisk icons by Christian Rosentereter
+;
+MSG_TRANSLATION_INFORMATION
+
+; Translation by: xxxxx
+;
+MSG_DESCRIPTION
+
+; 68k MacIntosh emulator
+;
+MSG_QUIT_WHILE_RUNING_INFORMATION
+
+; Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
 ;
 MSG_OK_GAD
 
@@ -236,7 +260,7 @@ MSG_SOUND
 ;
 MSG_SYSTEM
 
-; System
+; System message
 ;
 MSG_SIZE
 
@@ -290,19 +314,339 @@ MSG_MENU_BASILISK_QUIT
 
 ; Q\0Quit
 ;
-MSG_AUTHOR_INFORMATION
+ID_GRAPHICS
 
-; \33cBasilisk II 1.0 by Christian Bauer\n© Copyright 1997-2001\nDistribtion under General Public License (GPL)
+; Graphics
 ;
-MSG_PORT_INFORMATION
+ID_PREFS_GFX_MODE_GAD
 
-; AmigaOS port by Kjetil Hvalstrand, 2007-2014
+; Gfx mode
 ;
-MSG_GFX_INFORMATION
+ID_PREFS_GFX_WIDTH_GAD
 
-; Basilisk icons by Christian Rosentereter
+; Gfx Width
 ;
-MSG_DESCRIPTION
+ID_PREFS_GFX_HEIGHT_GAD
 
-; 68k MacIntosh emulator
+; Gfx height
+;
+ID_PREFS_GFX_MODE_ID_SELECT_GAD
+
+; Select screen mode
+;
+ID_PREFS_GFX_MODE_ID_GAD
+
+; Screen mode id
+;
+ID_PREFS_GFX_WINDOW_DEPTH_GAD
+
+; Window depth
+;
+ID_PREFS_GFX_RENDER_METHOD_GAD
+
+; Render mode
+;
+ID_PREFS_GFX_LOCK_GAD
+
+; Screem lock
+;
+ID_PREFS_GFX_FRAMESKIP_GAD
+
+; Frame skip
+;
+ID_PREFS_GFX_LINESKIP_GAD
+
+; Lineskip
+;
+ID_SOUND
+
+; Sound
+;
+ID_PREFS_DISABLE_SOUND
+
+; Disable sound
+;
+ID_VIRTUAL_SCSI_DEVICES
+
+; Scsi devices
+;
+ID_PREFS_ID_0_DEVICE_GAD
+
+; Device 0
+;
+ID_PREFS_ID_0_UNIT_GAD
+
+; Unit 0
+;
+ID_PREFS_ID_1_DEVICE_GAD
+
+; Device 1
+;
+ID_PREFS_ID_1_UNIT_GAD
+
+; Unit 1
+;
+ID_PREFS_ID_2_DEVICE_GAD
+
+; Device 2
+;
+ID_PREFS_ID_2_UNIT_GAD
+
+; Unit 2
+;
+ID_PREFS_ID_3_DEVICE_GAD
+
+; Device 3
+;
+ID_PREFS_ID_3_UNIT_GAD
+
+; Uinit 3
+;
+ID_PREFS_ID_4_DEVICE_GAD
+
+; Device 4
+;
+ID_PREFS_ID_4_UNIT_GAD
+
+; unit 4
+;
+ID_PREFS_ID_5_DEVICE_GAD
+
+; Device 5
+;
+ID_PREFS_ID_5_UNIT_GAD
+
+; unit 6
+;
+ID_PREFS_ID_6_DEVICE_GAD
+
+; Device 6
+;
+ID_PREFS_ID_6_UNIT_GAD
+
+; Unit 6
+;
+ID_PREFS_START_GAD
+
+; Start
+;
+ID_PREFS_QUIT_GAD
+
+; Quit
+;
+ID_PREFS_EDIT_GAD
+
+; Edit
+;
+ID_PREFS_REMOVE_GAD
+
+; Remove
+;
+ID_HARDWARE
+
+; Hardware
+;
+ID_CPU
+
+; CPU
+;
+ID_PREFS_SYSTEM_CPU_GAD
+
+; CPU
+;
+ID_PREFS_SYSTEM_FPU_GAD
+
+; FPU
+;
+ID_CPU_PRI
+
+; CPU priority
+;
+ID_CPU_ACTIVE_GAD
+
+; CPU active window
+;
+ID_CPU_INACTIVE_GAD
+
+; CPU inactive window
+;
+ID_RAM
+
+; RAM
+;
+ID_PREFS_SYSTEM_RAM_GAD
+
+; RAM
+;
+ID_SYSTEM
+
+; System
+;
+ID_PREFS_SYSTEM_MODEL_GAD
+
+; Mac model
+;
+ID_PREFS_SYSTEM_ROM_SELECT_GAD
+
+; Select rom
+;
+ID_PREFS_SYSTEM_ROM_GAD
+
+; Rom
+;
+ID_MODEM
+
+; Modem
+;
+ID_PREFS_MODEM_DEVICE_GAD
+
+; Modem device
+;
+ID_PREFS_MODEM_UNIT_GAD
+
+; Modem unit
+;
+ID_PREFS_MODEM_PARALLEL_GAD
+
+; Modem parallel
+;
+ID_PREFS_PRINTER_DEVICE_GAD
+
+; Printer device
+;
+ID_PREFS_PRINTER_UNIT_GAD
+
+; Printer unit
+;
+ID_PREFS_PRINTER_PARALLEL_GAD
+
+; Printer parallel
+;
+ID_ETHERNET
+
+; Ethernet
+;
+ID_PREFS_ETHERNET_DEVICE_SELECT_GAD
+
+; Select ethernet device
+;
+ID_PREFS_ETHERNET_DEVICE_GAD
+
+; Ethernet device
+;
+ID_PREFS_ETHERNET_UNIT_GAD
+
+; Ethernet unit
+;
+ID_MAC_VOLUMES
+
+; Volumes
+;
+ID_PREFS_ADD_BOOTDISK_GAD
+
+; Boot disk
+;
+ID_PREFS_ADD_GAD
+
+; Add
+;
+ID_PREFS_CREATE_GAD
+
+; Create
+;
+ID_CDROM
+
+; Cdrom
+;
+ID_PREFS_CD_DEVICE_GAD
+
+; Cd device
+;
+ID_PREFS_CD_UNIT_GAD
+
+; Cd unit
+;
+ID_PREFS_CD_BOOT_GAD
+
+; Cd boot
+;
+ID_PREFS_CD_DISABLE_DRIVER_GAD
+
+; Disable cd device
+;
+ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD
+
+; Shared directory
+;
+ID_PREFS_AMIGAOS4_ROOT_GAD
+
+; Shared directory
+;
+ID_PREFS_VOLUMETYPE_FILE_GAD
+
+; File volume type
+;
+ID_PREFS_VOLUMETYPE_DEVICE_GAD
+
+; Device volume type
+;
+ID_PREFS_TYPE_GAD
+
+; Type
+;
+ID_PREFS_DEVICE_GAD
+
+; Device
+;
+ID_PREFS_UNIT_GAD
+
+; Unit
+;
+ID_PREFS_PARTITION_NAME_GAD
+
+; Partition name
+;
+ID_PREFS_READ_ONLY_GAD
+
+; Read only
+;
+ID_PREFS_FILE_GAD
+
+; File
+;
+ID_PREFS_FILE_SELECT_GAD
+
+; File
+;
+ID_CREATE_NAME_ASL_GAD
+
+; Name
+;
+ID_CREATE_NAME_GAD
+
+; Name
+;
+ID_CREATE_OK_GAD
+
+; Ok
+;
+ID_CREATE_CANCEL_GAD
+
+; Cancel
+;
+ID_CREATE_SIZE_GAD
+
+; Size
+;
+ID_OK_GAD
+
+; Ok
+;
+ID_CANCEL_GAD
+
+; Cancel
+;
+ID_END
+
+; --- EOF ---
 ;
