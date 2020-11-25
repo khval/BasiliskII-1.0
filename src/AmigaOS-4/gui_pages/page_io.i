@@ -17,7 +17,7 @@ PAGE_Add, VGroupObject,
 	CHILD_WeightedHeight, 0,
 
 	LAYOUT_AddChild, VGroupObject,
-		GFrame(_L(ID_MODEM)),
+		GFrame(_L(ID_PRINTER)),
 		LAYOUT_AddChild, MakePopFile(ID_PREFS_PRINTER_DEVICE_GAD, MAX_STRING_LENGTH, ""),
 		CHILD_Label, MakeLabel(ID_PREFS_PRINTER_DEVICE_GAD),
 

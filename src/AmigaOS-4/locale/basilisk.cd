@@ -380,6 +380,9 @@ Modem unit
 ID_PREFS_MODEM_PARALLEL_GAD (//)
 Modem parallel
 ;
+ID_PRINTER (//)
+Printer
+;
 ID_PREFS_PRINTER_DEVICE_GAD (//)
 Printer device
 ;
