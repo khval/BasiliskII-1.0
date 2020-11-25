@@ -203,7 +203,17 @@ BOOL openlibs()
 	{
 		printf("failed to open catalog... maybe not installed\n");
 	}
-//	if (! catalog) return FALSE;
+	else
+	{
+		int n =0;
+		const char *str;
+		for (n=0;n<4;n++)
+		{
+			str = GetCatalogStr(catalog, n, NULL);
+			if (str) printf("%s\n",str);
+		}
+	}
+
 
 //	engine_mx = (APTR) AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
 //	if ( ! engine_mx) return FALSE;
@@ -217,7 +227,20 @@ void closedown()
 {
 	int i;
 
-	if (_locale) CloseLocale(_locale); _locale = NULL;
+	if (ILocale)	// check if lib is open...
+	{
+		if (catalog)
+		{
+			CloseCatalog(catalog); 
+			catalog = NULL;
+		}
+	
+		if (_locale)
+		{
+			CloseLocale(_locale); 
+			_locale = NULL;
+		}
+	}
 
 #ifdef __amigaos4__
 	if ( objectPointer )
