@@ -1,5 +1,5 @@
 ## version $VER: 01.catalog 01.01 (24.11.2020)
-## codeset 8859
+## codeset 0
 ## language Norwegian
 ;
 MSG_AUTHOR_INFORMATION
@@ -23,7 +23,7 @@ MSG_DESCRIPTION
 ; 68k MacIntosh emulator
 ;
 MSG_QUIT_WHILE_RUNING_INFORMATION
-Hvis du avslutter pÃ¥ denne mÃ¥ten, kan det fÃ¸re til korrupte MacOS-filer eller filsystem.\nDette er det samme som Ã¥ trekke i strÃ¸mkontakten mens datamaskinen kjÃ¸rer.
+Hvis du avslutter på denne møten, kan det føre til korrupte MacOS-filer eller filsystem.\nDette er det samme som å trekke i strømkontakten mens datamaskinen kjører.
 ; Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
 ;
 MSG_OK_GAD
