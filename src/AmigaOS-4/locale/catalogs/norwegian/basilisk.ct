@@ -187,7 +187,7 @@ _Bredde
 ; _Width
 ;
 MSG_PREFS_GFX_HEIGHT_GAD
-_HÃ¸yde
+_Høyde
 ; _Height
 ;
 MSG_PREFS_GFX_FULLSCREEN_GAD
@@ -263,7 +263,7 @@ Systemmelding
 ; System message
 ;
 MSG_SIZE
-StÃ¸rrelse
+Størrelse
 ; Size
 ;
 MSG_MB
@@ -327,7 +327,7 @@ Gfx bredde
 ; Gfx Width
 ;
 ID_PREFS_GFX_HEIGHT_GAD
-Gfx hÃ¸yde
+Gfx høde
 ; Gfx height
 ;
 ID_PREFS_GFX_MODE_ID_SELECT_GAD
@@ -347,8 +347,8 @@ Visings modus.
 ; Render mode
 ;
 ID_PREFS_GFX_LOCK_GAD
-SkrellÃ¥s
-; Screem lock
+Bitmap lås
+; Bitmap lock
 ;
 ID_PREFS_GFX_FRAMESKIP_GAD
 Bilde hopp
@@ -499,7 +499,7 @@ Modem
 ; Modem
 ;
 ID_PREFS_MODEM_DEVICE_GAD
-Modem enhet
+Modem driver
 ; Modem device
 ;
 ID_PREFS_MODEM_UNIT_GAD
@@ -510,16 +510,20 @@ ID_PREFS_MODEM_PARALLEL_GAD
 Modem parallel
 ; Modem parallel
 ;
+ID_PRINTER
+Printer
+; Printer
+;
 ID_PREFS_PRINTER_DEVICE_GAD
 Printer driver
 ; Printer device
 ;
 ID_PREFS_PRINTER_UNIT_GAD
-Printer enhet
+Printer enhet id
 ; Printer unit
 ;
 ID_PREFS_PRINTER_PARALLEL_GAD
-printer parallel
+Printer parallel
 ; Printer parallel
 ;
 ID_ETHERNET
