@@ -43,11 +43,21 @@
 #include "user_strings.h"
 #include "video.h"
 
+#ifdef _L
+#warning wtf
+#undef _L
+#endif
+
+#define CATCOMP_NUMBERS
+#include "locale/locale.h"
+
 #include "video_convert.h"
 #include "window_icons.h"
 #include "common_screen.h"
 
 #include "video_driver_classes.h"
+
+extern const char *(*_L) (unsigned int num) ;
 
 
 #define DEBUG 0
@@ -887,11 +897,16 @@ static void periodic_func(void)
 
 					case IDCMP_CLOSEWINDOW:
 
-						{						
+						{		
+							char opt_str[100];
+				
+							sprintf(opt_str,"%s|%s",_L(MSG_CANCEL_GAD) ,_L(MSG_PREFS_QUIT_GAD));
+
+
 							ULONG opt =req(
-									"Do you really want-to quit",  
-									"Quiting this way can result\nin corrupt MacOS files or filesystem.", 
-									"Cancel|Quit", 2);
+									GetString(STR_WINDOW_TITLE),
+									_L(MSG_QUIT_WHILE_RUNING_INFORMATION),
+									opt_str, 2);
 
 							switch (opt)
 							{
