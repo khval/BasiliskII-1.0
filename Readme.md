@@ -1,4 +1,4 @@
-# BasiliskII 1.0
+# BasiliskII 1.0 for AmigaOS4.x
 
 Date: October-23-2020
 
