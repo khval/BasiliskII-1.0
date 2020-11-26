@@ -59,7 +59,7 @@ First of all you need the AmigaOS4 SDK from Hyperion Enteriment.
 
 *Cd src*
 
-*Makelink uae_cpu uae_cpu_old *
+*Makelink uae_cpu uae_cpu_old*
 
 You need an assign, its because some files has to generated.
 
