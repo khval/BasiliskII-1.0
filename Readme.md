@@ -75,6 +75,11 @@ to build the soft FPU version (this one need GLIB version we do not have on Amig
 
 *make -f make-fpusoftcore*
 
+you can get glibc from here.
+
+http://ftp.gnu.org/gnu/glibc/
+
+
 License
 -------
 
