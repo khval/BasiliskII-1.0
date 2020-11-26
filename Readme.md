@@ -52,6 +52,29 @@ Best Regards
 Kjetil Hvalstrand 
 The maintainer of the AmigaOS4.1 build of Basilisk II.
 
+Compiling
+---------
+
+First of all you need the AmigaOS4 SDK from Hyperion Enteriment.
+
+*Cd src*
+
+*Makelink uae_cpu uae_cpu_old *
+
+You need an assign, its because some files has to generated.
+
+*assign uae_cpu: uae_cpu*
+
+*cd AmigaOS-4*
+
+To build AmigaOS-4 version.
+
+*make*
+
+to build the soft FPU version (this one need GLIB version we do not have on AmigaOS4)
+
+*make -f make-fpusoftcore*
+
 License
 -------
 
