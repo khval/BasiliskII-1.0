@@ -258,7 +258,7 @@ ID_PREFS_GFX_RENDER_METHOD_GAD (//)
 Render mode
 ;
 ID_PREFS_GFX_LOCK_GAD (//)
-Screem lock
+Screen lock
 ;
 ID_PREFS_GFX_FRAMESKIP_GAD (//)
 Frame skip
@@ -297,19 +297,19 @@ ID_PREFS_ID_3_DEVICE_GAD (//)
 Device 3
 ;
 ID_PREFS_ID_3_UNIT_GAD (//)
-Uinit 3
+Unit 3
 ;
 ID_PREFS_ID_4_DEVICE_GAD (//)
 Device 4
 ;
 ID_PREFS_ID_4_UNIT_GAD (//)
-unit 4
+Unit 4
 ;
 ID_PREFS_ID_5_DEVICE_GAD (//)
 Device 5
 ;
 ID_PREFS_ID_5_UNIT_GAD (//)
-unit 6
+Unit 5
 ;
 ID_PREFS_ID_6_DEVICE_GAD (//)
 Device 6
