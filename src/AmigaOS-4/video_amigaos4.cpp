@@ -474,6 +474,7 @@ bool VideoInit(bool classic)
 
 		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - VideoModes size is not 1 \n",__FUNCTION__,__LINE__);
 
+
 		// Find mode with specified dimensions
 		std::vector<video_mode>::const_iterator i, end = VideoModes.end();
 		for (i = VideoModes.begin(); i != end; ++i)
@@ -769,11 +770,8 @@ static void periodic_func(void)
 	int mx,my;
 	UWORD GadgetID;
 
- 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-
 	periodic_msgPort = (MsgPort*) AllocSysObjectTags(ASOT_PORT, TAG_DONE);
 	win_mask = 1 << periodic_msgPort->mp_SigBit;
-
 
 	// Start 60Hz timer for window refresh
 //	if (drv->monitor.display_type == DISPLAY_WINDOW || drv->monitor.display_type == DISPLAY_WINDOW_COMP) {
@@ -791,8 +789,6 @@ static void periodic_func(void)
 			}
 		}
 //	}
-
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 	// Main loop
 	for (;;) {
@@ -1008,8 +1004,6 @@ static void periodic_func(void)
 		}
 	}
 
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-
 	// Stop timer
 	if (timer_io) {
 		if (!CheckIO((struct IORequest *)timer_io))
@@ -1019,11 +1013,7 @@ static void periodic_func(void)
 		DeleteIORequest( (IORequest *) timer_io);
 	}
 
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-
 	if (timer_port)	FreeSysObject(ASOT_PORT,timer_port);
-
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 	while (drv) Delay(1);	// wait for driver to close...
 

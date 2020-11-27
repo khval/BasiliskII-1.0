@@ -348,13 +348,8 @@ void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 	for (n=0; n<bpr;n++)
 	{
 		source = from[n];
-#if 1
 		*to++ = vpal16[ (source & 0xF0) >>4];
 		*to++ = vpal16[ source & 0x0F];
-#else
-		*to++ = 0x11111111 * ((source & 0xF0) >>4);
-		*to++ =  0x11111111 * ( source & 0x0F);
-#endif
 	}
 }
 
