@@ -1534,7 +1534,7 @@ struct ColumnInfo volumes_ci[] =
 	{ 60, "name", 0 },
 	{ 20, "size", 0 },
 	{ 20, "RW", 0 },
-	{ ~0, (STRPTR) ~0, ~0 }
+	{ ~0, (STRPTR) ~0, ~0U }
 };
 
 void init_create_volume(int win_nr)
