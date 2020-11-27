@@ -15,13 +15,6 @@
 
 	sleep 1
 
-		echo "check if {target_lha}_src_V1_0.lha exists"
-		if exists {target_lha}_src_V1_0.lha
-			delete {target_lha}_src_V1_0.lha
-		endif
-
-	sleep 1
-
 		echo "check if t:obj exists"
 		if exists t:obj
 			delete t:obj all
@@ -36,24 +29,19 @@
 
 	sleep 1
 
-
 		makedir {target_lha}
 
 		makedir "{target_lha}/locale"
 		makedir "{target_lha}/locale/catalogs"
-		copy locale/#? "{target_lha}/locale" all
 
-		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "basilisk.cd" >> t:cleanup
-		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "basilisk.ct" >> t:cleanup
-		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "update" >> t:cleanup
-		list all "{target_lha}/locale" lformat "delete *"%f%n*"" | grep "makefile" >> t:cleanup
-		delete "{target_lha}/locale/#?(.c|.h)" 
+		LIST locale/catalogs/#?/#?.catalog LFORMAT "makedir *"{target_lha}/%p*"*ncopy *"%p%n*" *"{target_lha}/%p*"" >t:b2-catalogs
 
-		if exists t:cleanup
-			protect t:cleanup +s
-			t:cleanup
-			delete t:cleanup
+		type t:b2-catalogs
+
+		if exists t:b2-catalogs
+		execute t:b2-catalogs
 		endif
+
 
 		Copy BasiliskII.db {target_lha}/BasiliskII
 		Copy icons/BasiliskII.db.info {target_lha}/BasiliskII.info
@@ -61,7 +49,7 @@
 		Copy //BasiliskII-src-os4.readme ram:
 		Copy //README.md {target_lha}
 		Copy //Manual.txt {target_lha}
-		Copy //INSTALL {target_lha}
+		Copy INSTALL {target_lha}
 		copy //COPYING {target_lha}
 		copy //TECH {target_lha}
 
