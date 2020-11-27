@@ -304,6 +304,35 @@ int add_modes(int mode_id, video_depth depth)
 		AVT_ClearWithValue, 0,			\
 		TAG_END)
 
+
+bool have_mac_mode( uint32 width, uint32 height, uint32 depth )
+{
+	// Find mode with specified dimensions
+	std::vector<video_mode>::const_iterator i, end = VideoModes.end();
+	for (i = VideoModes.begin(); i != end; ++i)
+	{
+		if (i->x == width && i->y == height && i->depth == depth)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+uint32 last_mac_id()
+{
+	uint32 id = 0;
+
+	// Find mode with specified dimensions
+	std::vector<video_mode>::const_iterator i, end = VideoModes.end();
+
+	for (i = VideoModes.begin(); i != end; ++i)
+		if ( i->resolution_id > id) id = i->resolution_id;
+
+	return id;
+}
+
+
 bool VideoInit(bool classic)
 {
 	video_depth default_depth = VDEPTH_32BIT;
@@ -367,6 +396,9 @@ bool VideoInit(bool classic)
 		case DISPLAY_WINDOW:
 		case DISPLAY_WINDOW_COMP:
 
+			if (window_width<320) window_width=320;
+			if (window_height<200) window_height=200;
+
 			default_width = window_width;
 			default_height = window_height;
 
@@ -387,6 +419,19 @@ bool VideoInit(bool classic)
 			add_modes(window_width, window_height, VDEPTH_8BIT);
 			add_modes(window_width, window_height, VDEPTH_16BIT);
 			add_modes(window_width, window_height, VDEPTH_32BIT);
+
+			if (have_mac_mode( default_width, default_height, default_depth) == false)
+			{
+				int n = last_mac_id() + 1;
+				add_mode(default_width, default_height, n, TrivialBytesPerRow(default_width, VDEPTH_1BIT), VDEPTH_1BIT);
+				add_mode(default_width, default_height, n, TrivialBytesPerRow(default_width, VDEPTH_2BIT), VDEPTH_2BIT);
+				add_mode(default_width, default_height, n, TrivialBytesPerRow(default_width, VDEPTH_4BIT), VDEPTH_4BIT);
+				add_mode(default_width, default_height, n, TrivialBytesPerRow(default_width, VDEPTH_8BIT), VDEPTH_8BIT);
+				add_mode(default_width, default_height, n, TrivialBytesPerRow(default_width, VDEPTH_16BIT), VDEPTH_16BIT);
+				add_mode(default_width, default_height, n, TrivialBytesPerRow(default_width, VDEPTH_32BIT), VDEPTH_32BIT);
+			}
+
+
 			break;
 
 		case DISPLAY_SCREEN:
@@ -422,17 +467,6 @@ bool VideoInit(bool classic)
 			add_modes(0x80, VDEPTH_32BIT);
 #endif
 
-
-#if 0
-			// don't know way this don't work.
-
-			add_modes(default_width, default_height, VDEPTH_1BIT);
-			add_modes(default_width, default_height, VDEPTH_2BIT);
-			add_modes(default_width, default_height, VDEPTH_4BIT);
-			add_modes(default_width, default_height, VDEPTH_8BIT);
-			add_modes(default_width, default_height, VDEPTH_16BIT);
-			add_modes(default_width, default_height, VDEPTH_32BIT);
-#endif
 			break;
 	}
 
