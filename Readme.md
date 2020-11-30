@@ -48,8 +48,31 @@ so you don’t need to transferee the files using HFS.
 as result 15bit to 16bit + endiness is done in one operation, 8bit to 16bit is also uses 16bit lookup palette table. 
 16bit is 1/2 of data to transferee to the graphic card vs 32bit graphics.
 
-Best Regards
-Kjetil Hvalstrand 
+Hot keys
+--------
+
+**LALT+LSHIFT+CONTROL+key "+"**
+  
+    Increment frame skip
+    
+**LALT+LSHIFT+CONTROL+key "-"**
+
+    Decrement frame skip
+
+**LALT+LSHIFT+CONTROL+key "Print Screen"**
+
+    Power off, (use only if system has crashed).
+    
+**LALT+LSHIFT+CONTROL+key "Scroll lock"**
+
+    Trigger NMI interrupt. (not sure what this should do.)
+
+
+
+**Best Regards**
+
+Kjetil Hvalstrand
+
 The maintainer of the AmigaOS4.1 build of Basilisk II.
 
 Compiling
