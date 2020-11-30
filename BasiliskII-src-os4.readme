@@ -51,21 +51,21 @@ Changes in Basilisk II 1.0.5 AmigaOS4 23.11.2020 (Kjetil Hvalstrand)
 * Iconificaton will suspend CPU emulation while iconified freeing up the CPU.
 * Composition code rewritten.
 * Window active / inactive event will regulate cpu task emulation priority. 
-so AmigaOS is not staved from CPU cycles, when your trying to do stuff on Amiga side.
+so AmigaOS is not staved from CPU cycles, when your trying to do stuff on the Amiga side.
 * Samo79 provided italien catalog file.
 * GUI: Will correly display width and height if fullscreen is selected.
 * GUI: CPU info moved to its own TAB/Page
 * Updated the make_lha script, to include locale files.
-* A lot obsolete warnings fixed.
+* A lot of obsolete warnings fixed.
 * Now uses 64bit Seek instead old 32bit Seek for disk images 
 * You can now create large disk images >4Gbytes
 (Note this does not automatic allow you to use large disk images, MacOS also needs to support it.).
 * Added some code to force CPU emulation to quit (as it got stuck).
-* Buggy exit code fixed, did not set NULL after freeing devices, resulting bad things.
+* Buggy exit code fixed, it did not set NULL after freeing devices, resulting bad things.
 * -lauto removed, bad OpenLibrary / CloseLibrary code replaced.
 * Prefs files now stored in program directory, makes it easier when you backup, 
 or upgrade the OS, (no lost prefs files anymore.)
-* Added a worning message, if try to quit Basilisk II.
+* Added a worning message, if you try to quit Basilisk II.
 
 Changes in Basilisk II 1.0.4 AmigaOS4 03.01.2014 (Kjetil Hvalstrand)
 
@@ -81,7 +81,7 @@ Changes in Basilisk II 1.0.3 AmigaOS4 14.10.2013 (Kjetil Hvalstrand)
 * Optimized uae_cpu/memory.h; now use inline powerpc asm.
 * Optimized sysdeps.h for AmigaOS4; now use inline powerpc asm.
 * Added min/max values frame skip and line skip.
-* Small fix: line_skip = 0 is now no line_skip (like before), and like_skip=1 is one line skip (new).
+* Small fix: line_skip = 0 is now no line_skip (like before), and line skip=1 is one line skip (new).
 * Added window/boot depth option to gui under system tab.
 
 Changes in Basilisk II 1.0.2 AmigaOS4 10.10.2013 (Kjetil Hvalstrand)
