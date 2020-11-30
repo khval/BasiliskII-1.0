@@ -40,6 +40,22 @@ IT IS PROBABLY BETTER RUN SHAPESHIFTER OR FUSION ON
 THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
 BPPC/CSPPC IS TOO SLOW.
 
+Changes in Basilisk II 1.0.6 AmigaOS4 29.11.2020 (Kjetil Hvalstrand)
+
+* Fixed make_lha script
+* New install readmed for AmigaOS4.1 only.
+* Fixed a problem with a newer compiler.
+* Now create a new mode if default width and height don't 
+match modes (in window mode)
+* Fixed some typos, locale/basilisk.cd
+* Window close warning now support catalogs
+* Line skip / frame skip can now set different depending on if the window is active or deactive.
+(Can be useful while unstuffing or doing things on the Amiga side, will free up some CPU cycles.)
+* New Hot keys 
+LALT +LSHIFT+CTRL+key "+"	Increment frame skip.
+LALT +LSHIFT+CTRL+key "-"	Decrement frame skip.
+LALT +LSHIFT+CTRL+key "Print screen"	Power off
+
 Changes in Basilisk II 1.0.5 AmigaOS4 23.11.2020 (Kjetil Hvalstrand)
 
 * Removed all Picasso96 code, its no longer native to AmigaOS4.1 Final update 1
