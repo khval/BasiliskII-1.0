@@ -51,19 +51,19 @@ as result 15bit to 16bit + endiness is done in one operation, 8bit to 16bit is a
 Hot keys
 --------
 
-**LALT+LEHIFT+CONTROL+key "+"**
+**LALT+LSHIFT+CONTROL+key "+"**
   
     Increment frame skip
     
-**LALT+LEHIFT+CONTROL+key "-"**
+**LALT+LSHIFT+CONTROL+key "-"**
 
     Decrement frame skip
 
-**LALT+LEHIFT+CONTROL+key "Print Screen"**
+**LALT+LSHIFT+CONTROL+key "Print Screen"**
 
     Power off, (use only if system has crashed).
     
-**LALT+LEHIFT+CONTROL+key "Scroll lock"**
+**LALT+LSHIFT+CONTROL+key "Scroll lock"**
 
     Trigger NMI interrupt. (not sure what this should do.)
 
