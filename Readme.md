@@ -70,6 +70,7 @@ Hot keys
 
 
 **Best Regards**
+
 Kjetil Hvalstrand 
 The maintainer of the AmigaOS4.1 build of Basilisk II.
 
