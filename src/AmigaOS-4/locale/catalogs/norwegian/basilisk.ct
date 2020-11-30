@@ -198,10 +198,6 @@ MSG_PREFS_GFX_8BIT_GAD
 _8bit-modus
 ; _8bit mode
 ;
-MSG_PREFS_GFX_FRAMESKIP_GAD
-_Hopp over bilder
-; _Frame skip
-;
 MSG_PREFS_DISABLE_SOUND
 _Deaktiver lyd
 ; _Disable sound
@@ -349,14 +345,6 @@ Visings modus.
 ID_PREFS_GFX_LOCK_GAD
 Bitmap lås
 ; Bitmap lock
-;
-ID_PREFS_GFX_FRAMESKIP_GAD
-Bilde hopp
-; Frame skip
-;
-ID_PREFS_GFX_LINESKIP_GAD
-Linje hopp
-; Lineskip
 ;
 ID_SOUND
 Lyd
@@ -649,6 +637,24 @@ Ok
 ID_CANCEL_GAD
 Avbyrt
 ; Cancel
+;
+ID_ACTIVE_WINDOW_GAD
+Aktiv vindu
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD
+Bilde hopp
+;
+ID_ACTIVE_WINDOW_LINESKIP_GAD
+Linje hopp
+;
+ID_DEACTIVE_WINDOW_GAD
+Inaktiv vindu
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD
+Hopp over bilde
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD
+Hopp over linje
 ;
 ID_END
 End Of File

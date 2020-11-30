@@ -146,9 +146,6 @@ _Full screen
 MSG_PREFS_GFX_8BIT_GAD (//)
 _8bit mode
 ;
-MSG_PREFS_GFX_FRAMESKIP_GAD (//)
-_Frame skip
-;
 MSG_PREFS_DISABLE_SOUND (//)
 _Disable sound
 ;
@@ -260,11 +257,23 @@ Render mode
 ID_PREFS_GFX_LOCK_GAD (//)
 Screen lock
 ;
-ID_PREFS_GFX_FRAMESKIP_GAD (//)
+ID_ACTIVE_WINDOW_GAD (//)
+Active window
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD (//)
 Frame skip
 ;
-ID_PREFS_GFX_LINESKIP_GAD (//)
-Lineskip
+ID_ACTIVE_WINDOW_LINESKIP_GAD (//)
+Line skip
+;
+ID_DEACTIVE_WINDOW_GAD (//)
+Deactive window
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD (//)
+Frame skip
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD (//)
+Line skip
 ;
 ID_SOUND (//)
 Sound

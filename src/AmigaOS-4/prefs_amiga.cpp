@@ -28,7 +28,13 @@
 prefs_desc platform_prefs_items[] = {
 	{"sound", TYPE_STRING, false, "sound output mode description"},
 	{"scsimemtype", TYPE_INT32, false, "SCSI buffer memory type"},
-	{"lineskip", TYPE_INT32, false, "Skip scan lines"},
+
+	{"active_window_frameskip", TYPE_INT32, false, "active_window_frameskip"},
+	{"active_window_lineskip", TYPE_INT32, false, "active_window_lineskip"},
+
+	{"deactive_window_frameskip", TYPE_INT32, false, "deactive_window_frameskip"},
+	{"deactive_window_lineskip", TYPE_INT32, false, "deactive_window_lineskip"},
+
 	{"windowdepth", TYPE_INT32, false, "Window depth" },
 	{"use_bitmap_lock", TYPE_BOOLEAN, false, "Use bitmap lock" },
 	{"render_method", TYPE_INT32, false, "how to render the gfx" },

@@ -466,8 +466,12 @@ static void read_emulation_settings( void )
 	PrefsReplaceInt32("inactive_window_cpu_pri",		getv( obj[ID_CPU_INACTIVE_GAD], INTEGER_Number));
 
 	PrefsReplaceInt32("modelid",		getv( obj[ID_PREFS_SYSTEM_MODEL_GAD], CHOOSER_Selected) == 0 ? 5 : 14);
-	PrefsReplaceInt32("frameskip",	getv( obj[ID_PREFS_GFX_FRAMESKIP_GAD], INTEGER_Number));
-	PrefsReplaceInt32("lineskip",		getv( obj[ID_PREFS_GFX_LINESKIP_GAD], INTEGER_Number));
+
+	PrefsReplaceInt32("active_window_frameskip",		getv( obj[ID_ACTIVE_WINDOW_FRAMESKIP_GAD], INTEGER_Number));
+	PrefsReplaceInt32("active_window_lineskip",		getv( obj[ID_ACTIVE_WINDOW_LINESKIP_GAD], INTEGER_Number));
+
+	PrefsReplaceInt32("deactive_window_frameskip",	getv( obj[ID_DEACTIVE_WINDOW_FRAMESKIP_GAD], INTEGER_Number));
+	PrefsReplaceInt32("deactive_window_lineskip",		getv( obj[ID_DEACTIVE_WINDOW_LINESKIP_GAD], INTEGER_Number));
 
 	str = (char *) getv( obj[ID_PREFS_SYSTEM_ROM_GAD] , STRINGA_TextVal );
 
@@ -792,11 +796,17 @@ static void set_emulation_settings( void )
 	RSetAttrO( win_prefs,  ID_PREFS_GFX_RENDER_METHOD_GAD,
 		CHOOSER_Selected, PrefsFindInt32("render_method")) ;
 
-	RSetAttrO( win_prefs, ID_PREFS_GFX_FRAMESKIP_GAD,
-		INTEGER_Number, PrefsFindInt32("frameskip"));
+	RSetAttrO( win_prefs, ID_ACTIVE_WINDOW_FRAMESKIP_GAD,
+		INTEGER_Number, PrefsFindInt32("active_window_frameskip"));
 
-	RSetAttrO( win_prefs, ID_PREFS_GFX_LINESKIP_GAD,
-		INTEGER_Number, PrefsFindInt32("lineskip"));
+	RSetAttrO( win_prefs, ID_ACTIVE_WINDOW_LINESKIP_GAD,
+		INTEGER_Number, PrefsFindInt32("active_window_lineskip"));
+
+	RSetAttrO( win_prefs, ID_DEACTIVE_WINDOW_FRAMESKIP_GAD,
+		INTEGER_Number, PrefsFindInt32("deactive_window_frameskip"));
+
+	RSetAttrO( win_prefs, ID_DEACTIVE_WINDOW_LINESKIP_GAD,
+		INTEGER_Number, PrefsFindInt32("deactive_window_lineskip"));
 
 	RSetAttrO( win_prefs,  ID_PREFS_GFX_LOCK_GAD,
 		GA_Selected, PrefsFindBool("use_bitmap_lock"));

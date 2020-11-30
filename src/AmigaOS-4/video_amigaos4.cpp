@@ -353,8 +353,10 @@ bool VideoInit(bool classic)
 	active_window_cpu_pri = PrefsFindInt32("active_window_cpu_pri");
 	inactive_window_cpu_pri = PrefsFindInt32("inactive_window_cpu_pri");
 //	iconify_cpu_suspend = PrefsFindInt32("windowdepth");
-	frame_skip = PrefsFindInt32("frameskip");
-	line_skip = PrefsFindInt32("lineskip");
+
+	frame_skip = PrefsFindInt32("active_window_frameskip");
+	line_skip = PrefsFindInt32("active_window_lineskip");
+
 	frame_skip ++;
 	line_skip ++;
 
@@ -876,6 +878,10 @@ static void periodic_func(void)
 				switch (cl) {
 
 					case IDCMP_ACTIVEWINDOW:
+
+							frame_skip = PrefsFindInt32("active_window_frameskip");
+							line_skip = PrefsFindInt32("active_window_lineskip");
+
 						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
 							if (main_task) 
 							{
@@ -886,6 +892,10 @@ static void periodic_func(void)
 							break;
 
 					case IDCMP_INACTIVEWINDOW:
+
+							frame_skip = PrefsFindInt32("deactive_window_frameskip");
+							line_skip = PrefsFindInt32("deactive_window_lineskip");
+
 						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
 							if (main_task)
 							{
