@@ -102,5 +102,5 @@ enum
 extern void *get_convert( uint32_t scr_depth, uint32_t depth );
 extern void *get_convert_v2( uint32_t scr_depth, uint32_t depth );
 
-extern uint32 vpal32[256];
-extern uint16 vpal16[256];
+extern uint32 *vpal32;
+extern uint16 *vpal16;

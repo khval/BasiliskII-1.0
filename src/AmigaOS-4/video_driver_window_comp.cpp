@@ -55,7 +55,8 @@ extern struct MsgPort *periodic_msgPort;
 extern void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) ;
 
 static bool refreash_all_colors = true;
-extern void set_fn_set_palette( uint32 PixelFormat);
+// extern void set_fn_set_palette( uint32 PixelFormat);
+extern void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat);
 extern int get_max_palette_colors( int vdepth );
 
 static void bitmap_comp_draw_internal( driver_base *drv );
@@ -141,7 +142,7 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
-	set_fn_set_palette( dispi.PixelFormat );
+	set_fn_set_palette2( mode.depth, dispi.PixelFormat );
 
 	maxpalcolors =	get_max_palette_colors( mode.depth );
 
@@ -151,6 +152,9 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 		case rm_internal: 
 
 			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
+
+			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
+
 			if (  convert )
 			{
 				ULONG depth = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_DEPTH);

@@ -53,6 +53,9 @@ extern struct MsgPort *periodic_msgPort;
 void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) = NULL;
 
  void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_16bit_le_2pixels(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_16bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
  void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
  void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors);
  void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors);
@@ -61,8 +64,25 @@ static bool refreash_all_colors = true;
 
 static int maxpalcolors = 0;
 
-void set_fn_set_palette( uint32 PixelFormat)
+#define AllocShared(size) AllocVecTags(size,	\ 
+		AVT_Type, MEMF_SHARED,		\
+		AVT_ClearWithValue, 0,			\
+		TAG_END)
+
+void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 {
+	if (vpal16)
+	{
+		FreeVec(vpal16);
+		vpal16 = NULL;
+	}
+
+	if (vpal32) 
+	{
+		FreeVec(vpal32);
+		vpal32 = NULL;
+	}
+
 	switch (PixelFormat)
 	{
 		case PIXF_NONE:	// not RTG format.
@@ -73,22 +93,46 @@ void set_fn_set_palette( uint32 PixelFormat)
 
 		case PIXF_R5G6B5:
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_16bit_be;	
+	
+				if (macMode == VDEPTH_8BIT)
+				{
+					set_palette_fn = set_vpal_16bit_be_2pixels;
+					vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256 *256 );	// (input 2 x 8bit pixels) , 65536 combos. (output 2 x 16bit pixels).
+					if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 *256 );
+				} 
+				else
+				{
+					set_palette_fn = set_vpal_16bit_be;	
+					vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 2 pixels , 256 colors, 1 x 16 bit pixel
+				}
 				break;
 
 		case PIXF_R5G6B5PC:	
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_16bit_le;	
+
+				if (macMode == VDEPTH_8BIT)
+				{
+					set_palette_fn = set_vpal_16bit_le_2pixels;
+					vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256 *256 );	// (input 2 x 8bit pixels) , 65536 combos. (output 2 x 16bit pixels).
+					if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 *256 );
+				} 
+				else
+				{
+					set_palette_fn = set_vpal_16bit_le;	
+					vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 2 pixels , 256 colors, 1 x 16 bit pixel 
+				}
 				break;
 
 		case PIXF_A8R8G8B8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 				set_palette_fn = set_vpal_32bit_be;
+				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
 				break;
 
 		case PIXF_B8G8R8A8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 				set_palette_fn = set_vpal_32bit_le;
+				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
 				break;
 
 		default:
@@ -96,6 +140,7 @@ void set_fn_set_palette( uint32 PixelFormat)
 				set_palette_fn = NULL;
 	}
 }
+
 
 extern void show_set_palette_fn();
 
@@ -173,7 +218,8 @@ driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
-	set_fn_set_palette( dispi.PixelFormat );
+//	set_fn_set_palette( dispi.PixelFormat );
+	set_fn_set_palette2( mode.depth, dispi.PixelFormat );
 	show_set_palette_fn();
 
 	maxpalcolors =	get_max_palette_colors( mode.depth );
@@ -184,6 +230,9 @@ driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 		case rm_internal: 
 
  			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
+
+			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
+
 			if (  convert )
 			{
 				const char *name;
@@ -286,6 +335,22 @@ int driver_window::draw()
 
 #endif
 
+inline uint16 __pal_to_16bit(uint8 *pal, int num)
+{
+	register unsigned int n;
+	register unsigned int r;
+	register unsigned int g;
+	register unsigned int b;
+
+	n = num *3;
+	r = pal[n] & 0xF8;		// 4+1 = 5 bit
+	g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
+	b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
+	return ( (r << 8) | (g << 3) | (b >> 3));
+}
+
+
+
 void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors)
 {
 	int n;
@@ -302,36 +367,53 @@ void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors)
 	{
 		for (num=0;num<256;num++)
 		{
-			n = num *3;
-			r = pal[n] & 0xF8;		// 4+1 = 5 bit
-			g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
-			b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-			rgb = r << 8 | g << 3 | b >> 3;	
-
+			rgb = __pal_to_16bit(pal, num);
 			vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
-			refreash_all_colors = false;
 		}
+		refreash_all_colors = false;
 	}
 	else
 	{
-		n = num *3;
-		r = pal[n] & 0xF8;		// 4+1 = 5 bit
-		g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
-		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-		rgb = r << 8 | g << 3 | b >> 3;	
-
+		rgb = __pal_to_16bit(pal, num);
 		vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
 	}
 }
 
+void set_vpal_16bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+{
+	int index;
+	int num2;
+	register unsigned int rgb;
+	// Convert palette to 32 bits virtual buffer.
+
+	if (video_debug_out) FPrintf( video_debug_out, "%s\n",__FUNCTION__);
+
+	// pixel [0..0],[0..255]
+
+	for (num1=0;num1<256;num1++)
+	{
+		rgb = __pal_to_16bit(pal, num1);
+		vpal32[num1] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+	}
+
+	// pixel [1..255],[0..255]
+
+	index = 256;
+	num2 = index & 255;
+	num1 = (index >> 8) & 255;
+
+	for (index=0;index<256*256;index++)
+	{
+		num2 = (index & 0x00FF);
+		num1 = (index & 0xFF00) >> 8;
+
+		vpal32[index] =  ((vpal32[num1] & 0xFFFF) << 16) | (vpal32[num2] & 0xFFFF) ;
+	}
+
+}
+
 void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors)
 {
-	int n;
-	register unsigned int rgb;
-	register unsigned int r;
-	register unsigned int g;
-	register unsigned int b;
-
 	// Convert palette to 32 bits virtual buffer.
 
 	if (num >= maxcolors) refreash_all_colors=true;
@@ -340,23 +422,42 @@ void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors)
 	{
 		for (num=0;num<256;num++)
 		{
-			n = num *3;
-			r = pal[n] & 0xF8;		// 4+1 = 5 bit
-			g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
-			b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-			vpal16[num] = r << 8 | g << 3 | b >> 3;
-			refreash_all_colors = false;
+			vpal16[num] = __pal_to_16bit(pal, num);
 		}
+		refreash_all_colors = false;
 	}
 	else
 	{
-		n = num *3;
-		r = pal[n] & 0xF8;		// 4+1 = 5 bit
-		g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
-		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-		vpal16[num] = r << 8 | g << 3 | b >> 3;
+		vpal16[num] = __pal_to_16bit(pal, num);
 	}
 }
+
+void set_vpal_16bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+{
+
+	int index;
+	int num2;
+	register unsigned int rgb;
+	// Convert palette to 32 bits virtual buffer.
+
+	// pixel [0..0],[0..256]
+
+	for (num1=0;num1<256;num1++)
+	{
+		vpal32[num1] = __pal_to_16bit(pal, num1);
+	}
+
+	// pixel [1,256],[0..256]
+
+	for (index=256;index<256*256;index++)
+	{
+		num2 = index & 255;
+		num1 = (index >> 8) & 255;
+
+		vpal32[index] =  vpal32[num1] << 16 | vpal32[num2];
+	}
+}
+
 
 void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors)
 {
@@ -372,8 +473,6 @@ void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors)
 
 void driver_window::set_palette(uint8 *pal, int num)
 {
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - color num %ld\n",__FUNCTION__,__LINE__,num);
-
 	if (set_palette_fn) set_palette_fn(pal, num, maxpalcolors);
 }
 

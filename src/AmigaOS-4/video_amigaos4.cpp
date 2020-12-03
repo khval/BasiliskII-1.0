@@ -69,8 +69,8 @@ extern const char *(*_L) (unsigned int num) ;
 int last_wheel = 0;
 int delta_wheel = 0;
 
-uint32 vpal32[256];
-uint16 vpal16[256];
+uint32 *vpal32 = NULL;
+uint16 *vpal16 = NULL;
 
 extern bool quit_program_gui;
 
@@ -299,7 +299,7 @@ int add_modes(int mode_id, video_depth depth)
 	return mode_id;
 }
 
-#define AllocShard(size) AllocVecTags(size,	\ 
+#define AllocShared(size) AllocVecTags(size,	\ 
 		AVT_Type, MEMF_SHARED,		\
 		AVT_ClearWithValue, 0,			\
 		TAG_END)
@@ -362,7 +362,7 @@ bool VideoInit(bool classic)
 
 	// Allocate blank mouse pointer data
 
-	null_pointer = (UWORD *)AllocShard(12);
+	null_pointer = (UWORD *)AllocShared(12);
 
 	if (null_pointer == NULL) {
 		ErrorAlert(STR_NO_MEM_ERR);
@@ -652,6 +652,19 @@ void VideoExit(void)
 		dynamic_cast<Amiga_monitor_desc *>(*i)->video_close();
 
 	D(bug("VideoExit(void) %d\n",__LINE__));
+
+
+	if (vpal16)
+	{
+		FreeVec(vpal16);
+		vpal16 = NULL;
+	}
+
+	if (vpal32) 
+	{
+		FreeVec(vpal32);
+		vpal32 = NULL;
+	}
 
 	if (null_pointer)
 	{

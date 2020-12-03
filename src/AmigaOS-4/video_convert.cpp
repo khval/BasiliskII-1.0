@@ -9,8 +9,8 @@ extern BPTR video_debug_out;
 
 uint16 *lookup16bit = NULL;
 
-extern uint16 vpal16[256];
-extern uint32 vpal32[256];
+extern uint16 *vpal16;
+extern uint32 *vpal32;
 
 struct video_convert_names vcn[] =	{
 
@@ -23,6 +23,7 @@ struct video_convert_names vcn[] =	{
 	{"convert_2bit_lookup_to_16bit",(void *) convert_2bit_lookup_to_16bit},
 	{"convert_4bit_lookup_to_16bit",(void *) convert_4bit_lookup_to_16bit},
 	{"convert_8bit_lookup_to_16bit",(void *) convert_8bit_lookup_to_16bit},
+	{"convert_8bit_lookup_to_16bit_2pixels",(void *) convert_8bit_lookup_to_16bit_2pixels},
 	{"convert_15bit_to_16bit_be",(void *) convert_15bit_to_16bit_be},
 	{"convert_15bit_to_16bit_le",(void *) convert_15bit_to_16bit_le},
 	{"convert_16bit_lookup_to_16bit",(void *) convert_16bit_lookup_to_16bit},
@@ -310,13 +311,7 @@ void convert_8bit_to_16bit( char *from, uint16 *to,int  pixels )
 
 	for (n=0; n<pixels;n++)
 	{
-		rgb = vpal32[from[n]];
-		r = (rgb & 0xF80000) >> 8;
-		g = (rgb & 0x00FC00) >> 5;
-		b = (rgb & 0x0000F8) >> 3;
-		rgb =  r | g | b;
-
-		to[n] = ((rgb & 0xFF00) >> 8)  | ((rgb & 0xFF) << 8);
+		to[n] = vpal16[from[n]];
 	}
 }
 
@@ -339,6 +334,24 @@ void convert_2bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 }
 
 
+
+void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
+{
+	int bpr = pixels/2;
+	register char *from_to;
+	register unsigned int source;
+
+	from_to = from + bpr;
+
+	for (; from<from_to;from++)
+	{
+		source = *from;
+		*to++ = vpal16[ (source & 0xF0) >>4];
+		*to++ = vpal16[ source & 0x0F];
+	}
+}
+
+/*
 void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 {
 	int bpr = pixels/2;
@@ -352,7 +365,7 @@ void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 		*to++ = vpal16[ source & 0x0F];
 	}
 }
-
+*/
 
 void convert_8bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 {
@@ -361,6 +374,17 @@ void convert_8bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 	for (n=0; n<pixels;n++)
 	{
 		to[n] = vpal16[from[n]];
+	}
+}
+
+void convert_8bit_lookup_to_16bit_2pixels(  uint16 *from, uint32 *to,int  pixels )
+{
+	int packs = pixels / 2;
+	int n;
+
+	for (n=0; n<packs;n++)
+	{
+		to[n] = vpal32[from[n] ];
 	}
 }
 
