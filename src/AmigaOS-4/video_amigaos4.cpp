@@ -100,8 +100,6 @@ struct windowclass window_save_state;
 #define show_sigs( x )
 #endif
 
-int frame_dice=0;
-
 extern APTR video_mutex ;
 
 // Supported video modes

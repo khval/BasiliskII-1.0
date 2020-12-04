@@ -26,7 +26,6 @@
 
 #include "video_driver_classes.h"
 
-extern int frame_dice;
 extern int32 frame_skip;
 extern int32 line_skip;
 extern UWORD *null_pointer;			// Blank mouse pointer data
@@ -226,19 +225,8 @@ driver_window_comp::~driver_window_comp()
 
 int driver_window_comp::draw()	// this should already be mutex protected.
 {
-	char *to_mem ;
-	int to_bpr;  
-	int n,nn;
-	int min_bpr;
-
-	frame_dice ++;
-	if (frame_dice >  line_skip)  frame_dice = 0;
-
 	if (do_draw)
 	{
-		frame_dice ++;
-		if (frame_dice >  line_skip)  frame_dice = 0;
-
 		do_draw(this);
 		WaitBOVP( &the_win -> WScreen -> ViewPort );
 	}

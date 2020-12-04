@@ -25,7 +25,6 @@
 
 #include "video_driver_classes.h"
 
-extern int frame_dice;
 extern int32 frame_skip;
 extern int32 line_skip;
 extern UWORD *null_pointer;			// Blank mouse pointer data
@@ -74,9 +73,6 @@ int driver_screen::draw()
 {
 	if ((do_draw) && (the_screen))
 	{
-		frame_dice ++;
-		if (frame_dice >  line_skip)  frame_dice = 0;
-
 		do_draw(this);
 		WaitBOVP( &the_screen -> ViewPort );
 	}
