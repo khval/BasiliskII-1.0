@@ -1322,6 +1322,7 @@ void window_draw_internal_no_lock( driver_base *drv )
 	}
 }
 
+uint32 line_skip_start = 0;
 
 void bitmap_draw_internal( driver_base *drv )
 {
@@ -1345,7 +1346,9 @@ void bitmap_draw_internal( driver_base *drv )
 
 	if (BMLock)
 	{
-		for (nn=0; nn<drv ->mode.y;nn++)
+		line_skip_start = (line_skip_start + 1) % line_skip;
+
+		for (nn=line_skip_start; nn<drv ->mode.y;nn+=line_skip)
 		{
 			n = nn;
 			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
@@ -1377,7 +1380,9 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 	dx = iw /2 - drv -> mode.x / 2;
 	dy = ih /2 - drv -> mode.y / 2;
 
-	for (nn=0; nn<drv ->mode.y;nn++)
+	line_skip_start = (line_skip_start + 1) % line_skip;
+
+	for (nn=line_skip_start; nn<drv ->mode.y;nn+=line_skip)
 	{
 		n = nn;
 		drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
