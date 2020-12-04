@@ -22,6 +22,7 @@ struct video_convert_names vcn[] =	{
 	{"convert_1bit_to_16bit",(void *) convert_1bit_to_16bit},
 	{"convert_2bit_lookup_to_16bit",(void *) convert_2bit_lookup_to_16bit},
 	{"convert_4bit_lookup_to_16bit",(void *) convert_4bit_lookup_to_16bit},
+	{"convert_4bit_lookup_to_16bit_2pixels",(void *) convert_4bit_lookup_to_16bit_2pixels},
 	{"convert_8bit_lookup_to_16bit",(void *) convert_8bit_lookup_to_16bit},
 	{"convert_8bit_lookup_to_16bit_2pixels",(void *) convert_8bit_lookup_to_16bit_2pixels},
 	{"convert_15bit_to_16bit_be",(void *) convert_15bit_to_16bit_be},
@@ -351,21 +352,19 @@ void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 	}
 }
 
-/*
-void convert_4bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
+void convert_4bit_lookup_to_16bit_2pixels(  char *from, uint32 *to,int  pixels )
 {
 	int bpr = pixels/2;
-	int n;
+	register char *from_to;
 	register unsigned int source;
 
-	for (n=0; n<bpr;n++)
+	from_to = from + bpr;
+
+	for (; from<from_to;from++)
 	{
-		source = from[n];
-		*to++ = vpal16[ (source & 0xF0) >>4];
-		*to++ = vpal16[ source & 0x0F];
+		*to++ = vpal32[ *from ];
 	}
 }
-*/
 
 void convert_8bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 {

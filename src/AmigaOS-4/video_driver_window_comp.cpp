@@ -153,6 +153,7 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 
 			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
 
+			if (convert == (void (*)(char*, char*, int)) convert_4bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_16bit_2pixels; 
 			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
 
 			if (  convert )
