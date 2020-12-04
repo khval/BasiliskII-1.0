@@ -106,7 +106,7 @@ struct WindowIFace *IWindow = NULL;
 struct CheckBoxIFace *ICheckBox = NULL;
 struct RequesterIFace *IRequester = NULL;
 
-APTR engine_mx = 0;
+APTR video_mutex = NULL;
 
 bool remove_words(char *name,const char **list);
 
@@ -215,8 +215,8 @@ BOOL openlibs()
 	}
 
 
-//	engine_mx = (APTR) AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
-//	if ( ! engine_mx) return FALSE;
+	video_mutex = (APTR) AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
+	if ( ! video_mutex) return FALSE;
 
 
 	return TRUE;
@@ -320,10 +320,10 @@ void closedown()
 	if (RequesterBase) CloseLibrary(RequesterBase); RequesterBase = 0;
 	if (IRequester) DropInterface((struct Interface*) IRequester); IRequester = 0;
 
-	if (engine_mx) 
+	if (video_mutex) 
 	{
-		FreeSysObject(ASOT_MUTEX, engine_mx); 
-		engine_mx = NULL;
+		FreeSysObject(ASOT_MUTEX, video_mutex); 
+		video_mutex = NULL;
 	}
 
 }

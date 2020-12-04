@@ -102,7 +102,7 @@ struct windowclass window_save_state;
 
 int frame_dice=0;
 
-APTR video_mutex = NULL;
+extern APTR video_mutex ;
 
 // Supported video modes
 static vector<video_mode> VideoModes;
@@ -368,8 +368,6 @@ bool VideoInit(bool classic)
 		ErrorAlert(STR_NO_MEM_ERR);
 		return false;
 	}
-
-	video_mutex = AllocSysObject(ASOT_MUTEX,TAG_END);
 
 	// Get screen mode from preferences
 	const char *mode_str;
@@ -677,10 +675,6 @@ void VideoExit(void)
 		Close(video_debug_out);
 		video_debug_out = NULL;
 	}
-
-	D(bug("VideoExit(void) %d\n",__LINE__));
-
-	FreeSysObject(ASOT_MUTEX,video_mutex);
 
 	D(bug("VideoExit(void) END %d\n",__LINE__));
 }
