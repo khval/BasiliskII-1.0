@@ -354,11 +354,8 @@ bool VideoInit(bool classic)
 	inactive_window_cpu_pri = PrefsFindInt32("inactive_window_cpu_pri");
 //	iconify_cpu_suspend = PrefsFindInt32("windowdepth");
 
-	frame_skip = PrefsFindInt32("active_window_frameskip");
-	line_skip = PrefsFindInt32("active_window_lineskip");
-
-	frame_skip ++;
-	line_skip ++;
+	frame_skip = PrefsFindInt32("active_window_frameskip") + 1;
+	line_skip = PrefsFindInt32("active_window_lineskip") + 1;
 
 	// Allocate blank mouse pointer data
 
@@ -886,8 +883,8 @@ static void periodic_func(void)
 
 					case IDCMP_ACTIVEWINDOW:
 
-							frame_skip = PrefsFindInt32("active_window_frameskip");
-							line_skip = PrefsFindInt32("active_window_lineskip");
+							frame_skip = PrefsFindInt32("active_window_frameskip") +1;
+							line_skip = PrefsFindInt32("active_window_lineskip") + 1;
 
 						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
 							if (main_task) 
@@ -900,8 +897,8 @@ static void periodic_func(void)
 
 					case IDCMP_INACTIVEWINDOW:
 
-							frame_skip = PrefsFindInt32("deactive_window_frameskip");
-							line_skip = PrefsFindInt32("deactive_window_lineskip");
+							frame_skip = PrefsFindInt32("deactive_window_frameskip") + 1;
+							line_skip = PrefsFindInt32("deactive_window_lineskip") + 1;
 
 						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
 							if (main_task)
