@@ -1,7 +1,7 @@
 Short:        Source code to 68k Macintosh Emulator for AmigaOS4
 Author:       Christian Bauer, Ilkka Lehtoranta, Kjetil Hvalstrand
 Uploader:    Kjetil Hvalstrand
-Version:      1.0.5 
+Version:      1.0.6
 Type:         dev/c
 Architecture: AmigaOS4
 
@@ -40,7 +40,7 @@ IT IS PROBABLY BETTER RUN SHAPESHIFTER OR FUSION ON
 THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
 BPPC/CSPPC IS TOO SLOW.
 
-Changes in Basilisk II 1.0.6 AmigaOS4 29.11.2020 (Kjetil Hvalstrand)
+Changes in Basilisk II 1.0.6 AmigaOS4 05.12.2020 (Kjetil Hvalstrand)
 
 * Fixed make_lha script
 * New install readmed for AmigaOS4.1 only.
@@ -55,6 +55,12 @@ match modes (in window mode)
 LALT +LSHIFT+CTRL+key "+"	Increment frame skip.
 LALT +LSHIFT+CTRL+key "-"	Decrement frame skip.
 LALT +LSHIFT+CTRL+key "Print screen"	Power off
+* line_skip now works.
+* Removed frame_dice code, obsolete
+* Fixed bad values for frame_skip and line_skip
+* Video_mutex now moved to init.cpp
+* Converter 2x8bit pixels to 2x16bit pixels in one go. 
+* Converter 2x4bit pixels to 2x16bit pixels in one go. 
 
 Changes in Basilisk II 1.0.5 AmigaOS4 23.11.2020 (Kjetil Hvalstrand)
 
