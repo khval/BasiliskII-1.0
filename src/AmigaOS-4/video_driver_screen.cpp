@@ -30,7 +30,6 @@ extern int32 line_skip;
 extern UWORD *null_pointer;			// Blank mouse pointer data
 extern UWORD *current_pointer;		// Currently visible mouse pointer data
 extern BPTR video_debug_out;
-extern bool check_modeid(ULONG mode_id);
 extern int use_lock;
 extern int render_method;
 extern void window_draw_internal( driver_base *drv );
@@ -60,6 +59,11 @@ extern int get_max_palette_colors( int vdepth );
 uint32 amiga_color_table[2 + 256 * 3];
 static int maxpalcolors = 0;
 
+#define AllocShared(size) AllocVecTags(size,	\
+		AVT_Type, MEMF_SHARED,		\
+		AVT_ClearWithValue, 0,			\
+		TAG_END)
+
 void window_draw_internal_nop( driver_base *drv )
 {
 	if (drv == NULL) return;
@@ -80,8 +84,31 @@ int driver_screen::draw()
 	return 0;
 }
 
+void WbToFront()
+{
+	struct Screen *screen = LockPubScreen("workbench");
+
+	if (screen)
+	{
+		ScreenToFront( screen );
+		UnlockScreen( screen);
+	}
+}
+
 static void set_fn_set_palette( uint32 PixelFormat)
 {
+	if (vpal16)
+	{
+		FreeVec(vpal16);
+		vpal16 = NULL;
+	}
+
+	if (vpal32) 
+	{
+		FreeVec(vpal32);
+		vpal32 = NULL;
+	}
+
 	switch (PixelFormat)
 	{
 		case PIXF_NONE:	// not RTG format.
@@ -92,22 +119,26 @@ static void set_fn_set_palette( uint32 PixelFormat)
 
 		case PIXF_R5G6B5:
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_16bit_be;	
+				set_palette_fn = set_vpal_16bit_be;
+				vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
 				break;
 
 		case PIXF_R5G6B5PC:	
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 				set_palette_fn = set_vpal_16bit_le;	
+				vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
 				break;
 
 		case PIXF_A8R8G8B8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 				set_palette_fn = set_vpal_32bit_be;
+				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
 				break;
 
 		case PIXF_B8G8R8A8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 				set_palette_fn = set_vpal_32bit_le;
+				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
 				break;
 
 		default:
@@ -150,13 +181,9 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	// Set relative mouse mode
 	ADBSetRelMouseMode(true);
 
-	// Check if the mode is one we can handle
-	if (!check_modeid(mode_id))
-	{
-		init_ok = false;
-		ErrorAlert(STR_WRONG_SCREEN_FORMAT_ERR);
-		return;
-	}
+
+	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld -- mac mode %lx \n",__FUNCTION__,__LINE__, mode.resolution_id); 
+	if (video_debug_out) FPrintf(video_debug_out,"info: %s:%ld -- amiga mode %lx \n",__FUNCTION__,__LINE__, mode_id); 
 
 	struct DisplayInfo dispi;
 	struct DimensionInfo dimInfo;
@@ -188,7 +215,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 		SA_LikeWorkbench, TRUE,
 		TAG_END);
 
-	if (the_screen == NULL) {
+	if (the_screen == NULL)
+	{
 		ErrorAlert(STR_OPEN_SCREEN_ERR);
 		init_ok = false;
 		return;

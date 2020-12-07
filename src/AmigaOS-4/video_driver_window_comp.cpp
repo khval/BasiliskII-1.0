@@ -31,7 +31,6 @@ extern int32 line_skip;
 extern UWORD *null_pointer;			// Blank mouse pointer data
 extern UWORD *current_pointer;		// Currently visible mouse pointer data
 extern BPTR video_debug_out;
-extern bool check_modeid(ULONG mode_id);
 extern int use_lock;
 extern int render_method;
 extern void window_draw_internal( driver_base *drv );

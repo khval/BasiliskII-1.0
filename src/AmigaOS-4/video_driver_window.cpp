@@ -31,7 +31,6 @@ extern int32 line_skip;
 extern UWORD *null_pointer;			// Blank mouse pointer data
 extern UWORD *current_pointer;		// Currently visible mouse pointer data
 extern BPTR video_debug_out;
-extern bool check_modeid(ULONG mode_id);
 extern int use_lock;
 extern int render_method;
 extern void window_draw_internal( driver_base *drv );
@@ -135,7 +134,7 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 
 					default:
 						set_palette_fn = set_vpal_16bit_le;	
-						vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 2 pixels , 256 colors, 1 x 16 bit pixel
+						vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
 						break;
 				}
 				break;
