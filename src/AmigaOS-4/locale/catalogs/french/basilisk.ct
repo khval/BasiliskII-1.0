@@ -1,0 +1,669 @@
+## version $VER: basilisk.catalog 1.0 (12.12.2020)
+## codeset 111
+## language french
+## chunk AUTH Translated by Alexandre Balaban
+;
+MSG_AUTHOR_INFORMATION
+\33cBasilisk II 1.0 par Christian Bauer\n Copyright 1997-2001\nDistribtion sous licence General Public License (GPL)
+; \33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
+;
+MSG_PORT_INFORMATION
+Portage AmigaOS 4.X (PowerPC) par Kjetil Hvalstrand, 2007-2020
+; AmigaOS 4.X (PowerPC) port by Kjetil Hvalstrand, 2007-2020
+;
+MSG_GFX_INFORMATION
+Icônes de Basilisk par Christian Rosentereter
+; Basilisk icons by Christian Rosentereter
+;
+MSG_TRANSLATION_INFORMATION
+Traduction par Alexandre Balaban
+; Translation by: xxxxx
+;
+MSG_DESCRIPTION
+Émulateur de MacIntosh 68k
+; 68k MacIntosh emulator
+;
+MSG_QUIT_WHILE_RUNING_INFORMATION
+Quitter de cette façon peut corrompre les fichiers ou système de fichiers MacOS.\nCela est équivalent à débrancher l'alimentation pendant que l'ordinateur fonctionne.
+; Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
+;
+MSG_OK_GAD
+_Ok
+; _Ok
+;
+MSG_CANCEL_GAD
+_Annuler
+; _Cancel
+;
+MSG_PREFS_TYPE_GAD
+_Type
+; _Type
+;
+MSG_PREFS_READ_ONLY_GAD
+_Lecteur seule
+; _Read Only
+;
+MSG_PREFS_FILE_GAD
+_Fichier
+; _File
+;
+MSG_PREFS_DEVICE_GAD
+_Périphérique
+; _Device
+;
+MSG_PREFS_CREATE_GAD
+Créer
+; Create
+;
+MSG_PREFS_UNIT_GAD
+_Unité
+; _Unit
+;
+MSG_PREFS_FLAGS_GAD
+_Flags
+; _Flags
+;
+MSG_PREFS_START_BLOCK_GAD
+Bloc de débu_t
+; _Start Block
+;
+MSG_PREFS_BLOCKS_GAD
+_Blocs
+; _Blocks
+;
+MSG_PREFS_BLOCK_SIZE_GAD
+Taille de bloc
+; Block Size
+;
+MSG_PREFS_RAMSIZE_GAD
+%ld MiO
+; %ldMB
+;
+MSG_PREFS_ADD_GAD
+_Ajouter...
+; _Add...
+;
+MSG_PREFS_EDIT_GAD
+_Éditer...
+; _Edit...
+;
+MSG_PREFS_REMOVE_GAD
+_Supprimer
+; _Remove
+;
+MSG_PREFS_CD_DEVICE_GAD
+_Périphérique
+; _Device
+;
+MSG_PREFS_CD_UNIT_GAD
+_Unité
+; _Unit
+;
+MSG_PREFS_CD_BOOT_GAD
+_Démarrer depuis le CD
+; _Boot from CD
+;
+MSG_PREFS_CD_DISABLE_DRIVER_GAD
+Désactiver le pilote CD-ROM
+; Disable CD-ROM driver
+;
+MSG_PREFS_MORPHOS_ROOT_GAD
+Racine AmigaOS
+; AmigaOS root
+;
+MSG_PREFS_VOLUMETYPE_FILE_GAD
+Fichier
+; File
+;
+MSG_PREFS_VOLUMETYPE_DEVICE_GAD
+Périphérique
+; Device
+;
+MSG_PREFS_ID_0_DEVICE_GAD
+Périphérique ID _0
+; ID _0 Device
+;
+MSG_PREFS_ID_1_DEVICE_GAD
+Périphérique ID _1
+; ID _1 Device
+;
+MSG_PREFS_ID_2_DEVICE_GAD
+Périphérique ID _2
+; ID _2 Device
+;
+MSG_PREFS_ID_3_DEVICE_GAD
+Périphérique ID _3
+; ID _3 Device
+;
+MSG_PREFS_ID_4_DEVICE_GAD
+Périphérique ID _4
+; ID _4 Device
+;
+MSG_PREFS_ID_5_DEVICE_GAD
+Périphérique ID _5
+; ID _5 Device
+;
+MSG_PREFS_ID_6_DEVICE_GAD
+Périphérique ID _6
+; ID _6 Device
+;
+MSG_PREFS_SCSI_UNIT_GAD
+Unité
+; Unit
+;
+MSG_PREFS_MODEM_DEVICE_GAD
+Périphérique
+; Device
+;
+MSG_PREFS_MODEM_UNIT_GAD
+Unité
+; Unit
+;
+MSG_PREFS_MODEM_PARALLEL_GAD
+Périphérique parallèle
+; Parallel device
+;
+MSG_PREFS_ETHERNET_DEVICE_GAD
+Périphérique
+; Device
+;
+MSG_PREFS_ETHERNET_UNIT_GAD
+Unité
+; Unit
+;
+MSG_PREFS_PRINTER_DEVICE_GAD
+Périphérique
+; Device
+;
+MSG_PREFS_PRINTER_UNIT_GAD
+Unité
+; Unit
+;
+MSG_PREFS_PRINTER_PARALLEL_GAD
+Périphérique parallèle
+; Parallel device
+;
+MSG_PREFS_GFX_WIDTH_GAD
+_Largeur
+; _Width
+;
+MSG_PREFS_GFX_HEIGHT_GAD
+_Hauteur
+; _Height
+;
+MSG_PREFS_GFX_FULLSCREEN_GAD
+Plain é_cran
+; _Full screen
+;
+MSG_PREFS_GFX_8BIT_GAD
+Mode _8 bits
+; _8bit mode
+;
+MSG_PREFS_DISABLE_SOUND
+_Désactiver le son
+; _Disable sound
+;
+MSG_PREFS_SYSTEM_RAM_GAD
+RAM MacOS
+; MacOS RAM
+;
+MSG_PREFS_SYSTEM_MODEL_GAD
+Modèle de Mac
+; Mac Model
+;
+MSG_PREFS_SYSTEM_ROM_GAD
+Fichier _ROM
+; _ROM File
+;
+MSG_PREFS_START_GAD
+Démarrer
+; Start
+;
+MSG_PREFS_QUIT_GAD
+Quitter
+; Quit
+;
+MSG_MAC_VOLUMES
+Volumes Mac
+; Mac Volumes
+;
+MSG_CDROM
+CD-ROM
+; CD-ROM
+;
+MSG_VIRTUAL_SCSI_DEVICES
+Périphériques SCSI virtuels
+; Virtual SCSI devices
+;
+MSG_MODEM
+Modem
+; Modem
+;
+MSG_ETHERNET
+Ethernet
+; Ethernet
+;
+MSG_PRINTER
+Imprimante
+; Printer
+;
+MSG_GRAPHICS
+Affichage
+; Graphics
+;
+MSG_SOUND
+Son
+; Sound
+;
+MSG_SYSTEM
+Message système
+; System message
+;
+MSG_SIZE
+Taille
+; Size
+;
+MSG_MB
+MiO
+; MB
+;
+MSG_TITLE_BASILISK_SETTINGS
+Réglages Basilisk II
+; Basilisk II Settings
+;
+MSG_TITLE_ADD_VOLUME
+Ajouter Volume
+; Add Volume
+;
+MSG_TITLE_EDIT_VOLUME
+Éditer Volume
+; Edit Volume
+;
+MSG_PAGE_VOLUMES
+Volumes
+; Volumes
+;
+MSG_PAGE_SCSI
+SCSI
+; SCSI
+;
+MSG_PAGE_COMMUNICATION
+Communication
+; Communication
+;
+MSG_PAGE_EMULATION
+Émulation
+; Emulation
+;
+MSG_MENU_TITLE_BASILISK
+Basilisk
+; Basilisk
+;
+MSG_MENU_BASILISK_ABOUT
+?\0À propos...
+; ?\0About...
+;
+MSG_MENU_BASILISK_START
+D\0Démarrer
+; S\0Start
+;
+MSG_MENU_BASILISK_QUIT
+Q\0Quitter
+; Q\0Quit
+;
+ID_GRAPHICS
+Affichage
+; Graphics
+;
+ID_PREFS_GFX_MODE_GAD
+Mode d'affichage
+; Gfx mode
+;
+ID_PREFS_GFX_WIDTH_GAD
+Largeur d'affichage
+; Gfx Width
+;
+ID_PREFS_GFX_HEIGHT_GAD
+Hauteur d'affichage
+; Gfx height
+;
+ID_PREFS_GFX_MODE_ID_SELECT_GAD
+Sélectionnez le mode d'écran
+; Select screen mode
+;
+ID_PREFS_GFX_MODE_ID_GAD
+Mode d'écran
+; Screen mode id
+;
+ID_PREFS_GFX_WINDOW_DEPTH_GAD
+Profondeur de fenêtre
+; Window depth
+;
+ID_PREFS_GFX_RENDER_METHOD_GAD
+Mode de rendu
+; Render mode
+;
+ID_PREFS_GFX_LOCK_GAD
+Vérouiller l'écran
+; Screen lock
+;
+ID_ACTIVE_WINDOW_GAD
+Fenêtre active
+; Active window
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD
+Saut d'image
+; Frame skip
+;
+ID_ACTIVE_WINDOW_LINESKIP_GAD
+Saut de ligne
+; Line skip
+;
+ID_DEACTIVE_WINDOW_GAD
+Fenêtre inactive
+; Deactive window
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD
+Saut d'image
+; Frame skip
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD
+Saut de ligne
+; Line skip
+;
+ID_SOUND
+Son
+; Sound
+;
+ID_PREFS_DISABLE_SOUND
+Désactiver le son
+; Disable sound
+;
+ID_VIRTUAL_SCSI_DEVICES
+Périphériques SCSI
+; Scsi devices
+;
+ID_PREFS_ID_0_DEVICE_GAD
+Périphérique 0
+; Device 0
+;
+ID_PREFS_ID_0_UNIT_GAD
+Unité 0
+; Unit 0
+;
+ID_PREFS_ID_1_DEVICE_GAD
+Périphérique 1
+; Device 1
+;
+ID_PREFS_ID_1_UNIT_GAD
+Unité 1
+; Unit 1
+;
+ID_PREFS_ID_2_DEVICE_GAD
+Périphérique 2
+; Device 2
+;
+ID_PREFS_ID_2_UNIT_GAD
+Unité 2
+; Unit 2
+;
+ID_PREFS_ID_3_DEVICE_GAD
+Périphérique 3
+; Device 3
+;
+ID_PREFS_ID_3_UNIT_GAD
+Unité 3
+; Unit 3
+;
+ID_PREFS_ID_4_DEVICE_GAD
+Périphérique 4
+; Device 4
+;
+ID_PREFS_ID_4_UNIT_GAD
+Unité 4
+; Unit 4
+;
+ID_PREFS_ID_5_DEVICE_GAD
+Périphérique 5
+; Device 5
+;
+ID_PREFS_ID_5_UNIT_GAD
+Unité 5
+; Unit 5
+;
+ID_PREFS_ID_6_DEVICE_GAD
+Périphérique 6
+; Device 6
+;
+ID_PREFS_ID_6_UNIT_GAD
+Unité 6
+; Unit 6
+;
+ID_PREFS_START_GAD
+Démarrer
+; Start
+;
+ID_PREFS_QUIT_GAD
+Quitter
+; Quit
+;
+ID_PREFS_EDIT_GAD
+Éditer
+; Edit
+;
+ID_PREFS_REMOVE_GAD
+Supprimer
+; Remove
+;
+ID_HARDWARE
+Matériel
+; Hardware
+;
+ID_CPU
+Processeur
+; CPU
+;
+ID_PREFS_SYSTEM_CPU_GAD
+Processeur
+; CPU
+;
+ID_PREFS_SYSTEM_FPU_GAD
+Co-processeur arithmétique
+; FPU
+;
+ID_CPU_PRI
+Priorité CPU
+; CPU priority
+;
+ID_CPU_ACTIVE_GAD
+Fenêtre active
+; CPU active window
+;
+ID_CPU_INACTIVE_GAD
+Fenêtre inactive
+; CPU inactive window
+;
+ID_RAM
+RAM
+; RAM
+;
+ID_PREFS_SYSTEM_RAM_GAD
+RAM
+; RAM
+;
+ID_SYSTEM
+Système
+; System
+;
+ID_PREFS_SYSTEM_MODEL_GAD
+Modèle de Mac
+; Mac model
+;
+ID_PREFS_SYSTEM_ROM_SELECT_GAD
+Sélectionnez ROM
+; Select rom
+;
+ID_PREFS_SYSTEM_ROM_GAD
+ROM
+; Rom
+;
+ID_MODEM
+Modem
+; Modem
+;
+ID_PREFS_MODEM_DEVICE_GAD
+Périphérique
+; Modem device
+;
+ID_PREFS_MODEM_UNIT_GAD
+Unité
+; Modem unit
+;
+ID_PREFS_MODEM_PARALLEL_GAD
+Modem parallèle
+; Modem parallel
+;
+ID_PRINTER
+Imprimante
+; Printer
+;
+ID_PREFS_PRINTER_DEVICE_GAD
+Périphérique
+; Printer device
+;
+ID_PREFS_PRINTER_UNIT_GAD
+Unité
+; Printer unit
+;
+ID_PREFS_PRINTER_PARALLEL_GAD
+Imprimante parallèle
+; Printer parallel
+;
+ID_ETHERNET
+Ethernet
+; Ethernet
+;
+ID_PREFS_ETHERNET_DEVICE_SELECT_GAD
+Sélectionnez le périphérique Ethernet
+; Select ethernet device
+;
+ID_PREFS_ETHERNET_DEVICE_GAD
+Périphérique
+; Ethernet device
+;
+ID_PREFS_ETHERNET_UNIT_GAD
+Unité
+; Ethernet unit
+;
+ID_MAC_VOLUMES
+Volumes
+; Volumes
+;
+ID_PREFS_ADD_BOOTDISK_GAD
+Disque démarrage
+; Boot disk
+;
+ID_PREFS_ADD_GAD
+Ajouter
+; Add
+;
+ID_PREFS_CREATE_GAD
+Créer
+; Create
+;
+ID_CDROM
+CD-ROM
+; Cdrom
+;
+ID_PREFS_CD_DEVICE_GAD
+Périphérique
+; Cd device
+;
+ID_PREFS_CD_UNIT_GAD
+Unité
+; Cd unit
+;
+ID_PREFS_CD_BOOT_GAD
+Bootable
+; Cd boot
+;
+ID_PREFS_CD_DISABLE_DRIVER_GAD
+Désactiver CD-ROM
+; Disable cd device
+;
+ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD
+Sélectionnez le répertoire partagé
+; Shared directory
+;
+ID_PREFS_AMIGAOS4_ROOT_GAD
+Répertoire partagé
+; Shared directory
+;
+ID_PREFS_VOLUMETYPE_FILE_GAD
+Type de volume fichier
+; File volume type
+;
+ID_PREFS_VOLUMETYPE_DEVICE_GAD
+Type de volume périphérique
+; Device volume type
+;
+ID_PREFS_TYPE_GAD
+Type
+; Type
+;
+ID_PREFS_DEVICE_GAD
+Périphérique
+; Device
+;
+ID_PREFS_UNIT_GAD
+Unité
+; Unit
+;
+ID_PREFS_PARTITION_NAME_GAD
+Nom de partitition
+; Partition name
+;
+ID_PREFS_READ_ONLY_GAD
+Lecture seule
+; Read only
+;
+ID_PREFS_FILE_GAD
+Fichier
+; File
+;
+ID_PREFS_FILE_SELECT_GAD
+Fichier
+; File
+;
+ID_CREATE_NAME_ASL_GAD
+Nom
+; Name
+;
+ID_CREATE_NAME_GAD
+Nom
+; Name
+;
+ID_CREATE_OK_GAD
+Ok
+; Ok
+;
+ID_CREATE_CANCEL_GAD
+Annuler
+; Cancel
+;
+ID_CREATE_SIZE_GAD
+Taille
+; Size
+;
+ID_OK_GAD
+Ok
+; Ok
+;
+ID_CANCEL_GAD
+Annuler
+; Cancel
+;
+ID_END
+--- FIN DE FICHIER ---
+; --- EOF ---
+;
