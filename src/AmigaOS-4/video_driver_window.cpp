@@ -519,14 +519,20 @@ void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 
 void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors)
 {
-	int n = num *3;		// BGRA
-	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+	for (num=0;num<256;num++)
+	{
+		int n = num *3;		// BGRA
+		vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+	}
 }
 
 void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors)
 {
-	int n = num *3;		// ARGB
-	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	for (num=0;num<256;num++)
+	{
+		int n = num *3;		// ARGB
+		vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	}
 }
 
 void driver_window::set_palette(uint8 *pal, int num)
