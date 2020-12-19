@@ -153,6 +153,8 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 
 			if (convert == (void (*)(char*, char*, int)) convert_4bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_16bit_2pixels; 
 			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
+			if (convert == (void (*)(char*, char*, int)) convert_4bit_to_32bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_32bit_2pixels; 
+			if (convert == (void (*)(char*, char*, int)) convert_8bit_to_32bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_32bit_2pixels; 
 
 			if (  convert )
 			{
@@ -298,14 +300,24 @@ void set_palette_16bit_be(uint8 *pal, int num)
 
 void set_palette_32bit_le(uint8 *pal, int num)
 {
-	int n = num *3;		// BGRA
-	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+	int n;
+
+	for (num=0;num<256;num++)
+	{
+		n=num*3;
+		vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+	}
 }
 
 void set_palette_32bit_be(uint8 *pal, int num)
 {
-	int n = num *3;		// ARGB
-	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	int n;
+
+	for (num=0;num<256;num++)
+	{
+		n=num*3;
+		vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	 }
 }
 
 void driver_window_comp::set_palette(uint8 *pal, int num)

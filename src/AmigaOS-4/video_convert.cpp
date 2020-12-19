@@ -32,6 +32,9 @@ struct video_convert_names vcn[] =	{
 	{"convert_32bit_to_16bit_le",(void *) convert_32bit_to_16bit_le},
 	{"convert_copy_16bit",(void *) convert_copy_16bit},
 
+	{"convert_4bit_lookup_to_32bit_2pixels",(void *) convert_4bit_lookup_to_32bit_2pixels},
+	{"convert_8bit_lookup_to_32bit_2pixels",(void *) convert_8bit_lookup_to_32bit_2pixels},
+
 	{"convert_1bit_to_32bit",(void *) convert_1bit_to_32bit},
 	{"convert_2bit_to_32bit",(void *) convert_2bit_to_32bit},
 	{"convert_4bit_to_32bit",(void *) convert_4bit_to_32bit},
@@ -372,7 +375,7 @@ void convert_8bit_lookup_to_16bit(  char *from, uint16 *to,int  pixels )
 
 	for (n=0; n<pixels;n++)
 	{
-		to[n] = vpal16[from[n]];
+		to[n] = vpal16[ from[n] ];
 	}
 }
 
@@ -383,7 +386,33 @@ void convert_8bit_lookup_to_16bit_2pixels(  uint16 *from, uint32 *to,int  pixels
 
 	for (n=0; n<packs;n++)
 	{
-		to[n] = vpal32[from[n] ];
+		to[n] = vpal32[ from[n] ];
+	}
+}
+
+void convert_4bit_lookup_to_32bit_2pixels(  unsigned char *from, double *to,int  pixels )
+{
+	double *vpal64 = (double *) vpal32;	// need to use doubles to get true 64bit registers.
+	int bpr = pixels/2;
+	register unsigned char *from_to;
+
+	from_to = from + bpr;
+
+	for (; from<from_to;from++)
+	{
+		*to++ = vpal64[ *from ];
+	}
+}
+
+void convert_8bit_lookup_to_32bit_2pixels(  uint16 *from, double *to,int  pixels )
+{
+	double *vpal64 = (double *) vpal32;	// need to use doubles to get true 64bit registers.
+	int packs = pixels / 2;
+	int n;
+
+	for (n=0; n<packs;n++)
+	{
+		to[n] = vpal64[ from[n] ];
 	}
 }
 

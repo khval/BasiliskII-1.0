@@ -61,6 +61,10 @@ void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) = NULL;
  void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num, int maxcolors);
  void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
 
+ void set_vpal_4bit_to_32bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
+
+
 static bool refreash_all_colors = true;
 
 static int maxpalcolors = 0;
@@ -141,8 +145,25 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 
 		case PIXF_A8R8G8B8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_32bit_be;
-				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
+
+				switch (macMode)
+				{
+					case VDEPTH_4BIT:
+						set_palette_fn = set_vpal_4bit_to_32bit_be_2pixels;
+						vpal32 = (uint32 *) AllocShared (8 * 256 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 32bit pixels).
+						if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 );
+						break;
+
+					case VDEPTH_8BIT:
+						set_palette_fn = set_vpal_8bit_to_32bit_be_2pixels;
+						vpal32 = (uint32 *) AllocShared ( 8 * 256 * 256  );	// 2 input pixel , 256 colors,  2 x 32bit output pixel. (0.5Mb)
+						break;
+
+					default:
+						set_palette_fn = set_vpal_32bit_be;
+						vpal32 = (uint32 *) AllocShared ( 4 * 256);	// 1 pixels , 256 colors, 1 x 32bit pixel
+						break;
+				}
 				break;
 
 		case PIXF_B8G8R8A8: 
@@ -249,6 +270,8 @@ driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 
 			if (convert == (void (*)(char*, char*, int)) convert_4bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_16bit_2pixels; 
 			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
+			if (convert == (void (*)(char*, char*, int)) convert_4bit_to_32bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_32bit_2pixels; 
+			if (convert == (void (*)(char*, char*, int)) convert_8bit_to_32bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_32bit_2pixels; 
 
 			if (  convert )
 			{
@@ -516,17 +539,95 @@ void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 	}
 }
 
+void set_vpal_8bit_to_32bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+{
+
+	int index;
+	int num2;
+	register unsigned int rgb;
+	// Convert palette to 32 bits virtual buffer.
+
+	// pixel [0..0],[0..256]
+
+	for (num1=0;num1<256;num1++)
+	{
+		vpal32[num1*2] = 0xFF + (pal[num1] << 8) +  (pal[num1+1] << 16) + (pal[num1+2] << 24) ;
+	}
+
+	// pixel [0,256],[0..256]		// because color 0 is not always black... (we need to redo the first 256 colors also)
+
+	for (index=0;index<256*256;index++)
+	{
+		num1 = (index >> 8) & 255;
+		num2 = index & 255;
+
+		vpal32[index*2] = vpal32[num1*2+1];
+		vpal32[index*2+1] = vpal32[num2*2+1];
+	}
+}
+
+
+void set_vpal_4bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+{
+
+	int index;
+	int num2;
+	register unsigned int rgb;
+	// Convert palette to 32 bits virtual buffer.
+
+	// pixel [0,256],[0..256]		// because color 0 is not always black... (we need to redo the first 256 colors also)
+
+	for (index=0;index<256;index++)
+	{
+		num1 = ((index >> 4) & 0xF)*3;
+		num2 = (index & 0xF)*3;
+
+		vpal32[index*2] = 0xFF000000 + (pal[num1] << 16) +  (pal[num1+1] << 8) + pal[num1+2]  ;  // ARGB
+		vpal32[index*2+1] = 0xFF000000 + (pal[num2] << 16) +  (pal[num2+1] << 8) + pal[num2+2]  ;  // ARGB
+	}
+}
+
+
+void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+{
+
+	int index;
+	int num2;
+	register unsigned int rgb;
+	// Convert palette to 32 bits virtual buffer.
+
+	// pixel [0,256],[0..256]		// because color 0 is not always black... (we need to redo the first 256 colors also)
+
+	for (index=0;index<256*256;index++)
+	{
+		num1 = ((index >> 8) & 255)*3;
+		num2 = (index & 255)*3;
+
+		vpal32[index*2] = 0xFF000000 + (pal[num1] << 16) +  (pal[num1+1] << 8) + pal[num1+2]  ;  // ARGB
+		vpal32[index*2+1] = 0xFF000000 + (pal[num2] << 16) +  (pal[num2+1] << 8) + pal[num2+2]  ;  // ARGB
+	}
+}
 
 void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors)
 {
-	int n = num *3;		// BGRA
-	vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+	int n;
+
+	for (num=0;num<256;num++)
+	{
+		n = num *3;		// BGRA
+		vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+	}
 }
 
 void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors)
 {
-	int n = num *3;		// ARGB
-	vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	int n;
+
+	for (num=0;num<256;num++)
+	{
+		n = num *3;		// ARGB
+		vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+	}
 }
 
 void driver_window::set_palette(uint8 *pal, int num)
