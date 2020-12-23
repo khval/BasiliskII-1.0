@@ -340,6 +340,8 @@ driver_window::~driver_window()
 		VIDEO_BUFFER = NULL;
 	}
 
+	do_draw = NULL;
+
 	MutexRelease(video_mutex);
 }
 
