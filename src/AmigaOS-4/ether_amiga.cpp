@@ -1,7 +1,7 @@
 /*
  *  ether_amiga.cpp - Ethernet device driver, AmigaOS specific stuff
  *
- *  Basilisk II (C) 1997-2001 Christian Bauer
+ *  Basilisk II (C) 1997-2008 Christian Bauer
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,8 +25,10 @@
 #include <dos/dosextens.h>
 #include <dos/dostags.h>
 #include <devices/sana2.h>
+#define __USE_SYSBASE
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include <clib/alib_protos.h>
 
 #include "sysdeps.h"
 #include "cpu_emulation.h"
@@ -36,12 +38,14 @@
 #include "macos_util.h"
 #include "ether.h"
 #include "ether_defs.h"
+#include "exec/emulation.h"
 
 #define DEBUG 0
 #include "debug.h"
 
-#define MONITOR 0
+#define MONITOR 1
 
+#define AllocVecSharedClear(size) AllocVecTags( size, AVT_Type, MEMF_SHARED, AVT_ClearWithValue, 0, TAG_END );
 
 // These messages are sent to the network process
 const uint32 MSG_CLEANUP = 'clea';			// Remove all protocols
@@ -87,7 +91,7 @@ static struct MsgPort *read_port = NULL;	// Reply port for read IORequests (set 
 
 static bool write_done = false;				// Flag: write request done
 
-extern struct Task *MainTask;				// Pointer to main task (from main_amiga.cpp)
+extern struct Task *main_task;				// Pointer to main task (from main_amiga.cpp)
 
 
 // Prototypes
@@ -116,11 +120,11 @@ static int16 send_to_proc(uint32 what, uint32 pointer = 0, uint16 type = 0)
  *  Initialization
  */
 
-void EtherInit(void)
+bool ether_init(void)
 {
 	// Do nothing if no Ethernet device specified
 	if (PrefsFindString("ether") == NULL)
-		return;
+		return false;
 
 	// Initialize protocol list
 	NewList(&prot_list);
@@ -151,8 +155,7 @@ void EtherInit(void)
 		goto open_error;
 
 	// Everything OK
-	net_open = true;
-	return;
+	return true;
 
 open_error:
 	net_proc = NULL;
@@ -160,6 +163,7 @@ open_error:
 		DeleteMsgPort(reply_port);
 		reply_port = NULL;
 	}
+	return false;
 }
 
 
@@ -167,7 +171,7 @@ open_error:
  *  Deinitialization
  */
 
-void EtherExit(void)
+void ether_exit(void)
 {
 	// Stop process
 	if (net_proc) {
@@ -188,10 +192,10 @@ void EtherExit(void)
  *  Reset
  */
 
-void EtherReset(void)
+void ether_reset(void)
 {
 	// Remove all protocols
-	if (net_open)
+	if (net_proc)
 		send_to_proc(MSG_CLEANUP);
 }
 
@@ -265,7 +269,7 @@ static void remove_protocol(NetProtocol *p)
 	}
 
 	// Free protocol struct
-	FreeMem(p, sizeof(NetProtocol));
+	FreeVec(p);
 }
 
 
@@ -305,9 +309,9 @@ static  LONG copy_to_buff(uint8 *to /*a0*/, uint8 *from /*a1*/, uint32 packet_le
 	}
 	bug("\n");
 #endif
+
 	return 1;
 }
-
 
 /*
  *  Copy data from Mac WDS to outgoing network packet
@@ -343,7 +347,7 @@ static   LONG copy_from_buff(uint8 *to /*a0*/, char *wds /*a1*/, uint32 packet_l
  *  Process for communication with the Ethernet device
  */
 
-static  void net_func(void)
+static void net_func(void)
 {
 	const char *str;
 	BYTE od_error;
@@ -391,13 +395,12 @@ static  void net_func(void)
 	ULONG dev_unit;
 
 	str = PrefsFindString("ether");
-	if (str)
-		{
+	if (str) {
 		const char *FirstSlash = strchr(str, '/');
 		const char *LastSlash = strrchr(str, '/');
 
-		if (FirstSlash && FirstSlash && FirstSlash != LastSlash)
-			{
+		if (FirstSlash && FirstSlash && FirstSlash != LastSlash) {
+
 			// Device name contains path, i.e. "Networks/xyzzy.device"
 			const char *lp = str;
 			char *dp = dev_name;
@@ -409,28 +412,22 @@ static  void net_func(void)
 			if (strlen(dev_name) < 1)
 				goto quit;
 
-			if (1 != sscanf(LastSlash, "/%ld", &dev_unit))
+			if (sscanf(LastSlash, "/%ld", &dev_unit) != 1)
 				goto quit;
-
-//			printf("dev=<%s> unit=%d\n", dev_name, dev_unit);
-			}
-		else
-			{
-			if (2 != sscanf(str, "%[^/]/%ld", dev_name, &dev_unit))
+		} else {
+			if (sscanf(str, "%[^/]/%ld", dev_name, &dev_unit) != 2)
 				goto quit;
-			}
 		}
-	else
+	} else
 		goto quit;
 
 	// Open device
 	control_io->ios2_BufferManagement = buffer_tags;
-	od_error = OpenDevice( dev_name, dev_unit, (struct IORequest *)control_io, 0);
-	if (0 != od_error || control_io->ios2_Req.io_Device == 0)
-		{
+	od_error = OpenDevice((const char *) dev_name, dev_unit, (struct IORequest *)control_io, 0);
+	if (od_error != 0 || control_io->ios2_Req.io_Device == 0) {
 		printf("WARNING: OpenDevice(<%s>, unit=%d) returned error %d)\n", (UBYTE *)dev_name, dev_unit, od_error);
 		goto quit;
-		}
+	}
 	opened = true;
 
 	// Is it Ethernet?
@@ -463,7 +460,7 @@ static  void net_func(void)
 
 	// Initialization went well, inform main task
 	proc_error = false;
-	Signal(MainTask, SIGF_SINGLE);
+	Signal(main_task, SIGF_SINGLE);
 
 	// Main loop
 	for (;;) {
@@ -523,7 +520,7 @@ static  void net_func(void)
 						}
 
 						// Allocate NetProtocol, set type and handler
-						p = (NetProtocol *)AllocMem(sizeof(NetProtocol), MEMF_PUBLIC);
+						p = (NetProtocol *)AllocVecSharedClear(sizeof(NetProtocol));
 						if (p == NULL) {
 							msg->result = lapProtErr;
 							goto reply;
@@ -584,10 +581,9 @@ static  void net_func(void)
 						}
 						write_io->ios2_DataLength = len;
 
-						// Get destination address, set source address
+						// Get destination address
 						uint32 hdr = ReadMacInt32(wds + 2);
 						Mac2Host_memcpy(write_io->ios2_DstAddr, hdr, 6);
-						Host2Mac_memcpy(hdr + 6, ether_addr, 6);
 
 						// Get packet type
 						uint32 type = ReadMacInt16(hdr + 12);
@@ -645,9 +641,9 @@ quit:
 		CloseDevice((struct IORequest *)control_io);
 	}
 	if (write_io)
-		DeleteIORequest( (struct IORequest*) write_io);
+		DeleteIORequest( (IORequest*) write_io);
 	if (control_io)
-		DeleteIORequest( (struct IORequest*) control_io);
+		DeleteIORequest( (IORequest*) control_io);
 	if (control_port)
 		DeleteMsgPort(control_port);
 	if (write_port)
@@ -657,7 +653,7 @@ quit:
 
 	// Send signal to main task to confirm termination
 	Forbid();
-	Signal(MainTask, SIGF_SINGLE);
+	Signal(main_task, SIGF_SINGLE);
 }
 
 
