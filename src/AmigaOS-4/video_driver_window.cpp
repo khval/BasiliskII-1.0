@@ -151,7 +151,7 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 					case VDEPTH_4BIT:
 						set_palette_fn = set_vpal_4bit_to_32bit_be_2pixels;
 						vpal32 = (uint32 *) AllocShared (8 * 256 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 32bit pixels).
-						if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 );
+						if (vpal32) memset( vpal32, 0, 8 * 256 );
 						break;
 
 					case VDEPTH_8BIT:
