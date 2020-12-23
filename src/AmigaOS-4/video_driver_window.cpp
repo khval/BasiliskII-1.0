@@ -103,19 +103,19 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 				{
 					case VDEPTH_4BIT:
 						set_palette_fn = set_vpal_4bit_to_16bit_be_2pixels;
-						vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 16bit pixels).
-						if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 );
+						vpal32 = (uint32 *) AllocShared ( 4 * 16 * 16 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 16bit pixels).
+						if (vpal32) memset( vpal32, 0, 4 * 16 * 16 );
 						break;
 
 					case VDEPTH_8BIT:
 						set_palette_fn = set_vpal_8bit_to_16bit_be_2pixels;
-						vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256 *256 );	// (input 2 x 8bit pixels) , 65536 combos. (output 2 x 16bit pixels).
-						if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 *256 );
+						vpal32 = (uint32 *) AllocShared ( 4 * 256 * 256 );	// (input 2 x 8bit pixels) , 65536 combos. (output 2 x 16bit pixels).
+						if (vpal32) memset( vpal32, 0, 4 * 256 * 256 );
 						break;
 
 					default:
 						set_palette_fn = set_vpal_16bit_be;	
-						vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 2 pixels , 256 colors, 1 x 16 bit pixel
+						vpal16 = (uint16 *) AllocShared ( 2 * 256);	// 2 pixels , 256 colors, 1 x 16 bit pixel
 				}
 				break;
 
@@ -126,19 +126,19 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 				{
 					case VDEPTH_4BIT:
 						set_palette_fn = set_vpal_4bit_to_16bit_le_2pixels;
-						vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 16bit pixels).
-						if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 );
+						vpal32 = (uint32 *) AllocShared ( 4 * 16 * 16 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 16bit pixels).
+						if (vpal32) memset( vpal32, 0, 4 * 16 * 16 );
 						break;
 
 					case VDEPTH_8BIT:
 						set_palette_fn = set_vpal_8bit_to_16bit_le_2pixels;
-						vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256 *256 );	// (input 2 x 8bit pixels) , 65536 combos. (output 2 x 16bit pixels).
-						if (vpal32) memset( vpal32, 0, sizeof(uint32) * 256 *256 );
+						vpal32 = (uint32 *) AllocShared ( 4 * 256 * 256 );	// (input 2 x 8bit pixels) , 65536 combos. (output 2 x 16bit pixels).
+						if (vpal32) memset( vpal32, 0, 4 * 256 * 256 );
 						break;
 
 					default:
 						set_palette_fn = set_vpal_16bit_le;	
-						vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
+						vpal16 = (uint16 *) AllocShared ( 2 * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
 						break;
 				}
 				break;
