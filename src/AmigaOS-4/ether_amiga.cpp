@@ -291,8 +291,14 @@ static void remove_all_protocols(void)
  *  Copy received network packet to Mac side
  */
 
-static  LONG copy_to_buff(uint8 *to /*a0*/, uint8 *from /*a1*/, uint32 packet_len /*d0*/)
+// static __saveds __regargs LONG copy_to_buff(uint8 *to /*a0*/, uint8 *from /*a1*/, uint32 packet_len /*d0*/)
+
+static uint32 copy_to_buff_ppc(uint32 *Reg68K)
 {
+	uint8 *to = (uint8 *) Reg68K[REG68K_A0/4];
+	uint8 *from = (uint8 *) Reg68K[REG68K_A1/4];
+	uint32 packet_len = Reg68K[REG68K_D0/4];
+
 	D(bug("CopyToBuff to %08lx, from %08lx, size %08lx\n", to, from, packet_len));
 
 	// It would be more efficient (and take up less memory) if we
@@ -317,11 +323,18 @@ static  LONG copy_to_buff(uint8 *to /*a0*/, uint8 *from /*a1*/, uint32 packet_le
  *  Copy data from Mac WDS to outgoing network packet
  */
 
-static   LONG copy_from_buff(uint8 *to /*a0*/, char *wds /*a1*/, uint32 packet_len /*d0*/)
-{
-	D(bug("Sending Ethernet packet:\n"));
-	D(bug("CopyFromBuff to %08lx, wds %08lx, size %08lx\n", to, wds, packet_len));
+//static __saveds __regargs LONG copy_from_buff(uint8 *to /*a0*/, char *wds /*a1*/, uint32 packet_len /*d0*/)
 
+static uint32 copy_from_buff_ppc(uint32 *Reg68K)
+{
+	uint8 *to = (uint8 *) Reg68K[REG68K_A0/4];
+	char *wds = (char *) Reg68K[REG68K_A1/4];
+	uint32 packet_len =Reg68K[REG68K_D0/4];
+
+	D(bug("CopyFromBuff to %08lx, wds %08lx, size %08lx\n", to, wds, packet_len));
+#if MONITOR
+	bug("Sending Ethernet packet:\n");
+#endif
 	for (;;) {
 		int len = ReadMacInt16((uint32)wds);
 		if (len == 0)
@@ -342,6 +355,8 @@ static   LONG copy_from_buff(uint8 *to /*a0*/, char *wds /*a1*/, uint32 packet_l
 	return 1;
 }
 
+const struct EmuTrap stub_copy_to_buff_ppc = { TRAPINST, TRAPTYPE,  copy_to_buff_ppc };
+const struct EmuTrap stub_copy_from_buff_ppc = { TRAPINST, TRAPTYPE, copy_from_buff_ppc };
 
 /*
  *  Process for communication with the Ethernet device
@@ -357,8 +372,8 @@ static void net_func(void)
 	ULONG read_mask = 0, write_mask = 0, proc_port_mask = 0;
 	struct Sana2DeviceQuery query_data = {sizeof(Sana2DeviceQuery)};
 	ULONG buffer_tags[] = {
-		S2_CopyToBuff, (uint32)copy_to_buff,
-		S2_CopyFromBuff, (uint32)copy_from_buff,
+		S2_CopyToBuff, (uint32) &stub_copy_to_buff_ppc,
+		S2_CopyFromBuff, (uint32) &stub_copy_from_buff_ppc,
 		TAG_END
 	};
 

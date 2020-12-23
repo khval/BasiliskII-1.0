@@ -40,8 +40,9 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
     ../slot_rom.cpp ../rsrc_patches.cpp ../emul_op.cpp \
     ../macos_util.cpp ../xpram.cpp xpram_amigaos4.cpp ../timer.cpp \
     timer_amigaos4.cpp clip_amigaos4.cpp ../adb.cpp ../serial.cpp \
-    serial_amiga.cpp  ../ether.cpp ../dummy/ether_dummy.cpp  ../sony.cpp ../disk.cpp \
+    serial_amiga.cpp  ../ether.cpp  ../sony.cpp ../disk.cpp \
     ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp \
+	ether_amiga.cpp \
 	video_amigaos4.cpp \
 	video_convert.cpp \
 	window_icons.cpp \
