@@ -1492,15 +1492,30 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 	{
 		case PIXF_CLUT:
 
+			switch (depth)
+			{
+				case VDEPTH_1BIT:
+						init_lookup_1bit_to_8bit_8pixels();
+						convert = (void *) &convert_1bit_to_8bit_8pixels;
+						break;
+		
+				case VDEPTH_2BIT:
+						init_lookup_2bit_to_8bit_8pixels();
+						convert = (void *) &convert_2bit_to_8bit_8pixels;
+						break;
 
-			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_8bit;
-			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_to_8bit;
-			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_to_8bit;
-			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_copy_8bit;
+				case VDEPTH_4BIT:
+						init_lookup_4bit_to_8bit_4pixels();
+						convert = (void *) &convert_4bit_to_8bit_4pixels;
+						break;
+
+				case VDEPTH_8BIT:
+						convert = (void *) &convert_copy_8bit;
+						break;
+			}
 			break;
 
 		case PIXF_R5G6B5:
-
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
 			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in vpal16
@@ -1522,7 +1537,6 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit_be;
 			break;
-
 
 		case PIXF_R5G6B5PC:
 

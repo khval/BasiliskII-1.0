@@ -14,10 +14,14 @@ extern uint32 *vpal32;
 
 struct video_convert_names vcn[] =	{
 
-	{"convert_1bit_to_8bit",(void *) convert_1bit_to_8bit},
-	{"convert_2bit_to_8bit",(void *) convert_2bit_to_8bit},
-	{"convert_4bit_to_8bit",(void *) convert_4bit_to_8bit},
-	{"convert_copy_8bit",(void *) convert_copy_8bit},
+	{"convert_1bit_to_8bit",(void *) convert_1bit_to_8bit},	// obsolete
+	{"convert_2bit_to_8bit",(void *) convert_2bit_to_8bit},	// obsolete
+	{"convert_4bit_to_8bit",(void *) convert_4bit_to_8bit},	// obsolete
+	{"convert_copy_8bit",(void *) convert_copy_8bit},		// obsolete
+
+	{"convert_1bit_to_8bit_8pixels",(void *) convert_1bit_to_8bit_8pixels},
+	{"convert_2bit_to_8bit_8pixels",(void *) convert_2bit_to_8bit_8pixels},
+	{"convert_4bit_to_8bit_4pixels",(void *) convert_4bit_to_8bit_4pixels},
 
 	{"convert_1bit_to_16bit",(void *) convert_1bit_to_16bit},
 	{"convert_2bit_lookup_to_16bit",(void *) convert_2bit_lookup_to_16bit},
@@ -161,6 +165,106 @@ char convert_1bit_to_32bit_asm( char *from, uint32 *to,int  bytes )
 }
 */
 
+void init_lookup_1bit_to_8bit_8pixels()
+{
+	int n;
+	char *to;
+	char *offset;
+
+	if (lookup16bit != NULL) 
+	{
+		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- lookup not freed as it should be\n",__FUNCTION__,__LINE__ );
+	}
+
+	lookup16bit = (uint16 *) malloc(256 * 8);	
+	if (lookup16bit == NULL) return;
+
+	to = (char *) lookup16bit;
+
+	for (n=0; n<256;n++)
+	{	
+		offset = to + (n*8);
+
+		offset[0] = (n & 0x0080)>>7;
+		offset[1] = (n & 0x0040)>>6;
+		offset[2] = (n & 0x0020)>>5;
+		offset[3] = (n & 0x0010)>>4;
+		offset[4] = (n & 0x0008)>>3;
+		offset[5] = (n & 0x0004)>>2;
+		offset[6] = (n & 0x0002)>>1;
+		offset[7] = (n & 0x0001);
+	}
+}
+
+void init_lookup_2bit_to_8bit_8pixels()
+{
+	uint16 n;
+	char *to;
+	char *offset;
+
+	if (lookup16bit != NULL) 
+	{
+		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- lookup not freed as it should be\n",__FUNCTION__,__LINE__ );
+	}
+
+	lookup16bit = (uint16 *) malloc(256 * 256 * 8);	
+	if (lookup16bit == NULL) return;
+
+	to = (char *) lookup16bit;
+
+	n=0;
+	do
+	{	
+		offset = to + (n*8);
+
+		offset[0] = (n & 0xC000)>>14;
+		offset[1] = (n & 0x3000)>>12;
+		offset[2] = (n & 0x0C00)>>10;
+		offset[3] = (n & 0x0300)>>8;
+		offset[4] = (n & 0x00C0)>>6;
+		offset[5] = (n & 0x0030)>>4;
+		offset[6] = (n & 0x000C)>>2;
+		offset[7] = (n & 0x0003);
+		n++;
+	} while (n != 0);
+}
+
+void init_lookup_4bit_to_8bit_4pixels()
+{
+	uint8 *source;
+	uint16 n;
+	uint8 *to;
+
+	uint32 offset;
+
+	if (lookup16bit != NULL) 
+	{
+		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- lookup not freed as it should be\n",__FUNCTION__,__LINE__ );
+	}
+
+	lookup16bit = (uint16 *) malloc( (16*16*16*16) * 4);	
+	if (lookup16bit == NULL) return;
+
+	to = (uint8 *) lookup16bit;
+
+	n =0;
+	do
+	{
+		source = (uint8 *) &n;
+
+		offset = n*4;
+
+		to[offset + 0] = (*source & 0xF0)>>4;
+		to[offset + 1] = (*source & 0x0F);
+
+		source ++;
+
+		to[offset + 2] = (*source & 0xF0)>>4;
+		to[offset + 3] = (*source & 0x0F);
+		n++;
+	} while (n != 0);
+}
+
 void convert_1bit_to_8bit(  char *from, char *to,int  pixels )
 {
 	register int n;
@@ -248,6 +352,44 @@ void convert_1bit_to_32bit( char *from, uint32 *to,int pixels )
 		*to++ = from[n] & 1 ? 0xFF000000 : 0xFFFFFFFF;
 	}
 }
+
+
+void convert_1bit_to_8bit_8pixels( char *from, double *to,int  pixels )
+{
+	register int n;
+	register double *lookup64bit = (double *) lookup16bit;
+	register uint32 units = pixels / 8;
+
+	for (n=0; n<units;n++)
+	{
+		*to++ = lookup64bit[from[n]];
+	}
+}
+
+void convert_2bit_to_8bit_8pixels( uint16 *from, double *to,int  pixels )
+{
+	register int n;
+	register double *lookup64bit = (double *) lookup16bit;
+	register uint32 units = pixels / 8;
+
+	for (n=0; n<units;n++)
+	{
+		*to++ = lookup64bit[from[n]];
+	}
+}
+
+void convert_4bit_to_8bit_4pixels( uint16 *from, uint32 *to,int  pixels )		// 4 pixels, 4 bytes, == uint32
+{
+	register int n;
+	register uint32 *lookup32bit = (uint32 *) lookup16bit;
+	register uint32 units = pixels / 4;
+
+	for (n=0; n<units;n++)
+	{
+		*to++ = lookup32bit[from[n]];
+	}
+}
+
 
 void convert_8bit_to_32bit_db( char *from, uint32 *to,int  pixels )
 {

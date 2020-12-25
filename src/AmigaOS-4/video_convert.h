@@ -7,6 +7,10 @@ struct video_convert_names
 
 const char *get_name_converter_fn_ptr( void *fn_ptr);
 
+void init_lookup_1bit_to_8bit_8pixels();
+void init_lookup_2bit_to_8bit_8pixels();
+void init_lookup_4bit_to_8bit_4pixels();
+
 void init_lookup_15bit_to_16bit_le();
 void init_lookup_15bit_to_16bit_be();
 
@@ -17,6 +21,10 @@ void convert_copy_32bit( char *from, char *to,int  pixels );
 void convert_1bit_to_8bit( char *from, char *to,int  pixels );
 void convert_2bit_to_8bit( char *from, char *to,int  pixels );
 void convert_4bit_to_8bit( char *from, char *to,int  pixels );
+
+void convert_1bit_to_8bit_8pixels( char *from, double *to,int  pixels );
+void convert_2bit_to_8bit_8pixels( uint16 *from, double *to,int  pixels );
+void convert_4bit_to_8bit_4pixels( uint16 *from, uint32 *to,int  pixels );
 
 void convert_15bit_to_16bit_le( uint16 *from, uint16 *to,int  pixels );
 void convert_32bit_to_16bit_le( uint32 *from, uint16 *to,int  pixels );
