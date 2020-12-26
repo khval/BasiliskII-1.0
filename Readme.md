@@ -1,6 +1,6 @@
 # BasiliskII 1.0 for AmigaOS4.x
 
-Date: November-31-2020
+Date: December-26-2020
 
 This is old version of Basilisk II, I know there are newer more update versions around on GITHUB.
 This version focusses on AmigaOS4.1, so is designed around AmigaOS4.1 native graphic feature.
