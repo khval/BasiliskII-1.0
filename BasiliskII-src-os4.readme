@@ -1,7 +1,7 @@
 Short:        Source code to 68k Macintosh Emulator for AmigaOS4
 Author:       Christian Bauer, Ilkka Lehtoranta, Kjetil Hvalstrand
 Uploader:    Kjetil Hvalstrand
-Version:      1.0.6
+Version:      1.0.7
 Type:         dev/c
 Architecture: AmigaOS4
 
@@ -13,7 +13,7 @@ and sound.
  * Displays disk-image and partition size (when found!)
  * Mouse wheel support.
  * Hard-disk support for 64bit addressing.
- * disk image support for 64bit addressing.
+ * Disk image support for 64bit addressing.
  * Supports 2,8,16 and 256 colors, 15bit, 32bit mac video modes.
  * Full screen uses native video modes, 8bit, 16bit, and 32bit.
  (LE and BE modes should work.)
@@ -39,6 +39,25 @@ MACINTOSH SOFTWARE CAN HAVE BUGS, THERE IS NO MEMORY PROTECTION THAT CAN STOP IT
 IT IS PROBABLY BETTER RUN SHAPESHIFTER OR FUSION ON
 THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
 BPPC/CSPPC IS TOO SLOW.
+
+* ETHERNET CODE:
+ONLY MADE SOME CHANGES, THERE MAY BE SOME BUGS, TRY IT, BUT DIN'T EXPECT IT TO WORK.
+IF IT CRASHES IT WILL FREEZE YOUR SYSTEM. I DID NOT BREAK IT NEVER WORKED ON AMIGAOS4.
+
+Changes in Basilisk II 1.0.7 AmigaOS4 26.12.2020 (Kjetil Hvalstrand)
+
+* Frensh translation added (abalabanb).
+* Fixed palette problem on 32bit screens using window mode.
+* Faster converters for 32bit workbench screens.
+(4bit to 32bit, 8bit to 32bit)
+* Window composition, was updated to the same converters as window mode.
+* Newly rewitten the ether_amiga.cpp from 2008 insted of old code from 2001 (Basilisk 0.9).
+(This code now uses powerpc emulation stubs. it did not before.)
+Disclamer: Don't expect network code to work, I do get crashes some where else.
+* Minor bug fixes.
+* Made sure Window mode and Window composition, does draw graphics while window is closed.
+* Faster converters for 8bit full screen mode.
+(1bit to 8bit, 2bit to 8bit, 4bit to 8bit)
 
 Changes in Basilisk II 1.0.6 AmigaOS4 05.12.2020 (Kjetil Hvalstrand)
 
