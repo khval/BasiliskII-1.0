@@ -130,7 +130,7 @@ bool ether_init(void)
 	NewList(&prot_list);
 
 	// Create message port
-	reply_port = CreateMsgPort();
+	reply_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (reply_port == NULL)
 		goto open_error;
 	D(bug("signal mask %08lx\n", 1 << reply_port->mp_SigBit));
@@ -160,7 +160,7 @@ bool ether_init(void)
 open_error:
 	net_proc = NULL;
 	if (reply_port) {
-		DeleteMsgPort(reply_port);
+		FreeSysObject(ASOT_PORT,reply_port);
 		reply_port = NULL;
 	}
 	return false;
@@ -182,7 +182,7 @@ void ether_exit(void)
 
 	// Delete reply port
 	if (reply_port) {
-		DeleteMsgPort(reply_port);
+		FreeSysObject(ASOT_PORT,reply_port);
 		reply_port = NULL;
 	}
 }
@@ -381,21 +381,21 @@ static void net_func(void)
 	proc_error = true;
 
 	// Create message port for communication with main task
-	proc_port = CreateMsgPort();
+	proc_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (proc_port == NULL)
 		goto quit;
 	proc_port_mask = 1 << proc_port->mp_SigBit;
 
 	// Create message ports for device I/O
-	read_port = CreateMsgPort();
+	read_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (read_port == NULL)
 		goto quit;
 	read_mask = 1 << read_port->mp_SigBit;
-	write_port = CreateMsgPort();
+	write_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (write_port == NULL)
 		goto quit;
 	write_mask = 1 << write_port->mp_SigBit;
-	control_port = CreateMsgPort();
+	control_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
 	if (control_port == NULL)
 		goto quit;
 
@@ -655,16 +655,23 @@ quit:
 		}
 		CloseDevice((struct IORequest *)control_io);
 	}
+
 	if (write_io)
 		DeleteIORequest( (IORequest*) write_io);
 	if (control_io)
 		DeleteIORequest( (IORequest*) control_io);
 	if (control_port)
-		DeleteMsgPort(control_port);
+		FreeSysObject(ASOT_PORT,control_port);
 	if (write_port)
-		DeleteMsgPort(write_port);
+		FreeSysObject(ASOT_PORT,write_port);
 	if (read_port)
-		DeleteMsgPort(read_port);
+		FreeSysObject(ASOT_PORT,read_port);
+
+	write_io = NULL;
+	control_io = NULL;
+	read_port = NULL;
+	write_port = NULL;
+	control_port = NULL;
 
 	// Send signal to main task to confirm termination
 	Forbid();
