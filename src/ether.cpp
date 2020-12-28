@@ -51,10 +51,10 @@
 using std::map;
 #endif
 
-#define DEBUG 0
+#define DEBUG 1
 #include "debug.h"
 
-#define MONITOR 0
+#define MONITOR 1
 
 
 #ifdef __BEOS__
@@ -394,7 +394,13 @@ void EtherReadPacket(uint32 &src, uint32 &dest, uint32 &len, uint32 &remaining)
 {
 	D(bug("EtherReadPacket src %08x, dest %08x, len %08x, remaining %08x\n", src, dest, len, remaining));
 	uint32 todo = len > remaining ? remaining : len;
+
 	Mac2Mac_memcpy(dest, src, todo);
+
+#if MONITOR
+	hexDump( (char *) Mac2HostAddr(dest), todo);
+#endif
+
 	src += todo;
 	dest += todo;
 	len -= todo;
