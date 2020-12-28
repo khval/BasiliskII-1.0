@@ -204,6 +204,7 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 
 	amiga_color_table[0] = (256L << 16) + 0;	// load 256 colors, first colors is 0
 
+
 	// Open screen
 	the_screen = OpenScreenTags(
 		NULL,
@@ -219,6 +220,10 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	{
 		ErrorAlert(STR_OPEN_SCREEN_ERR);
 		init_ok = false;
+
+//		WbToFront();
+//		Delay(2000);
+
 		return;
 	}
 
@@ -247,6 +252,10 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	{
 		ErrorAlert(STR_OPEN_WINDOW_ERR);
 		init_ok = false;
+
+//		WbToFront();
+//		Delay(2000);
+
 		return;
 	}
 
