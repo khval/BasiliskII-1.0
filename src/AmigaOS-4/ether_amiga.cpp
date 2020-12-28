@@ -712,7 +712,10 @@ void EtherInterrupt(void)
 		M68kRegisters r;
 		r.d[0] = *(uint16 *)((uint32)io->ios2_Data + 12);	// Packet type
 		r.d[1] = io->ios2_DataLength - 18;					// Remaining packet length (without header, for ReadPacket) (-18 because the CRC is also included)
-		r.a[0] = (uint32)io->ios2_Data + 14;				// Pointer to packet (host address, for ReadPacket)
+//		r.a[0] = (uint32)io->ios2_Data + 14;				// Pointer to packet (host address, for ReadPacket)
+
+		r.a[0] = Host2MacAddr( (uint8*) io->ios2_Data + 14 );
+
 		r.a[3] = ether_data + ed_RHA + 14;					// Pointer behind header in RHA
 		r.a[4] = ether_data + ed_ReadPacket;				// Pointer to ReadPacket/ReadRest routines
 		D(bug(" calling protocol handler %08lx, type %08lx, length %08lx, data %08lx, rha %08lx, read_packet %08lx\n", p->handler, r.d[0], r.d[1], r.a[0], r.a[3], r.a[4]));
