@@ -43,7 +43,8 @@
 #define DEBUG 0
 #include "debug.h"
 
-#define MONITOR 1
+#define MONITOR 0
+
 
 #define AllocVecSharedClear(size) AllocVecTags( size, AVT_Type, MEMF_SHARED, AVT_ClearWithValue, 0, TAG_END );
 
@@ -599,6 +600,11 @@ static void net_func(void)
 						// Get destination address
 						uint32 hdr = ReadMacInt32(wds + 2);
 						Mac2Host_memcpy(write_io->ios2_DstAddr, hdr, 6);
+
+#if 0
+// 						this line comes from the morphos version, it looks like it set destination mac address to network card.
+//						Host2Mac_memcpy(hdr + 6, ether_addr, 6);		// this line is from morphos version...
+#endif
 
 						// Get packet type
 						uint32 type = ReadMacInt16(hdr + 12);
