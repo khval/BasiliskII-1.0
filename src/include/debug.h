@@ -69,6 +69,8 @@ extern void kprintf(const char *, ...);
 
 #endif
 
+extern void hexDump(char *start, int size);
+
 #if DEBUG
 #define D(x) (x);
 #else
