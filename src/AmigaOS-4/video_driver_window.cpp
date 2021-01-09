@@ -48,22 +48,29 @@ extern struct MsgPort *periodic_msgPort;
 
 #define IDCMP_common IDCMP_INACTIVEWINDOW | IDCMP_ACTIVEWINDOW | IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
-void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) = NULL;
+void (*set_palette_fn)(uint8 *pal, uint32 num) = NULL;
 
- void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_16bit_le(uint8 *pal, uint32 num);
+ void set_vpal_16bit_be(uint8 *pal, uint32 num);
+ void set_vpal_16bit_be(uint8 *pal, uint32 num);
+ void set_vpal_32bit_le(uint8 *pal, uint32 num);
+ void set_vpal_32bit_be(uint8 *pal, uint32 num);
 
- void set_vpal_4bit_to_16bit_le_2pixels(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_4bit_to_16bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
+ void set_vpal_4bit_to_16bit_le_2pixels(uint8 *pal, uint32 num);
+ void set_vpal_4bit_to_16bit_be_2pixels(uint8 *pal, uint32 num);
+ void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num);
+ void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num);
 
- void set_vpal_4bit_to_32bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
- void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num, int maxcolors);
 
+ void set_vpal_1bit_to_32bit_8pixels(uint8 *pal, uint32 num);
+
+ void set_vpal_2bit_to_32bit_be_4pixels(uint8 *pal, uint32 num);
+ void set_vpal_4bit_to_32bit_be_2pixels(uint8 *pal, uint32 num);
+ void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num);
+
+ void set_vpal_2bit_to_32bit_le_4pixels(uint8 *pal, uint32 num);
+ void set_vpal_4bit_to_32bit_le_2pixels(uint8 *pal, uint32 num);
+ void set_vpal_8bit_to_32bit_le_2pixels(uint8 *pal, uint32 num);
 
 static bool refreash_all_colors = true;
 
@@ -410,7 +417,7 @@ void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors)
 	}
 }
 
-void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1)
 {
 	int index;
 	int num2;
@@ -439,7 +446,7 @@ void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 
 }
 
- void set_vpal_4bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+ void set_vpal_4bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1)
 {
 	int index;
 	int num2;
@@ -467,7 +474,7 @@ void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 	}
 }
 
- void set_vpal_4bit_to_16bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+ void set_vpal_4bit_to_16bit_be_2pixels(uint8 *pal, uint32 num1)
 {
 	int index;
 	int num2;
@@ -495,7 +502,7 @@ void set_vpal_8bit_to_16bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 }
 
 
-void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors)
+void set_vpal_16bit_be(uint8 *pal, uint32 num)
 {
 	// Convert palette to 32 bits virtual buffer.
 
@@ -515,7 +522,7 @@ void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors)
 	}
 }
 
-void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+void set_vpal_8bit_to_16bit_be_2pixels(uint8 *pal, uint32 num1)
 {
 
 	int index;
@@ -569,7 +576,7 @@ void set_vpal_8bit_to_32bit_le_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 }
 
 
-void set_vpal_4bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+void set_vpal_4bit_to_32bit_le_2pixels(uint8 *pal, uint32 num1)
 {
 
 	int index;
@@ -590,7 +597,7 @@ void set_vpal_4bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 }
 
 
-void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
+void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1)
 {
 
 	int index;
@@ -610,7 +617,7 @@ void set_vpal_8bit_to_32bit_be_2pixels(uint8 *pal, uint32 num1, int maxcolors)
 	}
 }
 
-void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors)
+void set_vpal_32bit_le(uint8 *pal, uint32 num)
 {
 	int n;
 
@@ -621,7 +628,7 @@ void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors)
 	}
 }
 
-void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors)
+void set_vpal_32bit_be(uint8 *pal, uint32 num)
 {
 	int n;
 
@@ -634,7 +641,7 @@ void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors)
 
 void driver_window::set_palette(uint8 *pal, int num)
 {
-	if (set_palette_fn) set_palette_fn(pal, num, maxpalcolors);
+	if (set_palette_fn) set_palette_fn(pal, num);
 }
 
 void driver_window::kill_gfx_output()
