@@ -399,18 +399,7 @@ void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors)
 
 	// Convert palette to 32 bits virtual buffer.
 
-	if (num >= maxcolors) refreash_all_colors=true;
-
-	if (refreash_all_colors)
-	{
-		for (num=0;num<256;num++)
-		{
-			rgb = __pal_to_16bit(pal, num);
-			vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
-		}
-		refreash_all_colors = false;
-	}
-	else
+	for (num=0;num<256;num++)
 	{
 		rgb = __pal_to_16bit(pal, num);
 		vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
@@ -506,17 +495,7 @@ void set_vpal_16bit_be(uint8 *pal, uint32 num)
 {
 	// Convert palette to 32 bits virtual buffer.
 
-	if (num >= maxcolors) refreash_all_colors=true;
-
-	if (refreash_all_colors)
-	{
-		for (num=0;num<256;num++)
-		{
-			vpal16[num] = __pal_to_16bit(pal, num);
-		}
-		refreash_all_colors = false;
-	}
-	else
+	for (num=0;num<256;num++)
 	{
 		vpal16[num] = __pal_to_16bit(pal, num);
 	}
