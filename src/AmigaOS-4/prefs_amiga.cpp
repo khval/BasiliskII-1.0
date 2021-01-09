@@ -43,6 +43,8 @@ prefs_desc platform_prefs_items[] = {
 	{"inactive_window_cpu_pri", TYPE_INT32, false, "Inactive window" },
 	{"iconify_cpu_suspend", TYPE_BOOLEAN, false, "Supend cpu on iconify" },
 
+	{"ethernet_monitor", TYPE_BOOLEAN, false, "monitor Ethernet traffic" },
+
 	{NULL, TYPE_END, false, NULL} // End of list
 };
 

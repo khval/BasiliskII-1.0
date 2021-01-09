@@ -66,7 +66,7 @@ void hexDump(char *start, int size)
 		showBytes = showBytes > bytesPerLine ? bytesPerLine : showBytes;
 
 		printAsc( start + offset, showBytes );
-		if (showBytes<showBytes) for (n = showBytes ; n<showBytes;n++) printf(" ");
+		for (n = showBytes ; n<bytesPerLine;n++) printf(" ");
 
 		printf(" ");
 		printHex( start + offset, showBytes );

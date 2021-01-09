@@ -30,6 +30,8 @@
 #include <string.h>
 #include <map>
 
+#define SUPPORTS_UDP_TUNNEL 0
+
 #if SUPPORTS_UDP_TUNNEL
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -54,8 +56,7 @@ using std::map;
 #define DEBUG 1
 #include "debug.h"
 
-#define MONITOR 1
-
+bool ethernet_monitor = 0;
 
 #ifdef __BEOS__
 #define CLOSESOCKET closesocket
@@ -218,6 +219,14 @@ int16 EtherOpen(uint32 pb, uint32 dce)
 {
 	D(bug("EtherOpen\n"));
 
+	ethernet_monitor = PrefsFindBool("ethernet_monitor");
+
+	if ( ethernet_monitor )
+	{
+		printf( "Ethernet_monitor is Enabled \n");
+	}
+
+
 	// Allocate driver data
 	M68kRegisters r;
 	r.d[0] = SIZEOF_etherdata;
@@ -334,13 +343,14 @@ int16 EtherControl(uint32 pb, uint32 dce)
 					else
 						return eMultiErr;
 
-#if MONITOR
-					bug("Sending Ethernet packet:\n");
-					for (int i=0; i<len; i++) {
-						bug("%02x ", packet[i]);
+					if (ethernet_monitor)
+					{
+						printf("Sending Ethernet packet:\n");
+						for (int i=0; i<len; i++) {
+							printf("%02x ", packet[i]);
+						}
+						printf("\n");
 					}
-					bug("\n");
-#endif
 
 					// Send packet
 					struct sockaddr_in sa;
@@ -353,6 +363,13 @@ int16 EtherControl(uint32 pb, uint32 dce)
 					}
 				} else
 #endif
+					if (ethernet_monitor)
+					{
+						uint8 packet[1514];
+						int len = ether_wds_to_buffer(wds, packet);
+						hexDump( (char *) packet, len );
+					}
+
 					return ether_write(wds);
 			}
 			return noErr;
@@ -397,9 +414,10 @@ void EtherReadPacket(uint32 &src, uint32 &dest, uint32 &len, uint32 &remaining)
 
 	Mac2Mac_memcpy(dest, src, todo);
 
-#if MONITOR
-	hexDump( (char *) Mac2HostAddr(dest), todo);
-#endif
+	if (ethernet_monitor)
+	{
+		hexDump( (char *) Mac2HostAddr(dest), todo);
+	}
 
 	src += todo;
 	dest += todo;
@@ -419,13 +437,14 @@ void ether_udp_read(uint32 packet, int length, struct sockaddr_in *from)
 	if (memcmp(Mac2HostAddr(packet) + 6, ether_addr, 6) == 0)
 		return;
 
-#if MONITOR
-	bug("Receiving Ethernet packet:\n");
-	for (int i=0; i<length; i++) {
-		bug("%02x ", ReadMacInt8(packet + i));
+	if (ethernet_monitor)
+	{
+		printf("Receiving Ethernet packet:\n");
+		for (int i=0; i<length; i++) {
+			printf("%02x ", ReadMacInt8(packet + i));
+		}
+		printf("\n");
 	}
-	bug("\n");
-#endif
 
 	// Get packet type
 	uint16 type = ReadMacInt16(packet + 12);

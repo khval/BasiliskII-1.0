@@ -18,6 +18,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <stdbool.h>
+
 #include <exec/types.h>
 #include <exec/memory.h>
 #include <exec/errors.h>
@@ -40,10 +42,8 @@
 #include "ether_defs.h"
 #include "exec/emulation.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #include "debug.h"
-
-#define MONITOR 0
 
 
 #define AllocVecSharedClear(size) AllocVecTags( size, AVT_Type, MEMF_SHARED, AVT_ClearWithValue, 0, TAG_END );

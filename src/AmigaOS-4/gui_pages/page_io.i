@@ -12,6 +12,10 @@ PAGE_Add, VGroupObject,
 
 		LAYOUT_AddChild, MakeInteger(ID_PREFS_ETHERNET_UNIT_GAD, 5),
 		CHILD_Label, MakeLabel(ID_PREFS_ETHERNET_UNIT_GAD),
+
+		LAYOUT_AddChild, MakeCheck(ID_PREFS_ETHERNET_MONITOR_GAD, 0 ),
+		CHILD_Label, MakeLabel(ID_PREFS_ETHERNET_MONITOR_GAD),
+
 	LayoutEnd,
 	CHILD_WeightedHeight, 0,
 

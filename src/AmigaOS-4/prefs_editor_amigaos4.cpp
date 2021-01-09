@@ -411,6 +411,8 @@ static void read_serial_settings( void )
 	{
 		PrefsRemoveItem("ether");
 	}
+
+	PrefsReplaceBool("ethernet_monitor",		getv( obj[ID_PREFS_ETHERNET_MONITOR_GAD], GA_Selected));
 }
 
 static void read_emulation_settings( void )
@@ -719,6 +721,9 @@ static void set_serial_settings( void )
 		RSetAttrO( win_prefs, ID_PREFS_ETHERNET_DEVICE_GAD, STRINGA_TextVal, &ether_dev );
 		RSetAttrO( win_prefs, ID_PREFS_ETHERNET_UNIT_GAD, INTEGER_Number, ether_unit );
 	}
+
+	RSetAttrO( win_prefs,  ID_PREFS_ETHERNET_MONITOR_GAD, GA_Selected, PrefsFindBool("ethernet_monitor"));
+
 }
 
 void get_width_and_height_from_modeid( ULONG DisplayID, ULONG *width, ULONG *height )
