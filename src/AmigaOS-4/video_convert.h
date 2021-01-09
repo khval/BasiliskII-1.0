@@ -40,17 +40,26 @@ void convert_8bit_lookup_to_16bit( char *from, uint16 *to,int  pixels );
 void convert_8bit_lookup_to_16bit_2pixels( uint16 *from, uint32 *to,int  pixels );		// from 2x 8bit pixels to 2x 16bit pixels.
 void convert_16bit_lookup_to_16bit( uint16 *from, uint16 *to,int  pixels );
 
+void convert_1bit_to_32bit_8pixels( char *from, double *to,int  pixels );
+void convert_2bit_to_32bit_4pixels( char *from, double *to,int  pixels );
 void convert_4bit_lookup_to_32bit_2pixels( unsigned char *from, double *to,int  pixels );
 void convert_8bit_lookup_to_32bit_2pixels( uint16 *from, double *to,int  pixels );
 
+/*
+// this should be obsolete
 void convert_1bit_to_32bit( char *from, uint32 *to,int  pixels );
 void convert_2bit_to_32bit( char *from, uint32 *to,int  pixels );
 void convert_4bit_to_32bit( char *from, uint32 *to,int  pixels );
 void convert_8bit_to_32bit_db( char *from, uint32 *to,int  pixels );
 void convert_8bit_to_32bit_asm( char *from, uint32 *to,int  pixels );
 void convert_8bit_to_32bit( char *from, uint32 *to,int  pixels );
+*/
+
 void convert_15bit_to_32bit( uint16 *from, uint32 *to,int  pixels );
 void convert_16bit_to_32bit( uint16 *from, uint32 *to,int  pixels );
+
+
+
 extern uint16 *lookup16bit;
 
 

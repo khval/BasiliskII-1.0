@@ -153,8 +153,6 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 
 			if (convert == (void (*)(char*, char*, int)) convert_4bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_16bit_2pixels; 
 			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
-			if (convert == (void (*)(char*, char*, int)) convert_4bit_to_32bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_32bit_2pixels; 
-			if (convert == (void (*)(char*, char*, int)) convert_8bit_to_32bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_32bit_2pixels; 
 
 			if (  convert )
 			{
@@ -298,6 +296,47 @@ void set_palette_16bit_be(uint8 *pal, int num)
 	g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
 	b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
 	vpal16[num] = r << 8 | g << 3 | b >> 3;
+}
+
+
+#define _LE_ARGB(n) 0xFF + (pal[(n)] << 8) +  (pal[(n)+1] << 16) + (pal[(n)+2] << 24) ;
+#define _BE_ARGB(n) 0xFF000000 + (pal[(n)] << 16) +  (pal[(n)+1] << 8) + pal[(n)+2]  ; ;
+
+
+void set_palette_32bit_4pixels_le(uint8 *pal, int num)
+{
+	int x;
+	int n;
+	uint32 *d;
+
+	for (num=0;num<256;num++)
+	{
+		n=num*3;
+		d = vpal32 + num*8;
+
+		d[0]= _LE_ARGB( (n>>6)&3 );
+		d[1]= _LE_ARGB( (n>>4)&3 );
+		d[2]= _LE_ARGB( (n>>2)&3 );
+		d[3]= _LE_ARGB( (n)&3 );
+	}
+}
+
+void set_palette_32bit_4pixels_be(uint8 *pal, int num)
+{
+	int x;
+	int n;
+	uint32 *d;
+
+	for (num=0;num<256;num++)
+	{
+		n=num*3;
+		d = vpal32 + num*8;
+
+		d[0]= _BE_ARGB( (n>>6)&3 );
+		d[1]= _BE_ARGB( (n>>4)&3 );
+		d[2]= _BE_ARGB( (n>>2)&3 );
+		d[3]= _BE_ARGB( (n)&13);
+	}
 }
 
 void set_palette_32bit_le(uint8 *pal, int num)

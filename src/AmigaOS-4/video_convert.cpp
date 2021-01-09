@@ -36,18 +36,24 @@ struct video_convert_names vcn[] =	{
 	{"convert_32bit_to_16bit_le",(void *) convert_32bit_to_16bit_le},
 	{"convert_copy_16bit",(void *) convert_copy_16bit},
 
+	{"convert_1bit_to_32bit_8pixels",(void *) convert_1bit_to_32bit_8pixels},
+	{"convert_2bit_to_32bit_4pixels",(void *) convert_2bit_to_32bit_4pixels},
+
 	{"convert_4bit_lookup_to_32bit_2pixels",(void *) convert_4bit_lookup_to_32bit_2pixels},
 	{"convert_8bit_lookup_to_32bit_2pixels",(void *) convert_8bit_lookup_to_32bit_2pixels},
 
+/*
+// this should be obsolete
 	{"convert_1bit_to_32bit",(void *) convert_1bit_to_32bit},
 	{"convert_2bit_to_32bit",(void *) convert_2bit_to_32bit},
 	{"convert_4bit_to_32bit",(void *) convert_4bit_to_32bit},
 	{"convert_8bit_to_32bit",(void *) convert_8bit_to_32bit},
 	{"convert_8bit_to_32bit_db",(void *) convert_8bit_to_32bit_db},
+*/
+
 	{"convert_15bit_to_32bit",(void *) convert_15bit_to_32bit},
 	{"convert_16bit_to_32bit",(void *) convert_16bit_to_32bit},
 	{"convert_copy_32bit",(void *) convert_copy_32bit},
-
 	{NULL,NULL}};
 
 
@@ -180,6 +186,36 @@ void convert_1bit_to_8bit(  char *from, char *to,int  pixels )
 		*to++ = (source & 4)>>2;
 		*to++ = (source & 2)>>1;
 		*to++ = (source & 1);
+	}
+}
+
+void convert_1bit_to_32bit_8pixels(  char *from, double *to,int  pixels )
+{
+	register int n;
+	register double *source;
+	int bytes = pixels / 8;
+
+	for (n=0; n<bytes;n++)
+	{
+		source = (double *)  (vpal32 + (8*from[n]));
+		*to++ = source[0];
+		*to++ = source[1];
+		*to++ = source[2];
+		*to++ = source[3];
+	}
+}
+
+void convert_2bit_to_32bit_4pixels(  char *from, double *to,int  pixels )
+{
+	register int n;
+	register double *source;
+	int bytes = pixels / 4;
+
+	for (n=0; n<bytes;n++)
+	{
+		source = (double *)  (vpal32 + (4*from[n]));
+		*to++ = source[0];	// 64 bit 2 pixels
+		*to++ = source[1];  // 64 bit 2 pixels
 	}
 }
 

@@ -1472,9 +1472,12 @@ void *get_convert( uint32_t scr_depth, uint32_t depth )	// this thing is stupid 
 
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_32bit_to_16bit_le;
 			break;
+
 		case VDEPTH_32BIT:
-			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_32bit;
-			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_to_32bit;
+			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_32bit_8pixels;
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_to_32bit_4pixels;
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_32bit_2pixels;
+			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_32bit_2pixels;
 			if (depth == VDEPTH_16BIT)	convert = (void *) &convert_15bit_to_32bit;
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_copy_32bit;
 			break;
@@ -1564,10 +1567,10 @@ void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
 
 		case PIXF_A8R8G8B8:
 
-			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_32bit;
-			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_to_32bit;
-			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_to_32bit;
-			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_to_32bit;
+			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_32bit_8pixels;
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_to_32bit_4pixels;
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_32bit_2pixels;
+			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_32bit_2pixels;
 			if (depth == VDEPTH_16BIT)	convert = (void *) &convert_15bit_to_32bit;
 			if (depth == VDEPTH_32BIT)	convert = (void *) &convert_copy_32bit;
 			break;
