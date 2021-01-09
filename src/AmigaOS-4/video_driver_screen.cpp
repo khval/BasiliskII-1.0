@@ -43,13 +43,13 @@ extern struct MsgPort *periodic_msgPort;
 		IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE	
 
 
-extern void (*set_palette_fn)(uint8 *pal, uint32 num , int maxcolors);
+extern void (*set_palette_fn)(uint8 *pal, uint32 num);
 
-extern void set_vpal_16bit_le(uint8 *pal, uint32 num, int maxcolors);
-extern void set_vpal_16bit_be(uint8 *pal, uint32 num, int maxcolors);
-extern void set_vpal_32bit_le(uint8 *pal, uint32 num, int maxcolors );
-extern void set_vpal_32bit_be(uint8 *pal, uint32 num, int maxcolors);
-void set_screen_palette_8bit(uint8 *pal, uint32 num, int maxcolors);
+extern void set_vpal_16bit_le(uint8 *pal, uint32 num);
+extern void set_vpal_16bit_be(uint8 *pal, uint32 num);
+extern void set_vpal_32bit_le(uint8 *pal, uint32 num );
+extern void set_vpal_32bit_be(uint8 *pal, uint32 num);
+void set_screen_palette_8bit(uint8 *pal, uint32 num);
 
 static struct Screen *_the_screen = NULL;
 
@@ -396,30 +396,20 @@ inline void set_screen_color(uint8 *pal, uint32 num)
 //	print_color(pal, num);
 }
 
-void set_screen_palette_8bit(uint8 *pal, uint32 num, int maxcolors)
+void set_screen_palette_8bit(uint8 *pal, uint32 num)
 {
-	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -- _the_screen is %lx -- num %ld -- max colors %ld\n",__FUNCTION__,__LINE__,_the_screen,num,maxcolors);
-
 	if (_the_screen) 
 	{
-		if (num >= maxcolors)		// bad range
-		{
-			for (num = 0; num<maxcolors ; num++) set_screen_color(pal,  num);
-			amiga_color_table[0] = (maxcolors << 16) + 0;	// load 256 colors, first colors is 0
-			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
-		}
-		else
-		{
-			set_screen_color(pal,  num);
-			amiga_color_table[0] = (1 << 16) | num;	// load 1 color, first colors number is [num]
-			LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
-		}
+
+		for (num = 0; num<256 ; num++) set_screen_color(pal,  num);
+		amiga_color_table[0] = (256 << 16) + 0;	// load 256 colors, first colors is 0
+		LoadRGB32(&_the_screen->ViewPort, amiga_color_table);
 	}
 }
 
 void driver_screen::set_palette(uint8 *pal, int num)
 {
-	if (set_palette_fn) set_palette_fn(pal, num, maxpalcolors);
+	if (set_palette_fn) set_palette_fn(pal, num);
 }
 
 driver_screen::~driver_screen()
