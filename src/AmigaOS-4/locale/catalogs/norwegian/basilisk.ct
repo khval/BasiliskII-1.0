@@ -106,10 +106,6 @@ MSG_PREFS_CD_DISABLE_DRIVER_GAD
 Deaktiver CD-ROM-driveren
 ; Disable CD-ROM driver
 ;
-MSG_PREFS_MORPHOS_ROOT_GAD
-AmigaOS rot skuff
-; AmigaOS root
-;
 MSG_PREFS_VOLUMETYPE_FILE_GAD
 Fil
 ; File
@@ -162,26 +158,6 @@ MSG_PREFS_MODEM_PARALLEL_GAD
 Parallel enhet
 ; Parallel device
 ;
-MSG_PREFS_ETHERNET_DEVICE_GAD
-Enthernet
-; Device
-;
-MSG_PREFS_ETHERNET_UNIT_GAD
-Enhet id
-; Unit
-;
-MSG_PREFS_PRINTER_DEVICE_GAD
-Parallel enhet
-; Device
-;
-MSG_PREFS_PRINTER_UNIT_GAD
-Enhet
-; Unit
-;
-MSG_PREFS_PRINTER_PARALLEL_GAD
-Parallel enhet
-; Parallel device
-;
 MSG_PREFS_GFX_WIDTH_GAD
 _Bredde
 ; _Width
@@ -190,37 +166,13 @@ MSG_PREFS_GFX_HEIGHT_GAD
 _Høyde
 ; _Height
 ;
-MSG_PREFS_GFX_FULLSCREEN_GAD
+ID_PREFS_GFX_FULLSCREEN_GAD
 _Full skjerm
 ; _Full screen
 ;
-MSG_PREFS_GFX_8BIT_GAD
+ID_PREFS_GFX_8BIT_GAD
 _8bit-modus
 ; _8bit mode
-;
-MSG_PREFS_DISABLE_SOUND
-_Deaktiver lyd
-; _Disable sound
-;
-MSG_PREFS_SYSTEM_RAM_GAD
-MacOS RAM
-; MacOS RAM
-;
-MSG_PREFS_SYSTEM_MODEL_GAD
-Mac-modell
-; Mac Model
-;
-MSG_PREFS_SYSTEM_ROM_GAD
-_ROM-fil
-; _ROM File
-;
-MSG_PREFS_START_GAD
-Start
-; Start
-;
-MSG_PREFS_QUIT_GAD
-Avslutt
-; Quit
 ;
 MSG_MAC_VOLUMES
 Mac Volumes
@@ -529,6 +481,10 @@ Ethernet enhet
 ID_PREFS_ETHERNET_UNIT_GAD
 Ethernet enhet id
 ; Ethernet unit
+;
+ID_PREFS_ETHERNET_MONITOR_GAD
+Nettverks overvåking.
+; ETHERNET MONITORING
 ;
 ID_MAC_VOLUMES
 Mac disks

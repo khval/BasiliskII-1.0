@@ -66,7 +66,7 @@ APP = BasiliskII
 .SUFFIXES:
 .SUFFIXES: .c .cpp .asm .o .h
 
-all: $(APP)
+all: locale $(APP)
 
 OBJ_DIR = obj
 $(OBJ_DIR)::

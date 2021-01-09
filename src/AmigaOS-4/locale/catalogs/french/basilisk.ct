@@ -107,10 +107,6 @@ MSG_PREFS_CD_DISABLE_DRIVER_GAD
 Désactiver le pilote CD-ROM
 ; Disable CD-ROM driver
 ;
-MSG_PREFS_MORPHOS_ROOT_GAD
-Racine AmigaOS
-; AmigaOS root
-;
 MSG_PREFS_VOLUMETYPE_FILE_GAD
 Fichier
 ; File
@@ -163,26 +159,6 @@ MSG_PREFS_MODEM_PARALLEL_GAD
 Périphérique parallèle
 ; Parallel device
 ;
-MSG_PREFS_ETHERNET_DEVICE_GAD
-Périphérique
-; Device
-;
-MSG_PREFS_ETHERNET_UNIT_GAD
-Unité
-; Unit
-;
-MSG_PREFS_PRINTER_DEVICE_GAD
-Périphérique
-; Device
-;
-MSG_PREFS_PRINTER_UNIT_GAD
-Unité
-; Unit
-;
-MSG_PREFS_PRINTER_PARALLEL_GAD
-Périphérique parallèle
-; Parallel device
-;
 MSG_PREFS_GFX_WIDTH_GAD
 _Largeur
 ; _Width
@@ -191,37 +167,13 @@ MSG_PREFS_GFX_HEIGHT_GAD
 _Hauteur
 ; _Height
 ;
-MSG_PREFS_GFX_FULLSCREEN_GAD
+ID_PREFS_GFX_FULLSCREEN_GAD
 Plain é_cran
 ; _Full screen
 ;
-MSG_PREFS_GFX_8BIT_GAD
+ID_PREFS_GFX_8BIT_GAD
 Mode _8 bits
 ; _8bit mode
-;
-MSG_PREFS_DISABLE_SOUND
-_Désactiver le son
-; _Disable sound
-;
-MSG_PREFS_SYSTEM_RAM_GAD
-RAM MacOS
-; MacOS RAM
-;
-MSG_PREFS_SYSTEM_MODEL_GAD
-Modèle de Mac
-; Mac Model
-;
-MSG_PREFS_SYSTEM_ROM_GAD
-Fichier _ROM
-; _ROM File
-;
-MSG_PREFS_START_GAD
-Démarrer
-; Start
-;
-MSG_PREFS_QUIT_GAD
-Quitter
-; Quit
 ;
 MSG_MAC_VOLUMES
 Volumes Mac

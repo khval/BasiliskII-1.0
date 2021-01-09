@@ -77,9 +77,6 @@ _Boot from CD
 MSG_PREFS_CD_DISABLE_DRIVER_GAD (//)
 Disable CD-ROM driver
 ;
-MSG_PREFS_MORPHOS_ROOT_GAD (//)
-AmigaOS root
-;
 MSG_PREFS_VOLUMETYPE_FILE_GAD (//)
 File
 ;
@@ -119,50 +116,17 @@ Unit
 MSG_PREFS_MODEM_PARALLEL_GAD (//)
 Parallel device
 ;
-MSG_PREFS_ETHERNET_DEVICE_GAD (//)
-Device
-;
-MSG_PREFS_ETHERNET_UNIT_GAD (//)
-Unit
-;
-MSG_PREFS_PRINTER_DEVICE_GAD (//)
-Device
-;
-MSG_PREFS_PRINTER_UNIT_GAD (//)
-Unit
-;
-MSG_PREFS_PRINTER_PARALLEL_GAD (//)
-Parallel device
-;
 MSG_PREFS_GFX_WIDTH_GAD (//)
 _Width
 ;
 MSG_PREFS_GFX_HEIGHT_GAD (//)
 _Height
 ;
-MSG_PREFS_GFX_FULLSCREEN_GAD (//)
+ID_PREFS_GFX_FULLSCREEN_GAD (//)
 _Full screen
 ;
-MSG_PREFS_GFX_8BIT_GAD (//)
+ID_PREFS_GFX_8BIT_GAD (//)
 _8bit mode
-;
-MSG_PREFS_DISABLE_SOUND (//)
-_Disable sound
-;
-MSG_PREFS_SYSTEM_RAM_GAD (//)
-MacOS RAM
-;
-MSG_PREFS_SYSTEM_MODEL_GAD (//)
-Mac Model
-;
-MSG_PREFS_SYSTEM_ROM_GAD (//)
-_ROM File
-;
-MSG_PREFS_START_GAD (//)
-Start
-;
-MSG_PREFS_QUIT_GAD (//)
-Quit
 ;
 MSG_MAC_VOLUMES (//)
 Mac Volumes
@@ -412,6 +376,9 @@ Ethernet device
 ;
 ID_PREFS_ETHERNET_UNIT_GAD (//)
 Ethernet unit
+;
+ID_PREFS_ETHERNET_MONITOR_GAD (//)
+Monitor
 ;
 ID_MAC_VOLUMES(//)
 Volumes

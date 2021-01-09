@@ -1,3 +1,7 @@
-list catalogs all lformat "echo *E[1mread from *"%p%n*"*E[0m*nflexcat basilisk.cd *"%p%n*" catalog=%pbasilisk.catalog" | grep "basilisk.ct" >t:b2-flexcat
+
+echo "echo *"*E[1mread from *"basilisk.ct*"*E[0m" > t:b2-flexcat
+echo "flexcat basilisk.cd basilisk.ct catalog=basilisk.catalog" >> t:b2-flexcat
+
+list catalogs all lformat "echo *E[1mread from *"%p%n*"*E[0m*nflexcat basilisk.cd *"%p%n*" catalog=%pbasilisk.catalog" | grep "basilisk.ct" >> t:b2-flexcat
 protect t:b2-flexcat +s
 t:b2-flexcat 
