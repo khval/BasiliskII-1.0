@@ -1,7 +1,8 @@
 Short:        Source code to 68k Macintosh Emulator for AmigaOS4
 Author:       Christian Bauer, Ilkka Lehtoranta, Kjetil Hvalstrand
+Translations: Alexandre Balaban, Samir Hawamdeh
 Uploader:    Kjetil Hvalstrand
-Version:      1.0.7
+Version:      1.0.8
 Type:         dev/c
 Architecture: AmigaOS4
 
@@ -22,7 +23,8 @@ and sound.
  or set lower priority, when the emulator is not in focus.)
  * Supports CD-ROM
  * All PC keyboard keys are supported in emulation
-(Se source code if you like to help)
+
+(Se source code if you like to help, translations needed!)
 
 DISCLAIMER:
 
@@ -41,8 +43,19 @@ THE 68K THAN BASILISK II ON THE PPC. BASILISK II USES UAE CPU ENGINE AND
 BPPC/CSPPC IS TOO SLOW.
 
 * ETHERNET CODE:
-ONLY MADE SOME CHANGES, THERE MAY BE SOME BUGS, TRY IT, BUT DIN'T EXPECT IT TO WORK.
-IF IT CRASHES IT WILL FREEZE YOUR SYSTEM. I DID NOT BREAK IT NEVER WORKED ON AMIGAOS4.
+I DID NOT BREAK IT NEVER WORKED ON AMIGAOS4.
+I THINK IT MIGHT WORK NOW, IF ITS JUST A MACOS ISSUE, BUT FOR ME ITS NOT WORKING.
+I HAVE LOOKED FOR SOMETHING LIKE TCPDUMP FOR MAC HAVE NOT FOUND ANY.
+
+Changes in Basilisk II 1.0.8 AmigaOS4 26.12.2020 (Kjetil Hvalstrand)
+
+* Found bug in ether_amiga.cpp did not convert host address to macos address,
+* Added improved debuging, ascii/hex dump
+* Added a option to enable or disable network monitoring.
+
+(I hope someone see way this is not working.... 
+if its working for you please give some hints MacOS version,
+Open Transport version, etc.)
 
 Changes in Basilisk II 1.0.7 AmigaOS4 26.12.2020 (Kjetil Hvalstrand)
 
