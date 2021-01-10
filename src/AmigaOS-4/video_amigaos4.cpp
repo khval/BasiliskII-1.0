@@ -942,7 +942,7 @@ static void periodic_func(void)
 						{		
 							char opt_str[100];
 				
-							sprintf(opt_str,"%s|%s",_L(MSG_CANCEL_GAD) ,_L(MSG_PREFS_QUIT_GAD));
+							sprintf(opt_str,"%s|%s",_L(ID_CANCEL_GAD) ,_L(ID_PREFS_QUIT_GAD));
 
 
 							ULONG opt =req(
