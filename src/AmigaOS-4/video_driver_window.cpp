@@ -72,6 +72,7 @@ void (*set_palette_fn)(uint8 *pal, uint32 num) = NULL;
  void set_vpal_4bit_to_32bit_le_2pixels(uint8 *pal, uint32 num);
  void set_vpal_8bit_to_32bit_le_2pixels(uint8 *pal, uint32 num);
 
+
 static bool refreash_all_colors = true;
 
 static int maxpalcolors = 0;
@@ -155,6 +156,18 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 
 				switch (macMode)
 				{
+					case VDEPTH_1BIT:
+						set_palette_fn = set_vpal_1bit_to_32bit_8pixels;
+						vpal32 = (uint32 *) AllocShared (256 * 4 * 8 );	// (input 8 x 1bit pixels) , 256 combos. (output 8 x 32bit pixels).
+						if (vpal32) memset( vpal32, 0, 256 * 4  * 8 );
+						break;
+
+					case VDEPTH_2BIT:
+						set_palette_fn = set_vpal_2bit_to_32bit_be_4pixels;
+						vpal32 = (uint32 *) AllocShared (256 * 4 * 4 );	// (input 4 x 2bit pixels) , 256 combos. (output 4 x 32bit pixels).
+						if (vpal32) memset( vpal32, 0, 256 * 4  * 4 );
+						break;
+
 					case VDEPTH_4BIT:
 						set_palette_fn = set_vpal_4bit_to_32bit_be_2pixels;
 						vpal32 = (uint32 *) AllocShared (8 * 256 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 32bit pixels).
@@ -175,8 +188,37 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 
 		case PIXF_B8G8R8A8: 
 			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_32bit_le;
-				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
+
+				switch (macMode)
+				{
+					case VDEPTH_1BIT:
+						set_palette_fn = set_vpal_1bit_to_32bit_8pixels;
+						vpal32 = (uint32 *) AllocShared (256 * 4 * 8 );	// (input 2 x 4bit pixels) , 256 combos. (output 8 x 32bit pixels).
+						if (vpal32) memset( vpal32, 0, 256 * 4  * 8 );
+						break;
+
+					case VDEPTH_2BIT:
+						set_palette_fn = set_vpal_2bit_to_32bit_le_4pixels;
+						vpal32 = (uint32 *) AllocShared (256 * 4 * 4 );	// (input 4 x 2bit pixels) , 256 combos. (output 4 x 32bit pixels).
+						if (vpal32) memset( vpal32, 0, 256 * 4  * 4 );
+						break;
+
+					case VDEPTH_4BIT:
+						set_palette_fn = set_vpal_4bit_to_32bit_le_2pixels;
+						vpal32 = (uint32 *) AllocShared (8 * 256 );	// (input 2 x 4bit pixels) , 256 combos. (output 2 x 32bit pixels).
+						if (vpal32) memset( vpal32, 0, 8 * 256 );
+						break;
+
+					case VDEPTH_8BIT:
+						set_palette_fn = set_vpal_8bit_to_32bit_le_2pixels;
+						vpal32 = (uint32 *) AllocShared ( 8 * 256 * 256  );	// 2 input pixel , 256 colors,  2 x 32bit output pixel. (0.5Mb)
+						break;
+
+					default:
+						set_palette_fn = set_vpal_32bit_le;
+						vpal32 = (uint32 *) AllocShared ( 4 * 256);	// 1 pixels , 256 colors, 1 x 32bit pixel
+						break;
+				}
 				break;
 
 		default:
