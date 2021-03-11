@@ -65,6 +65,9 @@ extern const char *(*_L) (unsigned int num) ;
 
 #define MAC_CURSOR_UP	0x3E
 #define MAC_CURSOR_DOWN	0x3D
+#define MAC_CURSOR_LEFT	0x3B
+#define MAC_CURSOR_RIGHT	0x3C
+#define MAC_OPTION_KEY 0x3A
 
 int last_wheel = 0;
 int delta_wheel = 0;
@@ -1003,7 +1006,6 @@ static void periodic_func(void)
 							break;
 			
 						// LALT+LSHIFT+CONTROL 
-
 						if ((qualifier & (IEQUALIFIER_LALT | IEQUALIFIER_LSHIFT | IEQUALIFIER_CONTROL)) ==    (IEQUALIFIER_LALT | IEQUALIFIER_LSHIFT | IEQUALIFIER_CONTROL) )
 						{
 							bool is_break = false;
@@ -1033,10 +1035,36 @@ static void periodic_func(void)
 							if (is_break) break;
 						}
 
-						if (code & IECODE_UP_PREFIX)
-							ADBKeyUp(keycode2mac[code & 0x7f]);
-						else
-							ADBKeyDown(keycode2mac[code & 0x7f]);
+						switch (code)
+						{
+							case 112:	// home key
+						
+								ADBKeyDown( MAC_OPTION_KEY );
+								ADBKeyDown( MAC_CURSOR_LEFT );
+								ADBKeyUp( MAC_CURSOR_LEFT );
+								ADBKeyUp( MAC_OPTION_KEY );
+								break;
+
+							case 113: // end key
+
+								ADBKeyDown( MAC_OPTION_KEY );
+								ADBKeyDown( MAC_CURSOR_RIGHT );
+								ADBKeyUp( MAC_CURSOR_RIGHT );
+								ADBKeyUp( MAC_OPTION_KEY );
+								break;
+						
+							default:
+						
+								if (code & IECODE_UP_PREFIX)
+								{
+									ADBKeyUp(keycode2mac[code & 0x7f]);
+								}
+								else
+								{
+									ADBKeyDown(keycode2mac[code & 0x7f]);
+								}
+								break;
+						}
 						break;
 
 					case IDCMP_EXTENDEDMOUSE:
