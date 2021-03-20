@@ -1,4 +1,4 @@
-## version $VER: basilisk.catalog 1.6 (26.11.2020)
+## version $VER: basilisk.catalog 1.7 (10.03.2021)
 ## codeset 0
 ## language italiano
 ## chunk AUTH Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
@@ -18,7 +18,7 @@ MSG_AUTHOR_INFORMATION
 ; \33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
 ;
 MSG_PORT_INFORMATION
-Versione AmigaOS4 (PPC) a cura di Kjetil Hvalstrand, 2007-2020
+Versione AmigaOS4 (PPC) a cura di Kjetil Hvalstrand, 2007-2021
 ; AmigaOS 4.X (PowerPC) port by Kjetil Hvalstrand, 2007-2020
 ;
 MSG_GFX_INFORMATION
@@ -26,7 +26,7 @@ Icone realizzate da Christian Rosentreter
 ; Basilisk icons by Christian Rosentereter
 ;
 MSG_TRANSLATION_INFORMATION
-Traduzione italiana a cura di Samir Hawamdeh
+Traduzione italiana a cura di Samir Hawamdeh\n
 ; Translation by: xxxxx
 ;
 MSG_DESCRIPTION
@@ -166,11 +166,7 @@ Unità
 ; Unit
 ;
 MSG_PREFS_MODEM_PARALLEL_GAD
-Dispositivo parallela
-; Parallel device
-;
-MSG_PREFS_PRINTER_PARALLEL_GAD
-Dispositivo parallela
+Dispositivo Parallela
 ; Parallel device
 ;
 MSG_PREFS_GFX_WIDTH_GAD
@@ -262,7 +258,7 @@ Emulazione
 ; Emulation
 ;
 MSG_MENU_TITLE_BASILISK
-Basilisk
+Basilisk II
 ; Basilisk
 ;
 MSG_MENU_BASILISK_ABOUT
@@ -294,11 +290,11 @@ Altezza Gfx
 ; Gfx height
 ;
 ID_PREFS_GFX_MODE_ID_SELECT_GAD
-Seleziona modalità video
+Modalità video
 ; Select screen mode
 ;
 ID_PREFS_GFX_MODE_ID_GAD
-Seleziona modalità id
+ID modalità video
 ; Screen mode id
 ;
 ID_PREFS_GFX_WINDOW_DEPTH_GAD
@@ -310,16 +306,32 @@ Modalità render
 ; Render mode
 ;
 ID_PREFS_GFX_LOCK_GAD
-Blocco schermo
+Blocca schermo
 ; Screen lock
 ;
-ID_PREFS_GFX_FRAMESKIP_GAD
+ID_ACTIVE_WINDOW_GAD
+Finestra attiva
+; Active window
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD
 Frame skip
 ; Frame skip
 ;
-ID_PREFS_GFX_LINESKIP_GAD
-Lineskip
-; Lineskip
+ID_ACTIVE_WINDOW_LINESKIP_GAD
+Line skip
+; Line skip
+;
+ID_DEACTIVE_WINDOW_GAD
+Finestra disattiva
+; Deactive window
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD
+Frame skip
+; Frame skip
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD
+Line skip
+; Line skip
 ;
 ID_SOUND
 Audio
@@ -450,7 +462,7 @@ Modello Mac
 ; Mac model
 ;
 ID_PREFS_SYSTEM_ROM_SELECT_GAD
-Seleziona ROM
+ROM Mac
 ; Select rom
 ;
 ID_PREFS_SYSTEM_ROM_GAD
@@ -494,7 +506,7 @@ Ethernet
 ; Ethernet
 ;
 ID_PREFS_ETHERNET_DEVICE_SELECT_GAD
-Seleziona dispositivo ethernet
+Dispositivo ethernet
 ; Select ethernet device
 ;
 ID_PREFS_ETHERNET_DEVICE_GAD
@@ -504,6 +516,10 @@ Dispositivo ethernet
 ID_PREFS_ETHERNET_UNIT_GAD
 Unità ethernet
 ; Ethernet unit
+;
+ID_PREFS_ETHERNET_MONITOR_GAD
+Monitor
+; Monitor
 ;
 ID_MAC_VOLUMES
 Volumi
@@ -550,11 +566,11 @@ Directory condivisa
 ; Shared directory
 ;
 ID_PREFS_VOLUMETYPE_FILE_GAD
-Tipo volume file
+Tipo file volume
 ; File volume type
 ;
 ID_PREFS_VOLUMETYPE_DEVICE_GAD
-Tipo volume dispositivo
+Tipo dispositivo volume
 ; Device volume type
 ;
 ID_PREFS_TYPE_GAD
@@ -574,7 +590,7 @@ Nome partizione
 ; Partition name
 ;
 ID_PREFS_READ_ONLY_GAD
-Sola lettura
+Sola _Lettura
 ; Read only
 ;
 ID_PREFS_FILE_GAD
@@ -594,11 +610,11 @@ Nome
 ; Name
 ;
 ID_CREATE_OK_GAD
-Ok
+_Ok
 ; Ok
 ;
 ID_CREATE_CANCEL_GAD
-Annulla
+_Annulla
 ; Cancel
 ;
 ID_CREATE_SIZE_GAD
@@ -606,11 +622,11 @@ Dimensione
 ; Size
 ;
 ID_OK_GAD
-Ok
+_Ok
 ; Ok
 ;
 ID_CANCEL_GAD
-Annulla
+_Annulla
 ; Cancel
 ;
 ID_END
