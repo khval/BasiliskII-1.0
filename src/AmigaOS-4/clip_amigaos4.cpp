@@ -18,12 +18,21 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "sysdeps.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #include <libraries/iffparse.h>
 #include <devices/clipboard.h>
 #include <proto/exec.h>
 #include <proto/iffparse.h>
+#include <proto/dos.h>
+
+
+#include "sysdeps.h"
+#include "cpu_emulation.h"
+#include "emul_op.h"
+#include "main.h"
+
 
 #include "clip.h"
 #include "prefs.h"
@@ -33,32 +42,86 @@
 
 
 // Global variables
-static struct IFFHandle *iffw = NULL;
-static struct ClipboardHandle *ch = NULL;
-static bool clipboard_open = false;
-static bool no_clip_conversion;
 
 
-// Conversion tables
-static const uint8 mac2iso[0x80] =
+class ClipBox
 {
-	0xc4, 0xc5, 0xc7, 0xc9, 0xd1, 0xd6, 0xdc, 0xe1,
-	0xe0, 0xe2, 0xe4, 0xe3, 0xe5, 0xe7, 0xe9, 0xe8,
-	0xea, 0xeb, 0xed, 0xec, 0xee, 0xef, 0xf1, 0xf3,
-	0xf2, 0xf4, 0xf6, 0xf5, 0xfa, 0xf9, 0xfb, 0xfc,
-	0x2b, 0xb0, 0xa2, 0xa3, 0xa7, 0xb7, 0xb6, 0xdf,
-	0xae, 0xa9, 0x20, 0xb4, 0xa8, 0x23, 0xc6, 0xd8,
-	0x20, 0xb1, 0x3c, 0x3e, 0xa5, 0xb5, 0xf0, 0x53,
-	0x50, 0x70, 0x2f, 0xaa, 0xba, 0x4f, 0xe6, 0xf8,
-	0xbf, 0xa1, 0xac, 0x2f, 0x66, 0x7e, 0x44, 0xab,
-	0xbb, 0x2e, 0x20, 0xc0, 0xc3, 0xd5, 0x4f, 0x6f,
-	0x2d, 0x2d, 0x22, 0x22, 0x60, 0x27, 0xf7, 0x20,
-	0xff, 0x59, 0x2f, 0xa4, 0x3c, 0x3e, 0x66, 0x66,
-	0x23, 0xb7, 0x2c, 0x22, 0x25, 0xc2, 0xca, 0xc1,
-	0xcb, 0xc8, 0xcd, 0xce, 0xcf, 0xcc, 0xd3, 0xd4,
-	0x20, 0xd2, 0xda, 0xdb, 0xd9, 0x69, 0x5e, 0x7e,
-	0xaf, 0x20, 0xb7, 0xb0, 0xb8, 0x22, 0xb8, 0x20
+	public:
+
+		struct IFFHandle *iff;
+		struct ClipboardHandle *ch;
+		bool clipboard_open ;
+
+		ClipBox()
+		{
+			iff = NULL;
+			ch = NULL;
+			clipboard_open = false;
+
+			// Create clipboard IFF handle
+			iff = AllocIFF();
+			if (iff)
+			{
+				ch = OpenClipboard(PRIMARY_CLIP);
+				if (ch)
+				{
+					iff->iff_Stream = (ULONG)ch;
+					InitIFFasClip(iff);
+					clipboard_open = true;
+				}
+			}
+			
+		}
+
+		~ClipBox()
+		{
+			// free it only if its open.
+			if (ch) CloseClipboard(ch);
+			if (iff) FreeIFF(iff);
+
+			// make sure, its not freed twice.
+			ch = NULL;
+			iff = NULL;
+		}
 };
+
+class ByteArray
+{
+	public:
+
+		ByteArray() 
+			{
+				printf("ByteArray init\n");
+				data = NULL; _size = 0;
+			 }
+
+		~ByteArray() 
+			{
+				printf("ByteArray free data %08x\n",data);
+				 if (data) free(data);
+			 }
+
+		int size() 
+			{ 
+				printf("ByteArray get Size\n");
+				return _size; 
+			}
+
+		uint8& operator[](int idx)
+			{
+				char c = data[ idx ];
+				if (c<15) c='.';
+
+				printf("ByteArray get %d of %d -- %c\n",idx,_size, c);
+				return data[idx];
+			 }
+
+	uint8 *data;
+	int _size;
+};
+
+
+static bool no_clip_conversion;
 
 
 /*
@@ -67,20 +130,6 @@ static const uint8 mac2iso[0x80] =
 
 void ClipInit(void)
 {
-	no_clip_conversion = PrefsFindBool("noclipconversion");
-
-	// Create clipboard IFF handle
-	iffw = AllocIFF();
-	if (iffw)
-	{
-		ch = OpenClipboard(PRIMARY_CLIP);
-		if (ch)
-		{
-			iffw->iff_Stream = (ULONG)ch;
-			InitIFFasClip(iffw);
-			clipboard_open = true;
-		}
-	}
 }
 
 
@@ -90,13 +139,6 @@ void ClipInit(void)
 
 void ClipExit(void)
 {
-	// free it only if its open.
-	if (ch) CloseClipboard(ch);
-	if (iffw) FreeIFF(iffw);
-
-	// make sure, its not freed twice.
-	ch = NULL;
-	iffw = NULL;
 }
 
 
@@ -104,57 +146,268 @@ void ClipExit(void)
  *  Mac application wrote to clipboard
  */
 
+
 void PutScrap(uint32 type, void *scrap, int32 length)
 {
+	ClipBox cb;
+
 	D(bug("PutScrap type %08lx, data %08lx, length %ld\n", type, scrap, length));
-	if (length <= 0 || !clipboard_open)
+	if (length <= 0 || !cb.clipboard_open)
 		return;
 
 	switch (type)
 	{
+/*
+		case 'styl':
+		{
+			dump_str( (char *) scrap, length );
+		}
+		break;
+*/		
+
 		case 'TEXT':
 		{
 			D(bug(" clipping TEXT\n"));
 
 			// Open IFF stream
-			if (OpenIFF(iffw, IFFF_WRITE))
+			if (OpenIFF(cb.iff, IFFF_WRITE))
 				break;
 
 			// Convert text from Mac charset to ISO-Latin1
 			uint8 *buf = (uint8 *) AllocVec (length, MEMF_SHARED| MEMF_CLEAR);
-			uint8 *p = (uint8 *)scrap;
-			uint8 *q = buf;
-			for (int i=0; i<length; i++) {
-				uint8 c = *p++;
-				if (c < 0x80) {
-					if (c == 13)	// CR -> LF
-						c = 10;
-				} else if (!no_clip_conversion)
-					c = mac2iso[c & 0x7f];
-				*q++ = c;
-			}
 
-			// Write text
-			if (!PushChunk(iffw, MAKE_ID('F','T','X','T'), ID_FORM, IFFSIZE_UNKNOWN))
+			if (buf)
 			{
-				if (!PushChunk(iffw, 0, MAKE_ID('C','H','R','S'), IFFSIZE_UNKNOWN))
-				{
-					WriteChunkBytes(iffw, scrap, length);
-					PopChunk(iffw);
-				}
-				PopChunk(iffw);
-			}
+				uint8 *p = (uint8 *)scrap;
+				uint8 *q = buf;
 
-			// Close IFF stream
-			CloseIFF(iffw);
-			FreeVec(buf);
-			break;
+				for (int i=0; i<length; i++)
+				{
+					uint8 c = *p++;
+					if (c == 13) c= 10;	// CR -> LF
+					*q++ = c;
+				}
+
+				// Write text
+				if (!PushChunk(cb.iff, MAKE_ID('F','T','X','T'), ID_FORM, IFFSIZE_UNKNOWN))
+				{
+					if (!PushChunk(cb.iff, 0, MAKE_ID('C','H','R','S'), IFFSIZE_UNKNOWN))
+					{
+						WriteChunkBytes(cb.iff, buf, length);
+						PopChunk(cb.iff);
+					}
+					PopChunk(cb.iff);
+				}
+
+				// Close IFF stream
+				CloseIFF(cb.iff);
+				FreeVec(buf);
+			}
 		}
+		break;
 	}
 }
 
+class Dev
+{
+	public:
+
+		struct MsgPort *mp ;
+		struct IOClipReq *io;
+		bool open ;
+
+		void init()
+		{
+			mp = NULL;
+			io = NULL;
+			open = false;
+		}
+
+		Dev(int unit)
+		{
+			init();
+	
+			mp = (MsgPort *) AllocSysObjectTags(ASOT_PORT, TAG_END);
+
+			io = (struct IOClipReq *) AllocSysObjectTags( ASOT_IOREQUEST, 
+					ASOIOR_Size, sizeof(struct IOClipReq) ,
+					ASOIOR_ReplyPort, mp,
+					TAG_END);
+
+			if (! OpenDevice("clipboard.device", unit, (IORequest*) io, 0))
+			{
+				open = true;
+			}
+		}
+
+		~Dev()
+		{
+			if (open)
+			{
+				CloseDevice( (IORequest*) io);
+				open = false;
+			}
+
+			if (io) FreeSysObject( ASOT_IOREQUEST, io );
+			if (mp) FreeSysObject( ASOT_PORT, mp );
+		}
+
+		void initIO()
+		{
+			io->io_Offset = 0;
+			io->io_Error = 0;
+			io->io_ClipID = 0;
+		}
+
+		int QuaryFTXT()		// returns length if true :-)
+		{
+			uint32_t cbuff[4];	// ID_FROM, size, FTEXT, CHARS
+			initIO();
+			io -> io_Command = CMD_READ;
+			io -> io_Data = (STRPTR) cbuff;
+			io -> io_Length = 16;
+			DoIO( (IORequest*) io );
+			
+			if (io-> io_Actual == 16)
+			{
+				if (cbuff[0] == ID_FORM )
+				{
+					if (cbuff[2] == MAKE_ID('F','T','X','T')) return cbuff[1] - 12;
+				}
+			}
+			return 0;
+		}
+
+		bool read(uint8 *ptr,int len)
+		{
+			io -> io_Command = CMD_READ;
+			io -> io_Data = (STRPTR) ptr;
+			io -> io_Length = len;
+			DoIO( (IORequest*) io );
+			
+			if (io-> io_Actual == len) return true;
+			return false;
+		}
+};
+
+
+bool get_amiga_clip(ByteArray &data)
+{
+	Dev clip(0) ;
+	int len;
+
+	len = clip.QuaryFTXT();
+
+	if (len)
+	{
+		if (data.data) free(data.data);
+
+		data.data = (uint8*) malloc(len);
+
+		if (data.data) 
+		{
+			data._size = clip.read( data.data, len ) ? len : 0;
+		}
+	}
+
+	return data._size ? true: false;
+}
+
+
+
+void give2mac(ByteArray &data, uint32 type)
+{
+	// Allocate space for new scrap in MacOS side
+	M68kRegisters r;
+	r.d[0] = data.size();
+	Execute68kTrap(0xa71e, &r);			// NewPtrSysClear()
+	uint32 scrap_area = r.a[0];
+
+	if (scrap_area == 0) return;
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+	
+	int size = data.size();
+	uint8 *p = Mac2HostAddr(scrap_area);
+	for (int i = 0; i < size; i++) 
+	{
+		uint8 c = data[i];
+
+		if (c == 10) c = 13; 	// LF -> CR
+		*p++ = c;
+	}
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	// Add new data to clipboard
+	static uint8 proc[] = {
+			0x59, 0x8f,					// subq.l	#4,sp
+			0xa9, 0xfc,					// ZeroScrap()
+			0x2f, 0x3c, 0, 0, 0, 0,		// move.l	#length,-(sp)
+			0x2f, 0x3c, 0, 0, 0, 0,		// move.l	#type,-(sp)
+			0x2f, 0x3c, 0, 0, 0, 0,		// move.l	#outbuf,-(sp)
+			0xa9, 0xfe,					// PutScrap()
+			0x58, 0x8f,					// addq.l	#4,sp
+			M68K_RTS >> 8, M68K_RTS & 0xff
+		};
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	r.d[0] = sizeof(proc);
+	Execute68kTrap(0xa71e, &r);		// NewPtrSysClear()
+	uint32 proc_area = r.a[0];
+
+	if (proc_area)
+	{
+		printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+		// The procedure is run-time generated because it must lays in
+		// Mac address space. This is mandatory for "33-bit" address
+		// space optimization on 64-bit platforms because the static
+		// proc[] array is not remapped
+
+		Host2Mac_memcpy(proc_area, proc, sizeof(proc));
+
+		WriteMacInt32(proc_area +  6, data.size());
+		WriteMacInt32(proc_area + 12, type);
+		WriteMacInt32(proc_area + 18, scrap_area);
+
+//		we_put_this_data = true;
+
+		Execute68k(proc_area, &r);		// <--------------------------------- gets stuck here...
+
+		printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+		// We are done with scratch memory
+		r.a[0] = proc_area;
+		Execute68kTrap(0xa01f, &r);		// DisposePtr
+	}
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	r.a[0] = scrap_area;
+	Execute68kTrap(0xa01f, &r);		// DisposePtr
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+}
+
+
 void GetScrap(void **handle, uint32 type, int32 offset)
 {
+	ByteArray data;
+
 	D(bug("GetScrap handle %p, type %08x, offset %d\n", handle, type, offset));
+
+	if ( get_amiga_clip( data) == false) return;
+
+	switch (type) 
+	{
+		case 'TEXT':
+
+			int size = data.size();
+//			give2mac( data, type );
+			break;
+	}
 }
+
 
