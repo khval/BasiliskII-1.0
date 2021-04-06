@@ -36,54 +36,18 @@
 
 #include "clip.h"
 #include "prefs.h"
+#include "deviceClip.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #include "debug.h"
-
 
 // Global variables
 
+static bool we_put_this_data = false;
 
-class ClipBox
-{
-	public:
+void do_putscrap(uint32 type, void *scrap, int32 length);
 
-		struct IFFHandle *iff;
-		struct ClipboardHandle *ch;
-		bool clipboard_open ;
 
-		ClipBox()
-		{
-			iff = NULL;
-			ch = NULL;
-			clipboard_open = false;
-
-			// Create clipboard IFF handle
-			iff = AllocIFF();
-			if (iff)
-			{
-				ch = OpenClipboard(PRIMARY_CLIP);
-				if (ch)
-				{
-					iff->iff_Stream = (ULONG)ch;
-					InitIFFasClip(iff);
-					clipboard_open = true;
-				}
-			}
-			
-		}
-
-		~ClipBox()
-		{
-			// free it only if its open.
-			if (ch) CloseClipboard(ch);
-			if (iff) FreeIFF(iff);
-
-			// make sure, its not freed twice.
-			ch = NULL;
-			iff = NULL;
-		}
-};
 
 class ByteArray
 {
@@ -146,38 +110,38 @@ void ClipExit(void)
  *  Mac application wrote to clipboard
  */
 
-
 void PutScrap(uint32 type, void *scrap, int32 length)
 {
-	ClipBox cb;
-
-	D(bug("PutScrap type %08lx, data %08lx, length %ld\n", type, scrap, length));
-	if (length <= 0 || !cb.clipboard_open)
+	D(bug("PutScrap type %08lx, data %p, length %ld\n", type, scrap, length));
+	if (we_put_this_data) {
+		we_put_this_data = false;
+		return;
+	}
+	if (length <= 0)
 		return;
 
+//	XDisplayLock();
+	do_putscrap(type, scrap, length);
+//	XDisplayUnlock();
+}
+
+
+void do_putscrap(uint32 type, void *scrap, int32 length)
+{
 	switch (type)
 	{
-/*
-		case 'styl':
-		{
-			dump_str( (char *) scrap, length );
-		}
-		break;
-*/		
 
 		case 'TEXT':
 		{
 			D(bug(" clipping TEXT\n"));
-
-			// Open IFF stream
-			if (OpenIFF(cb.iff, IFFF_WRITE))
-				break;
 
 			// Convert text from Mac charset to ISO-Latin1
 			uint8 *buf = (uint8 *) AllocVec (length, MEMF_SHARED| MEMF_CLEAR);
 
 			if (buf)
 			{
+				DeviceClip clip(0);
+
 				uint8 *p = (uint8 *)scrap;
 				uint8 *q = buf;
 
@@ -188,112 +152,43 @@ void PutScrap(uint32 type, void *scrap, int32 length)
 					*q++ = c;
 				}
 
-				// Write text
-				if (!PushChunk(cb.iff, MAKE_ID('F','T','X','T'), ID_FORM, IFFSIZE_UNKNOWN))
-				{
-					if (!PushChunk(cb.iff, 0, MAKE_ID('C','H','R','S'), IFFSIZE_UNKNOWN))
-					{
-						WriteChunkBytes(cb.iff, buf, length);
-						PopChunk(cb.iff);
-					}
-					PopChunk(cb.iff);
-				}
-
-				// Close IFF stream
-				CloseIFF(cb.iff);
+				clip.WriteFTXT( (char *) buf, length);
 				FreeVec(buf);
 			}
 		}
 		break;
+
+		case 'styl':
+		 {
+			D(bug(" clipping styl\n"));
+			uint16 *p = (uint16 *)scrap;
+			uint16 n = (*p++);
+			D(bug(" %d styles (%d bytes)\n", n, length));
+			for (int i = 0; i < n; i++)
+			 {
+				uint32 offset = (*(uint32 *)p); p += 2;
+				uint16 line_height = (*p++);
+				uint16 font_ascent = (*p++);
+				uint16 font_family = (*p++);
+				uint16 style_code = (*p++);
+				uint16 char_size = (*p++);
+				uint16 r = (*p++);
+				uint16 g = (*p++);
+				uint16 b = (*p++);
+
+				D(bug("  offset=%d, height=%d, font ascent=%d, id=%d, style=%x, size=%d, RGB=%x/%x/%x\n",
+					  offset, line_height, font_ascent, font_family, style_code, char_size, r, g, b));
+			}
+		}
+		break;
 	}
+
 }
-
-class Dev
-{
-	public:
-
-		struct MsgPort *mp ;
-		struct IOClipReq *io;
-		bool open ;
-
-		void init()
-		{
-			mp = NULL;
-			io = NULL;
-			open = false;
-		}
-
-		Dev(int unit)
-		{
-			init();
-	
-			mp = (MsgPort *) AllocSysObjectTags(ASOT_PORT, TAG_END);
-
-			io = (struct IOClipReq *) AllocSysObjectTags( ASOT_IOREQUEST, 
-					ASOIOR_Size, sizeof(struct IOClipReq) ,
-					ASOIOR_ReplyPort, mp,
-					TAG_END);
-
-			if (! OpenDevice("clipboard.device", unit, (IORequest*) io, 0))
-			{
-				open = true;
-			}
-		}
-
-		~Dev()
-		{
-			if (open)
-			{
-				CloseDevice( (IORequest*) io);
-				open = false;
-			}
-
-			if (io) FreeSysObject( ASOT_IOREQUEST, io );
-			if (mp) FreeSysObject( ASOT_PORT, mp );
-		}
-
-		void initIO()
-		{
-			io->io_Offset = 0;
-			io->io_Error = 0;
-			io->io_ClipID = 0;
-		}
-
-		int QuaryFTXT()		// returns length if true :-)
-		{
-			uint32_t cbuff[4];	// ID_FROM, size, FTEXT, CHARS
-			initIO();
-			io -> io_Command = CMD_READ;
-			io -> io_Data = (STRPTR) cbuff;
-			io -> io_Length = 16;
-			DoIO( (IORequest*) io );
-			
-			if (io-> io_Actual == 16)
-			{
-				if (cbuff[0] == ID_FORM )
-				{
-					if (cbuff[2] == MAKE_ID('F','T','X','T')) return cbuff[1] - 12;
-				}
-			}
-			return 0;
-		}
-
-		bool read(uint8 *ptr,int len)
-		{
-			io -> io_Command = CMD_READ;
-			io -> io_Data = (STRPTR) ptr;
-			io -> io_Length = len;
-			DoIO( (IORequest*) io );
-			
-			if (io-> io_Actual == len) return true;
-			return false;
-		}
-};
 
 
 bool get_amiga_clip(ByteArray &data)
 {
-	Dev clip(0) ;
+	DeviceClip clip(0) ;
 	int len;
 
 	len = clip.QuaryFTXT();
@@ -301,18 +196,32 @@ bool get_amiga_clip(ByteArray &data)
 	if (len)
 	{
 		if (data.data) free(data.data);
-
 		data.data = (uint8*) malloc(len);
-
-		if (data.data) 
-		{
-			data._size = clip.read( data.data, len ) ? len : 0;
-		}
+		if (data.data) data._size = clip.read( data.data, len ) ? len : 0;		
 	}
+	clip.readDone();
 
 	return data._size ? true: false;
 }
 
+void dump_68k(char *code, char *code_end)
+{
+	char *ptr;
+	char *ncode;
+	char opcodeName[LEN_DISASSEMBLE_OPCODE_STRING], operands[LEN_DISASSEMBLE_OPERANDS_STRING];
+
+	for (;code<code_end;code=ncode)
+	{
+		ncode = (char *) Disassemble68k( (APTR) code, opcodeName, operands);
+
+		printf("%08x: %s %s\n", code, opcodeName,operands);
+
+		for (ptr = code; ptr<ncode; ptr++) printf("%02x ",*ptr);
+		printf("\n");
+
+		code = ncode;
+	}
+}
 
 
 void give2mac(ByteArray &data, uint32 type)
@@ -346,7 +255,7 @@ void give2mac(ByteArray &data, uint32 type)
 			0x2f, 0x3c, 0, 0, 0, 0,		// move.l	#length,-(sp)
 			0x2f, 0x3c, 0, 0, 0, 0,		// move.l	#type,-(sp)
 			0x2f, 0x3c, 0, 0, 0, 0,		// move.l	#outbuf,-(sp)
-			0xa9, 0xfe,					// PutScrap()
+			0xa9, 0xfe,					// PutScrap()  <------------ we do this....
 			0x58, 0x8f,					// addq.l	#4,sp
 			M68K_RTS >> 8, M68K_RTS & 0xff
 		};
@@ -372,7 +281,11 @@ void give2mac(ByteArray &data, uint32 type)
 		WriteMacInt32(proc_area + 12, type);
 		WriteMacInt32(proc_area + 18, scrap_area);
 
-//		we_put_this_data = true;
+		we_put_this_data = true;
+
+		dump_68k( 
+			(char *) Mac2HostAddr( (ULONG) proc_area), 
+			(char *) Mac2HostAddr( (ULONG) proc_area + sizeof(proc)) );
 
 		Execute68k(proc_area, &r);		// <--------------------------------- gets stuck here...
 
@@ -405,7 +318,7 @@ void GetScrap(void **handle, uint32 type, int32 offset)
 		case 'TEXT':
 
 			int size = data.size();
-//			give2mac( data, type );
+			give2mac( data, type );
 			break;
 	}
 }
