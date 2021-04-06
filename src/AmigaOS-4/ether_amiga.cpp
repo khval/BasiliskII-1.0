@@ -42,7 +42,7 @@
 #include "ether_defs.h"
 #include "exec/emulation.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #include "debug.h"
 
 

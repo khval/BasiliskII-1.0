@@ -26,6 +26,9 @@
 
 #include "video_driver_classes.h"
 
+#define DEBUG 0
+#include "debug.h"
+
 extern int32 frame_skip;
 extern int32 line_skip;
 extern UWORD *null_pointer;			// Blank mouse pointer data
@@ -152,7 +155,7 @@ void set_fn_set_palette2( uint32 macMode, uint32 PixelFormat)
 				break;
 
 		case PIXF_A8R8G8B8: 
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
+			if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 
 				switch (macMode)
 				{

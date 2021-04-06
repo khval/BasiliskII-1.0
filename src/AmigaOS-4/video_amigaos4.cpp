@@ -43,6 +43,9 @@
 #include "user_strings.h"
 #include "video.h"
 
+#define DEBUG 0
+#include "debug.h"
+
 #ifdef _L
 #warning wtf
 #undef _L
@@ -60,8 +63,7 @@
 extern const char *(*_L) (unsigned int num) ;
 
 
-#define DEBUG 0
-#include "debug.h"
+
 
 #define MAC_CURSOR_UP	0x3E
 #define MAC_CURSOR_DOWN	0x3D
@@ -254,7 +256,9 @@ int add_modes(int mode_id, video_depth depth)
 	int lw=0,lh=0;
 	int w,h;
 
+#ifdef D
 	if ( !video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
+#endif
 
 	for( DisplayID = NextDisplayInfo( INVALID_ID ) ; DisplayID !=INVALID_ID ;  DisplayID = NextDisplayInfo( DisplayID ) )
 	{
@@ -345,7 +349,11 @@ bool VideoInit(bool classic)
 	int mode_id;
 	int boot_depth;
 
+#ifdef D
 	if (!video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
+#else
+	video_debug_out = NULL;
+#endif
 
 	boot_depth = PrefsFindInt32("windowdepth");
 	use_lock = PrefsFindBool("use_bitmap_lock");
@@ -504,7 +512,7 @@ bool VideoInit(bool classic)
 
 	} else {
 
-		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - VideoModes size is not 1 \n",__FUNCTION__,__LINE__);
+		if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld - VideoModes size is not 1 \n",__FUNCTION__,__LINE__);
 
 
 		// Find mode with specified dimensions
@@ -887,7 +895,7 @@ static void periodic_func(void)
 							frame_skip = PrefsFindInt32("active_window_frameskip") +1;
 							line_skip = PrefsFindInt32("active_window_lineskip") + 1;
 
-						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
+						 	if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
 							if (main_task) 
 							{
 								Forbid();
@@ -901,7 +909,7 @@ static void periodic_func(void)
 							frame_skip = PrefsFindInt32("deactive_window_frameskip") + 1;
 							line_skip = PrefsFindInt32("deactive_window_lineskip") + 1;
 
-						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
+						 	if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
 							if (main_task)
 							{
 								Forbid();
@@ -946,7 +954,6 @@ static void periodic_func(void)
 							char opt_str[100];
 				
 							sprintf(opt_str,"%s|%s",_L(ID_CANCEL_GAD) ,_L(ID_PREFS_QUIT_GAD));
-
 
 							ULONG opt =req(
 									GetString(STR_WINDOW_TITLE),
