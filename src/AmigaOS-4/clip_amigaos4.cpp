@@ -38,7 +38,7 @@
 #include "prefs.h"
 #include "deviceClip.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #include "debug.h"
 
 // Global variables
@@ -47,36 +47,23 @@ static bool we_put_this_data = false;
 
 void do_putscrap(uint32 type, void *scrap, int32 length);
 
-
-
 class ByteArray
 {
 	public:
 
 		ByteArray() 
-			{
-				printf("ByteArray init\n");
-				data = NULL; _size = 0;
-			 }
+			{	data = NULL; _size = 0;		 }
 
 		~ByteArray() 
-			{
-				printf("ByteArray free data %08x\n",data);
-				 if (data) free(data);
-			 }
+			{	 if (data) free(data);		 }
 
 		int size() 
-			{ 
-				printf("ByteArray get Size\n");
-				return _size; 
-			}
+			{ 	return _size; 		}
 
 		uint8& operator[](int idx)
 			{
 				char c = data[ idx ];
 				if (c<15) c='.';
-
-				printf("ByteArray get %d of %d -- %c\n",idx,_size, c);
 				return data[idx];
 			 }
 
@@ -185,7 +172,6 @@ void do_putscrap(uint32 type, void *scrap, int32 length)
 
 }
 
-
 bool get_amiga_clip(ByteArray &data)
 {
 	DeviceClip clip(0) ;
@@ -204,24 +190,6 @@ bool get_amiga_clip(ByteArray &data)
 	return data._size ? true: false;
 }
 
-void dump_68k(char *code, char *code_end)
-{
-	char *ptr;
-	char *ncode;
-	char opcodeName[LEN_DISASSEMBLE_OPCODE_STRING], operands[LEN_DISASSEMBLE_OPERANDS_STRING];
-
-	for (;code<code_end;code=ncode)
-	{
-		ncode = (char *) Disassemble68k( (APTR) code, opcodeName, operands);
-
-		printf("%08x: %s %s\n", code, opcodeName,operands);
-
-		for (ptr = code; ptr<ncode; ptr++) printf("%02x ",*ptr);
-		printf("\n");
-
-		code = ncode;
-	}
-}
 
 
 void give2mac(ByteArray &data, uint32 type)
@@ -234,8 +202,6 @@ void give2mac(ByteArray &data, uint32 type)
 
 	if (scrap_area == 0) return;
 
-	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
-	
 	int size = data.size();
 	uint8 *p = Mac2HostAddr(scrap_area);
 	for (int i = 0; i < size; i++) 
@@ -245,8 +211,6 @@ void give2mac(ByteArray &data, uint32 type)
 		if (c == 10) c = 13; 	// LF -> CR
 		*p++ = c;
 	}
-
-	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
 
 	// Add new data to clipboard
 	static uint8 proc[] = {
@@ -260,16 +224,12 @@ void give2mac(ByteArray &data, uint32 type)
 			M68K_RTS >> 8, M68K_RTS & 0xff
 		};
 
-	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
-
 	r.d[0] = sizeof(proc);
 	Execute68kTrap(0xa71e, &r);		// NewPtrSysClear()
 	uint32 proc_area = r.a[0];
 
 	if (proc_area)
 	{
-		printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
-
 		// The procedure is run-time generated because it must lays in
 		// Mac address space. This is mandatory for "33-bit" address
 		// space optimization on 64-bit platforms because the static
@@ -282,26 +242,21 @@ void give2mac(ByteArray &data, uint32 type)
 		WriteMacInt32(proc_area + 18, scrap_area);
 
 		we_put_this_data = true;
-
+/*
 		dump_68k( 
 			(char *) Mac2HostAddr( (ULONG) proc_area), 
 			(char *) Mac2HostAddr( (ULONG) proc_area + sizeof(proc)) );
+*/
 
-		Execute68k(proc_area, &r);		// <--------------------------------- gets stuck here...
-
-		printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+		Execute68k(proc_area, &r);
 
 		// We are done with scratch memory
 		r.a[0] = proc_area;
 		Execute68kTrap(0xa01f, &r);		// DisposePtr
 	}
 
-	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
-
 	r.a[0] = scrap_area;
 	Execute68kTrap(0xa01f, &r);		// DisposePtr
-
-	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
 }
 
 
