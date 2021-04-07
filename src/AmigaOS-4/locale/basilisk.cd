@@ -461,6 +461,63 @@ Ok
 ID_CANCEL_GAD(//)
 Cancel
 ;
+LIST_WINDOW_DEPTH_DEFAULT_ITEM(//)
+Default
+;
+LIST_WINDOW_DEPTH_BW_ITEM(//)
+Black & White
+;
+LIST_WINDOW_DEPTH_4COLORS_ITEM(//)
+4 colors (2bit)
+;
+LIST_WINDOW_DEPTH_16COLORS_ITEM(//)
+16 colors (4bit)
+;
+LIST_WINDOW_DEPTH_256COLORS_ITEM(//)
+256 colors (8bit)
+;
+LIST_WINDOW_DEPTH_15BIT_ITEM(//)
+32 767 colors (15bit)
+;
+LIST_WINDOW_RENDER_INTERNAL_CONVERTION(//)
+Internal convertion
+;
+LIST_WINDOW_RENDER_WPA(//)
+System Write Pixel Array
+;
+LIST_WINDOW_RENDER_DIRECT(//)
+Direct write (if possible)
+;
+LIST_MODENAMES_WINDOW(//)
+Window
+;
+LIST_MODENAMES_COMPOSITION_WINDOW(//)
+Composition window
+;
+LIST_MODENAMES_FULL_SCREEN(//)
+Full screen
+;
+LIST_CATEGORYTABS_DISK (//)
+Disk
+;
+LIST_CATEGORYTABS_SCSI (//)
+SCSI
+;
+LIST_CATEGORYTABS_IO (//)
+IO
+;
+LIST_CATEGORYTABS_CPU (//)
+CPU
+;
+LIST_CATEGORYTABS_GRAPHICS (//)
+Graphics
+;
+LIST_DISKTYPES_PARTITION (//)
+Partition
+;
+LIST_DISKTYPES_DISKIMAGE (//)
+Diskimage
+;
 ID_END (//)
 --- EOF ---
 ;
