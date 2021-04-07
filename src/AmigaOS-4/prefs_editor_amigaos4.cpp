@@ -8,7 +8,8 @@
 
 
 void	init_create_volume(int win_nr);
-void init_win_disks(int win_nr, LONG page);
+void init_win_disks(int win_nr, LONG is_device, LONG read_only);
+
 
 int add_vol_opt = 0;
 
@@ -909,8 +910,7 @@ static void add_or_update_volume(ULONG add_new_volume)
 	int i;
 	char *mstr = NULL;
 	type		= getv( obj[ID_PREFS_TYPE_GAD], CLICKTAB_Current);
-	read_only	= 0;
-
+	read_only = getv(obj[ ID_PREFS_READ_ONLY_GAD ] , GA_Selected ) ? 1 : 0 ; 
 
 	switch( type )
 	{
@@ -924,7 +924,6 @@ static void add_or_update_volume(ULONG add_new_volume)
 
 		case 1:	// diskimage
 
-				read_only = getv(obj[ ID_PREFS_READ_ONLY_GAD ] , GA_Selected ) ? 1 : 0 ; 
 				diskimage = (STRPTR) getv( obj[ID_PREFS_FILE_GAD], STRINGA_TextVal );
 				sprintf(str, "%s%s", read_only ? "*" : "", (STRPTR) diskimage );
 				break;
@@ -1065,7 +1064,7 @@ void add_edit_volume( int adding )
 		}
 	}
 
-	init_win_disks(win_disks,is_device);
+	init_win_disks(win_disks,is_device, read_only);
 
 	if ( ( win[win_disks] = RA_OpenWindow( layout[win_disks] ) ) )
 	{
@@ -1089,6 +1088,7 @@ void add_edit_volume( int adding )
 		{
 			RSetAttrO( win_disks, ID_PREFS_FILE_GAD, STRINGA_TextVal, str);
 		}
+		RSetAttrO( win_prefs, ID_PREFS_READ_ONLY_GAD, GA_Selected, read_only );
 	}
 
 	add_vol_opt = adding;
@@ -1342,7 +1342,7 @@ void init_create_volume(int win_nr)
 }
 
 
-void init_win_disks(int win_nr, LONG is_device)
+void init_win_disks(int win_nr, LONG is_device, LONG read_only)
 {
 	layout[win_nr] = (Object*) WindowObject,
 			WA_ScreenTitle, ScreenTitle,
@@ -1376,6 +1376,9 @@ void init_win_disks(int win_nr, LONG is_device)
 
 					CLICKTAB_Current, (is_device == TRUE ? 0:1) ,
 				ClickTabEnd,
+
+				LAYOUT_AddChild, MakeCheck(ID_PREFS_READ_ONLY_GAD, read_only),
+					CHILD_Label, MakeLabel(ID_PREFS_READ_ONLY_GAD), 
 
 				LAYOUT_AddChild, HGroupObject,
 					LAYOUT_AddChild, MakeButton(ID_OK_GAD),
