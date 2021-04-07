@@ -518,6 +518,18 @@ Partition
 LIST_DISKTYPES_DISKIMAGE (//)
 Diskimage
 ;
+LIST_VOLUMES_NAME_COLUMN (//)
+Name
+;
+LIST_VOLUMES_SIZE_COLUMN (//)
+Size
+;
+LIST_VOLUMES_RW_COLUMN (//)
+RW
+;
+TXT_READ_ONLY (//)
+Read Only
+;
 ID_END (//)
 --- EOF ---
 ;
