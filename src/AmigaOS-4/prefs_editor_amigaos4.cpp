@@ -702,7 +702,6 @@ static void set_emulation_settings( void )
 			ULONG	DisplayID;
 
 			sscanf(str,"scr/%d/%s",&value, (char *) DisplayIDStr); 
-			
 			sscanf(DisplayIDStr,"%x", &DisplayID);	
 
 			get_width_and_height_from_modeid(  DisplayID, &width, &height );
@@ -710,51 +709,28 @@ static void set_emulation_settings( void )
 		}
 	}
 
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_GAD,
-		CHOOSER_Selected, value );
-
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_WIDTH_GAD,
-		INTEGER_Number, width);
-
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_HEIGHT_GAD,
-		INTEGER_Number, height);
-
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_ID_GAD,
-		STRINGA_TextVal, DisplayIDStr);
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_GAD,				CHOOSER_Selected, value );
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_WIDTH_GAD,				INTEGER_Number, width);
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_HEIGHT_GAD,				INTEGER_Number, height);
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_MODE_ID_GAD, 			STRINGA_TextVal, DisplayIDStr);
 
 	if (DisplayIDStr)	{ free(DisplayIDStr); DisplayIDStr=NULL; }
 
-
-	RSetAttrO( win_prefs, ID_PREFS_GFX_WINDOW_DEPTH_GAD, 
-		CHOOSER_Selected, PrefsFindInt32("windowdepth")) ;
-
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_RENDER_METHOD_GAD,
-		CHOOSER_Selected, PrefsFindInt32("render_method")) ;
-
-	RSetAttrO( win_prefs, ID_ACTIVE_WINDOW_FRAMESKIP_GAD,
-		INTEGER_Number, PrefsFindInt32("active_window_frameskip"));
-
-	RSetAttrO( win_prefs, ID_ACTIVE_WINDOW_LINESKIP_GAD,
-		INTEGER_Number, PrefsFindInt32("active_window_lineskip"));
-
-	RSetAttrO( win_prefs, ID_DEACTIVE_WINDOW_FRAMESKIP_GAD,
-		INTEGER_Number, PrefsFindInt32("deactive_window_frameskip"));
-
-	RSetAttrO( win_prefs, ID_DEACTIVE_WINDOW_LINESKIP_GAD,
-		INTEGER_Number, PrefsFindInt32("deactive_window_lineskip"));
-
-	RSetAttrO( win_prefs,  ID_PREFS_GFX_LOCK_GAD,
-		GA_Selected, PrefsFindBool("use_bitmap_lock"));
+	RSetAttrO( win_prefs, ID_PREFS_GFX_WINDOW_DEPTH_GAD, 		CHOOSER_Selected, PrefsFindInt32("windowdepth")) ;
+	RSetAttrO( win_prefs, ID_PREFS_GFX_RENDER_METHOD_GAD,	CHOOSER_Selected, PrefsFindInt32("render_method")) ;
+	RSetAttrO( win_prefs, ID_ACTIVE_WINDOW_FRAMESKIP_GAD,		INTEGER_Number, PrefsFindInt32("active_window_frameskip"));
+	RSetAttrO( win_prefs, ID_ACTIVE_WINDOW_LINESKIP_GAD,		INTEGER_Number, PrefsFindInt32("active_window_lineskip"));
+	RSetAttrO( win_prefs, ID_DEACTIVE_WINDOW_FRAMESKIP_GAD,	INTEGER_Number, PrefsFindInt32("deactive_window_frameskip"));
+	RSetAttrO( win_prefs, ID_DEACTIVE_WINDOW_LINESKIP_GAD,		INTEGER_Number, PrefsFindInt32("deactive_window_lineskip"));
+	RSetAttrO( win_prefs,  ID_PREFS_GFX_LOCK_GAD,				GA_Selected, PrefsFindBool("use_bitmap_lock"));
 
 	// Sound
 
-	RSetAttrO( win_prefs,  ID_PREFS_DISABLE_SOUND,
-		GA_Selected, PrefsFindBool("nosound"));
+	RSetAttrO( win_prefs,  ID_PREFS_DISABLE_SOUND,	GA_Selected, PrefsFindBool("nosound"));
 
 	// FPU
 
-	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_FPU_GAD,
-		GA_Selected, PrefsFindBool("fpu"));
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_FPU_GAD, GA_Selected, PrefsFindBool("fpu"));
 
 	// RAM
 
