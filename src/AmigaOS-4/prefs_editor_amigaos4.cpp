@@ -1281,13 +1281,31 @@ int event(int id, int code)
 	return retval;
 }
 
+// misuse flags for ID, we don't need flags anyway.
+
 struct ColumnInfo volumes_ci[] =
 {
-	{ 60, "name", 0 },
-	{ 20, "size", 0 },
-	{ 20, "RW", 0 },
+	{ 60, NULL, LIST_VOLUMES_NAME_COLUMN },
+	{ 20, NULL, LIST_VOLUMES_SIZE_COLUMN },
+	{ 20, NULL, LIST_VOLUMES_RW_COLUMN },
 	{ ~0, (STRPTR) ~0, ~0U }
 };
+
+
+void FixColumnInfoNames(struct ColumnInfo *ci )
+{
+	struct ColumnInfo *i;
+
+	for (i=ci;i -> ci_Flags != ~0; i++)
+	{
+		if (i -> ci_Flags)
+		{
+			i -> ci_Title = _L( i -> ci_Flags );
+			i -> ci_Flags = 0;
+		}
+	}
+}
+
 
 void init_create_volume(int win_nr)
 {
@@ -1501,6 +1519,8 @@ bool RunPrefs(void)
 	if (!appport) return FALSE;
 
 	NewList( &list_files );
+
+	FixColumnInfoNames( volumes_ci  );
 
 	init_STRPTR_list( local_window_render_method_names, window_render_method_names );
 	init_STRPTR_list( local_window_depth_names, window_depth_names );
