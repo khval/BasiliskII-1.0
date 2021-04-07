@@ -740,31 +740,21 @@ static void set_emulation_settings( void )
 	for (value=0;(ramsize_mb>>value)>1;value++);
 	// 0 = 1mb,	1 = 2mb,		2 = 4mb,		3 = 8mb,		4 = 16mb,
 
-	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_RAM_GAD,
-		CHOOSER_Selected, value - 3);
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_RAM_GAD, CHOOSER_Selected, value - 3);
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_CPU_GAD, CHOOSER_Selected, PrefsFindInt32("cpu") );
 
-	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_CPU_GAD,
-		CHOOSER_Selected, PrefsFindInt32("cpu") );
-
-
-	RSetAttrO( win_prefs, ID_CPU_ACTIVE_GAD,
-		INTEGER_Number, PrefsFindInt32("active_window_cpu_pri"));
-
-	RSetAttrO( win_prefs, ID_CPU_INACTIVE_GAD,
-		INTEGER_Number, PrefsFindInt32("inactive_window_cpu_pri"));
-
+	RSetAttrO( win_prefs, ID_CPU_ACTIVE_GAD,	INTEGER_Number, PrefsFindInt32("active_window_cpu_pri"));
+	RSetAttrO( win_prefs, ID_CPU_INACTIVE_GAD,	INTEGER_Number, PrefsFindInt32("inactive_window_cpu_pri"));
 
 	// Model
 
 	id = PrefsFindInt32("modelid");
-	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_MODEL_GAD, 
-		CHOOSER_Selected, id == 5 ? 0 : 1);	// id is 5 or 14
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_MODEL_GAD,  CHOOSER_Selected, id == 5 ? 0 : 1);	// id is 5 or 14
 
 	// ROM
 
 	str = PrefsFindString("rom");
-	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_ROM_GAD,
-		STRINGA_TextVal, str);
+	RSetAttrO( win_prefs,  ID_PREFS_SYSTEM_ROM_GAD, STRINGA_TextVal, str);
 }
 
 void close_window(int layout_nr)
