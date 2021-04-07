@@ -298,6 +298,27 @@ ID_PREFS_GFX_LOCK_GAD
 Bitmap lås
 ; Bitmap lock
 ;
+ID_ACTIVE_WINDOW_GAD
+Aktiv vindu
+; Active vindu
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD
+Bilde hopp
+; Frame skip
+;
+ID_ACTIVE_WINDOW_LINESKIP_GAD
+Linje hopp
+; Line skip
+;
+ID_DEACTIVE_WINDOW_GAD
+Inaktiv vindu
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD
+Hopp over bilde
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD
+Hopp over linje
+;
 ID_SOUND
 Lyd
 ; Sound
@@ -594,23 +615,81 @@ ID_CANCEL_GAD
 Avbyrt
 ; Cancel
 ;
-ID_ACTIVE_WINDOW_GAD
-Aktiv vindu
+LIST_WINDOW_DEPTH_DEFAULT_ITEM
+Standard
+; Default
 ;
-ID_ACTIVE_WINDOW_FRAMESKIP_GAD
-Bilde hopp
+LIST_WINDOW_DEPTH_BW_ITEM
+Sort og hvit
+; Black & White
 ;
-ID_ACTIVE_WINDOW_LINESKIP_GAD
-Linje hopp
+LIST_WINDOW_DEPTH_4COLORS_ITEM
+4 farger
+; 4 colors (2bit)
 ;
-ID_DEACTIVE_WINDOW_GAD
-Inaktiv vindu
+LIST_WINDOW_DEPTH_16COLORS_ITEM
+16 farger (4bit)
+; 16 colors (4bit)
 ;
-ID_DEACTIVE_WINDOW_FRAMESKIP_GAD
-Hopp over bilde
+LIST_WINDOW_DEPTH_256COLORS_ITEM
+256 farger (8bit)
+; 256 colors (8bit)
 ;
-ID_DEACTIVE_WINDOW_LINESKIP_GAD
-Hopp over linje
+LIST_WINDOW_DEPTH_15BIT_ITEM
+32 767 fager (15bit)
+; 32 767 colors (15bit)
+;
+LIST_WINDOW_RENDER_INTERNAL_CONVERTION
+intern konvertering
+; Internal convertion
+;
+LIST_WINDOW_RENDER_WPA
+Metode WritePixelArray
+; System Write Pixel Array
+;
+LIST_WINDOW_RENDER_DIRECT
+Diekte
+; Direct write (if possible)
+;
+LIST_MODENAMES_WINDOW
+Vindu
+; Window
+;
+LIST_MODENAMES_COMPOSITION_WINDOW
+Sammensett Vindu
+; Composition window 
+;
+LIST_MODENAMES_FULL_SCREEN
+Full skjerm
+; Full screen
+;
+LIST_CATEGORYTABS_DISK
+Disk
+; Disk
+;
+LIST_CATEGORYTABS_SCSI
+SCSI
+; SCSI
+;
+LIST_CATEGORYTABS_IO
+IO
+; IO
+;
+LIST_CATEGORYTABS_CPU
+CPU
+; CPU
+;
+LIST_CATEGORYTABS_GRAPHICS
+Grafikk
+; Graphics
+;
+LIST_DISKTYPES_PARTITION
+Partisjon
+; Partition
+;
+LIST_DISKTYPES_DISKIMAGE
+Diskbilde
+; Diskimage
 ;
 ID_END
 End Of File
