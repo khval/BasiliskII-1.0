@@ -461,7 +461,7 @@ void add_volume(struct List *list,char *str, LONG num)
 
 		LBNA_Column, 2,
 		LBNCA_CopyText, TRUE,
-		LBNCA_Text, read_only ? "Read Only" : "",
+		LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : "",
 		LBNCA_Editable, FALSE,
 
 		TAG_DONE)))
@@ -513,7 +513,7 @@ void edit_volume(struct Node *node,char *str)
 
 		LBNA_Column, 2,
 		LBNCA_CopyText, TRUE,
-		LBNCA_Text, read_only ? "Read Only" : "",
+		LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : "",
 		LBNCA_Editable, FALSE,
 
 		TAG_DONE);
