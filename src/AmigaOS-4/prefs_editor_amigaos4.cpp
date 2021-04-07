@@ -6,6 +6,7 @@
 #include <proto/exec.h>
 #include "amiga_rdb.h"
 
+
 void	init_create_volume(int win_nr);
 void init_win_disks(int win_nr, LONG page);
 
@@ -70,24 +71,74 @@ static void update_volume(int type, char *str, ULONG add_new_volume, ULONG read_
 
 struct MsgPort *appport;
 
-const char	*window_depth_names[]=
+ULONG local_window_depth_names[]=
 {
-	"Default",
-	"Black & White",
-	"4 colors (2bit)",
-	"16 colors (4bit)",
-	"256 colors (8bit)",
-	"32 767 colors (15bit)",
+	LIST_WINDOW_DEPTH_DEFAULT_ITEM,
+	LIST_WINDOW_DEPTH_BW_ITEM,
+	LIST_WINDOW_DEPTH_4COLORS_ITEM,
+	LIST_WINDOW_DEPTH_16COLORS_ITEM,
+	LIST_WINDOW_DEPTH_256COLORS_ITEM,
+	LIST_WINDOW_DEPTH_15BIT_ITEM,
 	NULL
 };
 
-const char	*window_render_method_names[]=
+ULONG local_window_render_method_names[]=
 {
-	"Internal convertion",
-	"System Write Pixel Array",
-	"Direct write (if possible)",
+	LIST_WINDOW_RENDER_INTERNAL_CONVERTION,
+	LIST_WINDOW_RENDER_WPA,
+	LIST_WINDOW_RENDER_DIRECT,
 	NULL
 };
+
+ULONG local_VolumeTypes[] =
+{
+	ID_PREFS_VOLUMETYPE_FILE_GAD,
+	ID_PREFS_VOLUMETYPE_DEVICE_GAD,
+	NULL
+}; 
+
+ULONG local_ModeNames[] = 
+{
+	LIST_MODENAMES_WINDOW,
+	LIST_MODENAMES_COMPOSITION_WINDOW,
+	LIST_MODENAMES_FULL_SCREEN,
+	NULL
+};
+
+ULONG local_CategoryTabs[]=
+{
+	LIST_CATEGORYTABS_DISK,
+	LIST_CATEGORYTABS_SCSI,
+	LIST_CATEGORYTABS_IO,
+	LIST_CATEGORYTABS_CPU,
+	LIST_CATEGORYTABS_GRAPHICS,
+	NULL
+};
+
+ULONG local_DiskTypes[]=
+{
+	LIST_DISKTYPES_PARTITION,
+	LIST_DISKTYPES_DISKIMAGE,
+	NULL
+};
+
+CONST_STRPTR CategoryTabs
+		[	sizeof(local_CategoryTabs)	/ sizeof(ULONG)	];
+
+CONST_STRPTR DiskTypes
+		[	sizeof(local_DiskTypes)		/ sizeof(ULONG)	];
+
+CONST_STRPTR window_render_method_names
+		[	sizeof(local_window_render_method_names)	/ sizeof(ULONG)	];
+
+CONST_STRPTR window_depth_names
+		[	sizeof(local_window_depth_names)		/ sizeof(ULONG)	];
+
+CONST_STRPTR VolumeTypes
+		[	sizeof(local_VolumeTypes)			/ sizeof(ULONG)	];
+
+CONST_STRPTR ModeNames
+		[	sizeof(local_ModeNames)				/ sizeof(ULONG)	];
 
 const char	*device_names[]=
 {
@@ -104,6 +155,18 @@ const char	*device_names[]=
 	"peg2ide.device",
 	NULL
 };
+
+
+STATIC CONST CONST_STRPTR CPUNames[] = {"68000","68010","68020","68030","68040", NULL};
+STATIC CONST CONST_STRPTR RamNames[] ={"8Mb","16Mb","32Mb","64Mb","128Mb","256Mb","512Mb",NULL};
+
+STATIC CONST CONST_STRPTR ModelNames[] =
+{
+	"Mac IIci (MacOS 7.x)",
+	"Quadra 900 (MacOS 8.x)",
+	NULL
+};
+
 
 int find_device_name(char *txt)
 {
@@ -176,23 +239,7 @@ ULONG getv( Object *obj, ULONG arg )
 
 extern Object *app;
 
-STATIC CONST CONST_STRPTR ModeNames[] = { "Window","Window composition","Full screen",NULL};
-STATIC CONST CONST_STRPTR CPUNames[] = {"68000","68010","68020","68030","68040", NULL};
-STATIC CONST CONST_STRPTR RamNames[] ={"8Mb","16Mb","32Mb","64Mb","128Mb","256Mb","512Mb",NULL};
 
-STATIC CONST CONST_STRPTR ModelNames[] =
-{
-	"Mac IIci (MacOS 7.x)",
-	"Quadra 900 (MacOS 8.x)",
-	NULL
-};
-
-STATIC CONST_STRPTR VolumeTypes[] =
-{
-	(CONST_STRPTR) _L(ID_PREFS_VOLUMETYPE_FILE_GAD),
-	(CONST_STRPTR) _L(ID_PREFS_VOLUMETYPE_DEVICE_GAD),
-	NULL
-};
 
 static void read_volumes_settings( void )
 {
@@ -1073,7 +1120,6 @@ void add_edit_volume( int adding )
 	return;
 }
 
-
 static void remove_volume( void )
 {
 	struct Node *entry = (struct Node *) getv(obj[ID_MAC_VOLUMES], LISTBROWSER_SelectedNode);
@@ -1091,8 +1137,6 @@ static void remove_volume( void )
 		RSetAttrO( win_prefs, ID_PREFS_REMOVE_GAD , GA_Disabled, TRUE);
 	}
 }
-
-
 
 /*
  *  Show preferences editor
@@ -1271,9 +1315,6 @@ int event(int id, int code)
 	return retval;
 }
 
-const char *tablabels[]={"Disk","SCSI","IO","CPU","Graphics",NULL};
-const char *disk_tablabels[]={"Partition","Diskimage",NULL};
-
 struct ColumnInfo volumes_ci[] =
 {
 	{ 60, "name", 0 },
@@ -1345,7 +1386,7 @@ void init_win_disks(int win_nr, LONG is_device)
 
 				LAYOUT_AddChild,  obj[ID_PREFS_TYPE_GAD] = (Object*) ClickTabObject,
 					GA_RelVerify, TRUE,
-					GA_Text, disk_tablabels,
+					GA_Text, DiskTypes,
 					GA_ID, ID_PREFS_TYPE_GAD ,
 
 					CLICKTAB_PageGroup,  PageObject,
@@ -1442,7 +1483,7 @@ void init_win_prefs(int win_nr)
 				LAYOUT_AddChild,  ClickTabObject,
 
 					GA_RelVerify, TRUE,
-					GA_Text, tablabels,
+					GA_Text, CategoryTabs,
 
 					CLICKTAB_PageGroup,  PageObject,
 					LAYOUT_DeferLayout, TRUE,
@@ -1468,6 +1509,19 @@ void init_win_prefs(int win_nr)
 }
 
 
+void init_STRPTR_list( ULONG *local_array, CONST_STRPTR *str_array )
+{
+	ULONG *local_item;
+	CONST_STRPTR *str_array_item = str_array;
+
+	for (local_item = local_array; *local_item ; local_item++, str_array_item++ )
+	{
+		*str_array_item = _L( (unsigned int) *local_item );
+	}
+	*str_array_item = NULL;
+
+}
+
 bool RunPrefs(void)
 {
 	int		n = 0;
@@ -1479,6 +1533,12 @@ bool RunPrefs(void)
 
 	NewList( &list_files );
 
+	init_STRPTR_list( local_window_render_method_names, window_render_method_names );
+	init_STRPTR_list( local_window_depth_names, window_depth_names );
+	init_STRPTR_list( local_VolumeTypes, VolumeTypes );
+	init_STRPTR_list( local_ModeNames, ModeNames );
+	init_STRPTR_list( local_CategoryTabs, CategoryTabs );
+	init_STRPTR_list( local_DiskTypes, DiskTypes );
 
 	for (n=1;n<win_end;n++)
 	{
