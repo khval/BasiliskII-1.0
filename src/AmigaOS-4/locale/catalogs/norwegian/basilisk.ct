@@ -691,6 +691,21 @@ LIST_DISKTYPES_DISKIMAGE
 Diskbilde
 ; Diskimage
 ;
+LIST_VOLUMES_NAME_COLUMN
+Navn
+; Name
+;
+LIST_VOLUMES_SIZE_COLUMN
+Størrelse
+; Size
+;
+LIST_VOLUMES_RW_COLUMN
+Skriv & lese
+; RW
+;
+TXT_READ_ONLY
+kun lese
+; Read Only
 ID_END
 End Of File
 ; --- EOF ---
