@@ -75,6 +75,26 @@ Kjetil Hvalstrand
 
 The maintainer of the AmigaOS4.1 build of Basilisk II.
 
+Contributing to the translation:
+--------------------------------
+
+You do not need any programming skills! 
+You do not need to have SDK installed!
+
+The thing you need to do is make directory named your country.
+copy the basilisk.ct into the directory of your country.
+there is a empty line this where you should write the translation.
+
+The list contains identifiers, this should not be changed,
+the line with English text should not be changed, this is original text.  
+
+If you are lazy you can copy the text into google translate, to get a quick result, you should read the translation carefully, to make sure it did not mistranslate, sometimes, one word can how two different meanings. Some times google translate does not create good formulated sentence. 
+
+basilisk.cd file is the original and should not be touched, (unless you find some mistake)
+
+basilisk.cd is used generate the locale.h and locale.c and the basilisk.ct file, in the local directory.
+don’t modify the locale.h and locale.c files (this files will be overwritten), and you should only modify the copy of the basilisk.ct file for your language.
+
 Compiling
 ---------
 
