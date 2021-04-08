@@ -30,9 +30,6 @@ extern struct TextFont *open_font( char const *filename, int size );
 
 struct Process *main_task = NULL;
 
-struct Library 				*AmosExtensionBase = NULL;
-struct AmosExtensionIFace	*IAmosExtension = NULL;
-
 struct Library				*DataTypesBase = NULL;
 struct DataTypesIFace		*IDataTypes = NULL;
 
@@ -121,7 +118,6 @@ uint32 *ImagePointer = NULL;
 Object *objectPointer = NULL;
 #endif
 
-
 struct BitMap *pointerBitmap = NULL;
 
 BOOL open_lib( const char *name, int ver , const char *iname, int iver, struct Library **base, struct Interface **interface)
@@ -140,18 +136,6 @@ BOOL open_lib( const char *name, int ver , const char *iname, int iver, struct L
 	}
 	return (*interface) ? TRUE : FALSE;
 }
-
-const char *newprefix = "kitty";
-const char *newsuffix  = ".library";
-
-#ifdef __amigaos4__
-// can't use inline for extensions
-#undef makeLookupTable
-#undef makeContext
-#undef FreeLookupTable
-#undef FreeContext
-#endif
-
 
 BOOL openlibs()
 {
