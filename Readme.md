@@ -87,9 +87,9 @@ basilisk.cd file is the original and should not be touched, (unless you find som
 basilisk.cd is used generate the locale.h and locale.c and the basilisk.ct file, in the local directory.
 don’t modify the locale.h and locale.c files (this files will be overwritten), and you should only modify the copy of the basilisk.ct file for your language.
 
-If you like to generate catalog file, should have SDK installed.
+If you like to generate catalog file, you should have the SDK installed.
 
-you need to have the tools CATCOMP and FLEXCAT installed. (one of the tools are in the SDK I believe.)
+You need to have the tools CATCOMP and FLEXCAT installed. (one of the tools are in the SDK I believe.)
 look on OS4Depot.net and Aminet.net if it’s not included in the AmigaOS4 SDK.
 
 Compiling
