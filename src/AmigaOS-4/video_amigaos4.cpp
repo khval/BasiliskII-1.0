@@ -256,7 +256,10 @@ int add_modes(int mode_id, video_depth depth)
 	int lw=0,lh=0;
 	int w,h;
 
-#ifdef D
+#if DEBUG==1
+
+#warning D is found....
+
 	if ( !video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
 #endif
 
@@ -349,7 +352,7 @@ bool VideoInit(bool classic)
 	int mode_id;
 	int boot_depth;
 
-#ifdef D
+#if DEBUG==1
 	if (!video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
 #else
 	video_debug_out = NULL;
@@ -477,7 +480,7 @@ bool VideoInit(bool classic)
 	}
 
 
-#if DEBUG
+#if DEBUG==1
 	bug("Available video modes:\n");
 	vector<video_mode>::const_iterator i = VideoModes.begin(), end = VideoModes.end();
 	while (i != end) {
@@ -558,7 +561,9 @@ bool VideoInit(bool classic)
 
 bool Amiga_monitor_desc::video_open()
 {
+#if DEBUG==1
 	if ( !video_debug_out ) video_debug_out = Open("CON:",MODE_NEWFILE);
+#endif
 
 	// Start periodic process
 	periodic_proc = CreateNewProcTags(

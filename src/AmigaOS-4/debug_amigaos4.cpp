@@ -17,3 +17,29 @@ void dump_68k(char *code, char *code_end)
 		code = ncode;
 	}
 }
+
+void show_sigs(char *txt)
+{
+	struct Task *t;
+	int n;
+
+	t = FindTask(NULL);
+
+	printf("\n%s\n",txt);
+
+	for (n=0;n<31;n++)
+	{
+		if ((t -> tc_SigAlloc & 0x1FFF0000) & (1 << n))	printf("Sig %08x\n",1 << n);
+	}
+
+/*
+	printf("\n%s\n",txt);
+
+	printf("BIT: ");
+	for (n=31;n>=0;n--) printf("%d", (t -> tc_SigAlloc & 0x1FFF0000) & (1<<n) ? 1 : 0);
+	printf("\n");
+
+	printf("HEX: %08X\n",t -> tc_SigAlloc & 0x1FFF0000 );
+
+*/
+}
