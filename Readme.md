@@ -67,14 +67,6 @@ Hot keys
 
     Trigger NMI interrupt. (not sure what this should do.)
 
-
-
-**Best Regards**
-
-Kjetil Hvalstrand
-
-The maintainer of the AmigaOS4.1 build of Basilisk II.
-
 Contributing to the translation:
 --------------------------------
 
