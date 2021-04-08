@@ -1,0 +1,535 @@
+; basilisk.cd
+MSG_AUTHOR_INFORMATION (//)
+\33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
+;
+MSG_PORT_INFORMATION (//)
+AmigaOS 4.X (PowerPC) port by Kjetil Hvalstrand, 2007-2020
+;
+MSG_GFX_INFORMATION (//)
+Basilisk icons by Christian Rosentereter
+;
+MSG_TRANSLATION_INFORMATION (//)
+Translation by: xxxxx
+;
+MSG_DESCRIPTION (//)
+68k MacIntosh emulator
+;
+MSG_QUIT_WHILE_RUNING_INFORMATION (//)
+Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
+;
+MSG_OK_GAD (//)
+_Ok
+;
+MSG_CANCEL_GAD (//)
+_Cancel
+;
+MSG_PREFS_TYPE_GAD (//)
+_Type
+;
+MSG_PREFS_READ_ONLY_GAD (//)
+_Read Only
+;
+MSG_PREFS_FILE_GAD (//)
+_File
+;
+MSG_PREFS_DEVICE_GAD (//)
+_Device
+;
+MSG_PREFS_CREATE_GAD (//)
+Create
+;
+MSG_PREFS_UNIT_GAD (//)
+_Unit
+;
+MSG_PREFS_FLAGS_GAD (//)
+_Flags
+;
+MSG_PREFS_START_BLOCK_GAD (//)
+_Start Block
+;
+MSG_PREFS_BLOCKS_GAD (//)
+_Blocks
+;
+MSG_PREFS_BLOCK_SIZE_GAD (//)
+Block Size
+;
+MSG_PREFS_RAMSIZE_GAD (//)
+%ldMB
+;
+MSG_PREFS_ADD_GAD (//)
+_Add...
+;
+MSG_PREFS_EDIT_GAD (//)
+_Edit...
+;
+MSG_PREFS_REMOVE_GAD (//)
+_Remove
+;
+MSG_PREFS_CD_DEVICE_GAD (//)
+_Device
+;
+MSG_PREFS_CD_UNIT_GAD (//)
+_Unit
+;
+MSG_PREFS_CD_BOOT_GAD (//)
+_Boot from CD
+;
+MSG_PREFS_CD_DISABLE_DRIVER_GAD (//)
+Disable CD-ROM driver
+;
+MSG_PREFS_VOLUMETYPE_FILE_GAD (//)
+File
+;
+MSG_PREFS_VOLUMETYPE_DEVICE_GAD (//)
+Device
+;
+MSG_PREFS_ID_0_DEVICE_GAD (//)
+ID _0 Device
+;
+MSG_PREFS_ID_1_DEVICE_GAD (//)
+ID _1 Device
+;
+MSG_PREFS_ID_2_DEVICE_GAD (//)
+ID _2 Device
+;
+MSG_PREFS_ID_3_DEVICE_GAD (//)
+ID _3 Device
+;
+MSG_PREFS_ID_4_DEVICE_GAD (//)
+ID _4 Device
+;
+MSG_PREFS_ID_5_DEVICE_GAD (//)
+ID _5 Device
+;
+MSG_PREFS_ID_6_DEVICE_GAD (//)
+ID _6 Device
+;
+MSG_PREFS_SCSI_UNIT_GAD (//)
+Unit
+;
+MSG_PREFS_MODEM_DEVICE_GAD (//)
+Device
+;
+MSG_PREFS_MODEM_UNIT_GAD (//)
+Unit
+;
+MSG_PREFS_MODEM_PARALLEL_GAD (//)
+Parallel device
+;
+MSG_PREFS_GFX_WIDTH_GAD (//)
+_Width
+;
+MSG_PREFS_GFX_HEIGHT_GAD (//)
+_Height
+;
+ID_PREFS_GFX_FULLSCREEN_GAD (//)
+_Full screen
+;
+ID_PREFS_GFX_8BIT_GAD (//)
+_8bit mode
+;
+MSG_MAC_VOLUMES (//)
+Mac Volumes
+;
+MSG_CDROM (//)
+CD-ROM
+;
+MSG_VIRTUAL_SCSI_DEVICES (//)
+Virtual SCSI devices
+;
+MSG_MODEM (//)
+Modem
+;
+MSG_ETHERNET (//)
+Ethernet
+;
+MSG_PRINTER (//)
+Printer
+;
+MSG_GRAPHICS (//)
+Graphics
+;
+MSG_SOUND (//)
+Sound
+;
+MSG_SYSTEM (//)
+System message
+;
+MSG_SIZE (//)
+Size
+;
+MSG_MB (//)
+MB
+;
+MSG_TITLE_BASILISK_SETTINGS (//)
+Basilisk II Settings
+;
+MSG_TITLE_ADD_VOLUME (//)
+Add Volume
+;
+MSG_TITLE_EDIT_VOLUME (//)
+Edit Volume
+;
+MSG_PAGE_VOLUMES (//)
+Volumes
+;
+MSG_PAGE_SCSI (//)
+SCSI
+;
+MSG_PAGE_COMMUNICATION (//)
+Communication
+;
+MSG_PAGE_EMULATION (//)
+Emulation
+;
+MSG_MENU_TITLE_BASILISK (//)
+Basilisk
+;
+MSG_MENU_BASILISK_ABOUT (//)
+?\0About...
+;
+MSG_MENU_BASILISK_START (//)
+S\0Start
+;
+MSG_MENU_BASILISK_QUIT (//)
+Q\0Quit
+;
+ID_GRAPHICS (//)
+Graphics
+;
+ID_PREFS_GFX_MODE_GAD (//)
+Gfx mode
+;
+ID_PREFS_GFX_WIDTH_GAD (//)
+Gfx Width
+;
+ID_PREFS_GFX_HEIGHT_GAD (//)
+Gfx height
+;
+ID_PREFS_GFX_MODE_ID_SELECT_GAD (//)
+Select screen mode
+;
+ID_PREFS_GFX_MODE_ID_GAD (//)
+Screen mode id
+;
+ID_PREFS_GFX_WINDOW_DEPTH_GAD (//)
+Window depth
+;
+ID_PREFS_GFX_RENDER_METHOD_GAD (//)
+Render mode
+;
+ID_PREFS_GFX_LOCK_GAD (//)
+Screen lock
+;
+ID_ACTIVE_WINDOW_GAD (//)
+Active window
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD (//)
+Frame skip
+;
+ID_ACTIVE_WINDOW_LINESKIP_GAD (//)
+Line skip
+;
+ID_DEACTIVE_WINDOW_GAD (//)
+Deactive window
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD (//)
+Frame skip
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD (//)
+Line skip
+;
+ID_SOUND (//)
+Sound
+;
+ID_PREFS_DISABLE_SOUND (//)
+Disable sound
+;
+ID_VIRTUAL_SCSI_DEVICES (//)
+Scsi devices
+;
+ID_PREFS_ID_0_DEVICE_GAD (//)
+Device 0
+;
+ID_PREFS_ID_0_UNIT_GAD (//)
+Unit 0
+;
+ID_PREFS_ID_1_DEVICE_GAD (//)
+Device 1
+;
+ID_PREFS_ID_1_UNIT_GAD (//)
+Unit 1
+;
+ID_PREFS_ID_2_DEVICE_GAD (//)
+Device 2
+;
+ID_PREFS_ID_2_UNIT_GAD (//)
+Unit 2
+;
+ID_PREFS_ID_3_DEVICE_GAD (//)
+Device 3
+;
+ID_PREFS_ID_3_UNIT_GAD (//)
+Unit 3
+;
+ID_PREFS_ID_4_DEVICE_GAD (//)
+Device 4
+;
+ID_PREFS_ID_4_UNIT_GAD (//)
+Unit 4
+;
+ID_PREFS_ID_5_DEVICE_GAD (//)
+Device 5
+;
+ID_PREFS_ID_5_UNIT_GAD (//)
+Unit 5
+;
+ID_PREFS_ID_6_DEVICE_GAD (//)
+Device 6
+;
+ID_PREFS_ID_6_UNIT_GAD (//)
+Unit 6
+;
+ID_PREFS_START_GAD (//)
+Start
+;
+ID_PREFS_QUIT_GAD (//)
+Quit
+;
+ID_PREFS_EDIT_GAD (//)
+Edit
+;
+ID_PREFS_REMOVE_GAD (//)
+Remove
+;
+ID_HARDWARE (//)
+Hardware
+;
+ID_CPU (//)
+CPU
+;
+ID_PREFS_SYSTEM_CPU_GAD (//)
+CPU
+;
+ID_PREFS_SYSTEM_FPU_GAD (//)
+FPU
+;
+ID_CPU_PRI (//)
+CPU priority
+;
+ID_CPU_ACTIVE_GAD (//)
+CPU active window
+;
+ID_CPU_INACTIVE_GAD (//)
+CPU inactive window
+;
+ID_RAM (//)
+RAM
+;
+ID_PREFS_SYSTEM_RAM_GAD (//)
+RAM
+;
+ID_SYSTEM (//)
+System
+;
+ID_PREFS_SYSTEM_MODEL_GAD (//)
+Mac model
+;
+ID_PREFS_SYSTEM_ROM_SELECT_GAD (//)
+Select rom
+;
+ID_PREFS_SYSTEM_ROM_GAD (//)
+Rom
+;
+ID_MODEM (//)
+Modem
+;
+ID_PREFS_MODEM_DEVICE_GAD (//)
+Modem device
+;
+ID_PREFS_MODEM_UNIT_GAD (//)
+Modem unit
+;
+ID_PREFS_MODEM_PARALLEL_GAD (//)
+Modem parallel
+;
+ID_PRINTER (//)
+Printer
+;
+ID_PREFS_PRINTER_DEVICE_GAD (//)
+Printer device
+;
+ID_PREFS_PRINTER_UNIT_GAD (//)
+Printer unit
+;
+ID_PREFS_PRINTER_PARALLEL_GAD (//)
+Printer parallel
+;
+ID_ETHERNET (//)
+Ethernet
+;
+ID_PREFS_ETHERNET_DEVICE_SELECT_GAD (//)
+Select ethernet device
+;
+ID_PREFS_ETHERNET_DEVICE_GAD (//)
+Ethernet device
+;
+ID_PREFS_ETHERNET_UNIT_GAD (//)
+Ethernet unit
+;
+ID_PREFS_ETHERNET_MONITOR_GAD (//)
+Monitor
+;
+ID_MAC_VOLUMES(//)
+Volumes
+;
+ID_PREFS_ADD_BOOTDISK_GAD(//)
+Boot disk
+;
+ID_PREFS_ADD_GAD(//)
+Add
+;
+ID_PREFS_CREATE_GAD(//)
+Create
+;
+ID_CDROM (//)
+Cdrom
+;
+ID_PREFS_CD_DEVICE_GAD (//)
+Cd device
+;
+ID_PREFS_CD_UNIT_GAD (//)
+Cd unit
+;
+ID_PREFS_CD_BOOT_GAD (//)
+Cd boot
+;
+ID_PREFS_CD_DISABLE_DRIVER_GAD (//)
+Disable cd device
+;
+ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD (//)
+Shared directory
+;
+ID_PREFS_AMIGAOS4_ROOT_GAD (//)
+Shared directory
+;
+ID_PREFS_VOLUMETYPE_FILE_GAD (//)
+File volume type
+;
+ID_PREFS_VOLUMETYPE_DEVICE_GAD (//)
+Device volume type
+;
+ID_PREFS_TYPE_GAD(//)
+Type
+;
+ID_PREFS_DEVICE_GAD(//)
+Device
+;
+ID_PREFS_UNIT_GAD(//)
+Unit
+;
+ID_PREFS_PARTITION_NAME_GAD(//)
+Partition name
+;
+ID_PREFS_READ_ONLY_GAD(//)
+Read only
+;
+ID_PREFS_FILE_GAD(//)
+File
+;
+ID_PREFS_FILE_SELECT_GAD(//)
+File
+;
+ID_CREATE_NAME_ASL_GAD(//)
+Name
+;
+ID_CREATE_NAME_GAD(//)
+Name
+;
+ID_CREATE_OK_GAD(//)
+Ok
+;
+ID_CREATE_CANCEL_GAD(//)
+Cancel
+;
+ID_CREATE_SIZE_GAD(//)
+Size
+;
+ID_OK_GAD(//)
+Ok
+;
+ID_CANCEL_GAD(//)
+Cancel
+;
+LIST_WINDOW_DEPTH_DEFAULT_ITEM(//)
+Default
+;
+LIST_WINDOW_DEPTH_BW_ITEM(//)
+Black & White
+;
+LIST_WINDOW_DEPTH_4COLORS_ITEM(//)
+4 colors (2bit)
+;
+LIST_WINDOW_DEPTH_16COLORS_ITEM(//)
+16 colors (4bit)
+;
+LIST_WINDOW_DEPTH_256COLORS_ITEM(//)
+256 colors (8bit)
+;
+LIST_WINDOW_DEPTH_15BIT_ITEM(//)
+32 767 colors (15bit)
+;
+LIST_WINDOW_RENDER_INTERNAL_CONVERTION(//)
+Internal convertion
+;
+LIST_WINDOW_RENDER_WPA(//)
+System Write Pixel Array
+;
+LIST_WINDOW_RENDER_DIRECT(//)
+Direct write (if possible)
+;
+LIST_MODENAMES_WINDOW(//)
+Window
+;
+LIST_MODENAMES_COMPOSITION_WINDOW(//)
+Composition window
+;
+LIST_MODENAMES_FULL_SCREEN(//)
+Full screen
+;
+LIST_CATEGORYTABS_DISK (//)
+Disk
+;
+LIST_CATEGORYTABS_SCSI (//)
+SCSI
+;
+LIST_CATEGORYTABS_IO (//)
+IO
+;
+LIST_CATEGORYTABS_CPU (//)
+CPU
+;
+LIST_CATEGORYTABS_GRAPHICS (//)
+Graphics
+;
+LIST_DISKTYPES_PARTITION (//)
+Partition
+;
+LIST_DISKTYPES_DISKIMAGE (//)
+Diskimage
+;
+LIST_VOLUMES_NAME_COLUMN (//)
+Name
+;
+LIST_VOLUMES_SIZE_COLUMN (//)
+Size
+;
+LIST_VOLUMES_RW_COLUMN (//)
+RW
+;
+TXT_READ_ONLY (//)
+Read Only
+;
+ID_END (//)
+--- EOF ---
+;

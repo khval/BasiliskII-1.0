@@ -1,4 +1,4 @@
-## version $VER: basilisk.catalog 1.7 (10.03.2021)
+## version $VER: basilisk.catalog 1.8 (8.04.2021)
 ## codeset 0
 ## language italiano
 ## chunk AUTH Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
@@ -14,7 +14,7 @@
 ; Traduzione italiana di Basilisk II (ReAction GUI)
 ;
 MSG_AUTHOR_INFORMATION
-\33cBasilisk II 1.0 di Christian Bauer\n© Copyright 1997-2008\n\nDistribuito secondo i termini della licenza General Public License (GPL)
+\33cBasilisk II 1.0 di Christian Bauer\n© Copyright 1997-2008\n\nDistribuito secondo i termini della General Public License (GPL)
 ; \33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
 ;
 MSG_PORT_INFORMATION
@@ -34,7 +34,7 @@ Emulatore Macintosh 68k
 ; 68k MacIntosh emulator
 ;
 MSG_QUIT_WHILE_RUNING_INFORMATION
-Chiudere il programma in questo modo potrebbe comportare la corruzione dei file di MacOS o del filesystem.\nQuesto è lo stesso che spegnere il pulsante di alimentazione mentre il computer è in funzione.
+Chiudere il programma in questo modo potrebbe comportare la corruzione dei file di MacOS o del filesystem.\nQuesto è lo stesso che spegnere il pulsante di alimentazione quando il computer è acceso.
 ; Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
 ;
 MSG_OK_GAD
@@ -482,7 +482,7 @@ Unità modem
 ; Modem unit
 ;
 ID_PREFS_MODEM_PARALLEL_GAD
-Parallela modem
+Modem parallela
 ; Modem parallel
 ;
 ID_PRINTER
@@ -498,7 +498,7 @@ Unità stampante
 ; Printer unit
 ;
 ID_PREFS_PRINTER_PARALLEL_GAD
-Parallela stampante
+Stampante parallela
 ; Printer parallel
 ;
 ID_ETHERNET
@@ -628,6 +628,98 @@ _Ok
 ID_CANCEL_GAD
 _Annulla
 ; Cancel
+;
+LIST_WINDOW_DEPTH_DEFAULT_ITEM
+Predefinita
+; Default
+;
+LIST_WINDOW_DEPTH_BW_ITEM
+Nero & Bianco
+; Black & White
+;
+LIST_WINDOW_DEPTH_4COLORS_ITEM
+4 colori (2bit)
+; 4 colors (2bit)
+;
+LIST_WINDOW_DEPTH_16COLORS_ITEM
+16 colori (4bit)
+; 16 colors (4bit)
+;
+LIST_WINDOW_DEPTH_256COLORS_ITEM
+256 colori (8bit)
+; 256 colors (8bit)
+;
+LIST_WINDOW_DEPTH_15BIT_ITEM
+32767 colors (15bit)
+; 32 767 colors (15bit)
+;
+LIST_WINDOW_RENDER_INTERNAL_CONVERTION
+Conversione interna
+; Internal convertion
+;
+LIST_WINDOW_RENDER_WPA
+System Write Pixel Array
+; System Write Pixel Array
+;
+LIST_WINDOW_RENDER_DIRECT
+Scrittura diretta (se possibile)
+; Direct write (if possible)
+;
+LIST_MODENAMES_WINDOW
+Finestra
+; Window
+;
+LIST_MODENAMES_COMPOSITION_WINDOW
+Finestra composition
+; Composition window
+;
+LIST_MODENAMES_FULL_SCREEN
+Schermo intero
+; Full screen
+;
+LIST_CATEGORYTABS_DISK
+Disco
+; Disk
+;
+LIST_CATEGORYTABS_SCSI
+SCSI
+; SCSI
+;
+LIST_CATEGORYTABS_IO
+IO
+; IO
+;
+LIST_CATEGORYTABS_CPU
+CPU
+; CPU
+;
+LIST_CATEGORYTABS_GRAPHICS
+Video
+; Graphics
+;
+LIST_DISKTYPES_PARTITION
+Partizione
+; Partition
+;
+LIST_DISKTYPES_DISKIMAGE
+Immagine
+; Diskimage
+;
+LIST_VOLUMES_NAME_COLUMN
+Nome
+; Name
+;
+LIST_VOLUMES_SIZE_COLUMN
+Dimensione
+; Size
+;
+LIST_VOLUMES_RW_COLUMN
+LS
+; RW
+;
+TXT_READ_ONLY
+Sola Lettura
+; Read Only
 ;
 ID_END
 --- FINE DELLA LINEA ---
