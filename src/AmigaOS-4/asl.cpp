@@ -19,15 +19,10 @@
 
 #include "asl.h"
 
-extern struct Window **win;
-extern Object **layout;
-extern Object **refresh;
-extern Object **obj;
 
 char *last_asl_path = NULL;
 
-
-void imagefile_asl( int win_id, int str_gad_id, BOOL opt )
+void imagefile_asl( void (*action) (const char *name), BOOL opt )
 {
 	struct FileRequester *freq;
 	BOOL rc;
@@ -66,32 +61,31 @@ void imagefile_asl( int win_id, int str_gad_id, BOOL opt )
 				}
 				else
 				{
-					sprintf(name_whit_path,"");
+					sprintf(name_whit_path,freq->fr_File);
 				}
 
-				RSetAttrO( win_id, str_gad_id, STRINGA_TextVal, name_whit_path);
+				action(name_whit_path);
 				free(name_whit_path);
 			}
 		}
-		else	Printf ("requester was cancelled\n");
 
 		if (path) { free(path); path = NULL; }
 		if (freq) FreeAslRequest (freq);
 	}
 }
 
-void DO_ASL(int win_id, int str_gad_id, BOOL opt)
+void DO_ASL( const char *(*current_str) (), void (*action) ( const char *value ), BOOL drawers_only )
 {
 	struct FileRequester *freq;
 	BOOL rc;
-	char *str = NULL;
+	const char *str = NULL;
 	char *path = NULL;
 	int i;
 
 	freq = (struct FileRequester *) AllocAslRequestTags (ASL_FileRequest,TAG_END);
 	if (freq)
 	{
-		str = (char *) getv( obj[str_gad_id], STRINGA_TextVal);
+		str = current_str();
 
 		i =(int) (strrchr(str, '/') - str);
 		if (i<=0) i =(int) (strrchr(str, ':') - str);
@@ -101,7 +95,7 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 		else
 		{ path = strdup(""); }
 
-		rc = AslRequestTags (freq, ASLFR_InitialDrawer,path,ASLFR_InitialFile,"",ASLFR_DrawersOnly, opt ,TAG_END);
+		rc = AslRequestTags (freq, ASLFR_InitialDrawer,path,ASLFR_InitialFile,"",ASLFR_DrawersOnly, drawers_only ,TAG_END);
 
 		if (rc)
 		{
@@ -124,55 +118,45 @@ void DO_ASL(int win_id, int str_gad_id, BOOL opt)
 				}
 				else
 				{
-					sprintf(name_whit_path,"");
+					sprintf(name_whit_path,freq->fr_File);
 				}
 
-				RSetAttrO( win_id, str_gad_id, STRINGA_TextVal, name_whit_path);
+				action(name_whit_path);
 				free(name_whit_path);
 			}
 		}
-		else	Printf ("requester was cancelled\n");
 
 		if (path) { free(path); path = NULL; }
 		if (freq) FreeAslRequest (freq);
 	}
 }
 
-void DO_ASL_MODE_ID(int win_id, int str_gad_id)
+void DO_ASL_MODE_ID(  	int (*current_ModeID) (), 
+					void (*action) (ASL_ModeID  *asl_modeid) )
 {
 	struct  ScreenModeRequester *mreq;
-	BOOL rc;
-	int mode;
+	BOOL rc = false;
+	ASL_ModeID mode;
 	char *str;
-	char tmpbuffer[50];
+
+
 	int width,height;
 
 	mreq = (struct ScreenModeRequester *) AllocAslRequestTags (ASL_ScreenModeRequest,TAG_END);
 	if (mreq)
 	{
-		str = (char *) getv( obj[str_gad_id], STRINGA_TextVal);
-
-		sscanf(str,"%x",&mode);
-
-		rc = AslRequestTags (mreq,ASLSM_InitialDisplayID,mode,TAG_END);
+		rc = AslRequestTags (mreq,ASLSM_InitialDisplayID,current_ModeID(),TAG_END);
 
 		if (rc)
 		{
 			struct DimensionInfo dimInfo;
-
-			sprintf(tmpbuffer,"%X",(unsigned int) mreq -> sm_DisplayID);
-
 			GetDisplayInfoData( NULL, &dimInfo, sizeof(dimInfo) , DTAG_DIMS, (unsigned int) mreq -> sm_DisplayID );
 
-			width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
-			height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
-
-			RSetAttrO( win_id, ID_PREFS_GFX_MODE_ID_GAD,STRINGA_TextVal, tmpbuffer);
-			RSetAttrO( win_id, ID_PREFS_GFX_WIDTH_GAD,INTEGER_Number, width);
-			RSetAttrO( win_id, ID_PREFS_GFX_HEIGHT_GAD, INTEGER_Number, height);
-
+			mode.modeID = mreq -> sm_DisplayID;
+			mode.width = 1 + dimInfo.Nominal.MaxX - dimInfo.Nominal.MinX;
+			mode.height = 1 + dimInfo.Nominal.MaxY - dimInfo.Nominal.MinY;
+			action( &mode );
 		}
-		else	Printf ("requester was cancelled\n");
 
 		FreeAslRequest (mreq);
 	}
