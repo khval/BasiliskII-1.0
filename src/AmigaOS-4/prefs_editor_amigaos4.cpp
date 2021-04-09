@@ -1170,6 +1170,85 @@ static int runtime_event(int id,int code)
 	return retval;
 }
 
+int asl_mode_get_current_mode()
+{
+	int mode;
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	const char *str = (char *) getv( obj[ ID_PREFS_GFX_MODE_ID_GAD ], STRINGA_TextVal);
+	sscanf(str,"%x",&mode);
+	return mode;
+}
+
+void asl_mode_action (ASL_ModeID  *mode)
+{
+	char tmpbuffer[50];
+
+	printf("%s:%s:%d\n",__FILE__,__FUNCTION__,__LINE__);
+
+	sprintf(tmpbuffer,"%X",(unsigned int) mode -> modeID);
+	RSetAttrO( win_prefs, ID_PREFS_GFX_MODE_ID_GAD,STRINGA_TextVal, tmpbuffer);
+	RSetAttrO( win_prefs, ID_PREFS_GFX_WIDTH_GAD,INTEGER_Number, mode -> width);
+	RSetAttrO( win_prefs, ID_PREFS_GFX_HEIGHT_GAD, INTEGER_Number, mode -> height);
+}
+
+// --- win_prefs, ID_PREFS_AMIGAOS4_ROOT_GAD
+
+const char *asl_current_amigaos_root_name()
+{
+	return (char *) getv( obj[ID_PREFS_AMIGAOS4_ROOT_GAD], STRINGA_TextVal);
+}
+
+void asl_action_amigaos_root_name( const char *value )
+{
+	RSetAttrO( win_prefs, ID_PREFS_AMIGAOS4_ROOT_GAD, STRINGA_TextVal, value );
+}
+
+// --- win_create_volume, ID_CREATE_NAME_GAD
+
+const char *asl_current_create_name()
+{
+	return (char *) getv( obj[ID_CREATE_NAME_GAD], STRINGA_TextVal);
+}
+
+void asl_action_create_name( const char *value )
+{
+	RSetAttrO( win_create_volume, ID_CREATE_NAME_GAD, STRINGA_TextVal, value );
+}
+
+// --- win_prefs,ID_PREFS_SYSTEM_ROM_GAD
+
+const char *asl_current_system_rom()
+{
+	return (char *) getv( obj[ID_PREFS_SYSTEM_ROM_GAD], STRINGA_TextVal);
+}
+
+void asl_action_system_rom( const char *value )
+{
+	RSetAttrO( win_prefs,ID_PREFS_SYSTEM_ROM_GAD, STRINGA_TextVal, value );
+}
+
+// --- win_prefs, ID_PREFS_ETHERNET_DEVICE_GAD,
+
+const char *asl_current_ethernet_device()
+{
+	return (char *) getv( obj[ID_CREATE_NAME_GAD], STRINGA_TextVal);
+}
+
+void asl_action_ethernet_device( const char *value )
+{
+	RSetAttrO( win_create_volume, ID_CREATE_NAME_GAD, STRINGA_TextVal, value );
+}
+
+// --- win_disks, ID_PREFS_FILE_GAD
+
+void asl_action_imagefile(const char *name)
+{
+	RSetAttrO( win_disks, ID_PREFS_FILE_GAD, STRINGA_TextVal, name);
+}
+
+
 int event(int id, int code)
 {
 	int retval = 0;
@@ -1212,27 +1291,27 @@ int event(int id, int code)
 			break;
 
 		case ID_PREFS_FILE_SELECT_GAD:
-			imagefile_asl (win_disks, ID_PREFS_FILE_GAD, FALSE);
+			imagefile_asl ( asl_action_imagefile, FALSE);
 			break;
 
 		case ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD:
-			DO_ASL (win_prefs, ID_PREFS_AMIGAOS4_ROOT_GAD, TRUE);
+			DO_ASL (asl_current_amigaos_root_name, asl_action_amigaos_root_name, TRUE);
 			break;
 
 		case ID_PREFS_SYSTEM_ROM_SELECT_GAD:
-			DO_ASL (win_prefs,ID_PREFS_SYSTEM_ROM_GAD, FALSE);
+			DO_ASL ( asl_current_system_rom, asl_action_system_rom , FALSE);
 			break;
 
     		case ID_PREFS_GFX_MODE_ID_SELECT_GAD:
-			DO_ASL_MODE_ID (win_prefs,ID_PREFS_GFX_MODE_ID_GAD);
+			DO_ASL_MODE_ID ( asl_mode_get_current_mode, asl_mode_action );
 			break;
 
     		case ID_PREFS_ETHERNET_DEVICE_SELECT_GAD:
-			DO_ASL(win_prefs, ID_PREFS_ETHERNET_DEVICE_GAD, FALSE);
+			DO_ASL( asl_current_ethernet_device, asl_action_ethernet_device ,FALSE);
 			break;
 
 		case ID_CREATE_NAME_ASL_GAD:
-			DO_ASL(win_create_volume, ID_CREATE_NAME_GAD, FALSE);
+			DO_ASL( asl_current_create_name, asl_action_create_name, FALSE);
 			break;
 
 		case ID_CREATE_OK_GAD:
