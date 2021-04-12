@@ -63,8 +63,8 @@ struct List list_files;
 
 extern struct Catalog *catalog;
 
-#define ScreenTitle "BasiliskII II 1.0"
-
+//#define ScreenTitle "BasiliskII II 1.0"
+#include "../include/version.h"
 
 #include "cdrom.h"
 
@@ -159,7 +159,7 @@ const char	*device_names[]=
 
 
 STATIC CONST CONST_STRPTR CPUNames[] = {"68000","68010","68020","68030","68040", NULL};
-STATIC CONST CONST_STRPTR RamNames[] ={"8Mb","16Mb","32Mb","64Mb","128Mb","256Mb","512Mb",NULL};
+STATIC CONST CONST_STRPTR RamNames[] ={"8 MB","16 MB","32 MB","64 MB","128 MB","256 MB","512 MB",NULL};
 
 STATIC CONST CONST_STRPTR ModelNames[] =
 {
@@ -425,7 +425,7 @@ void add_volume(struct List *list,char *str, LONG num)
 	long long int size;
 	char str_size[30];
 	int 	v_unit;
-	const char *str_unit[]={"Byte","KByte","MByte","GByte"};
+	const char *str_unit[]={"B","KB","MB","GB"};
 
 	size = 0;
 	v_unit = 0;
@@ -441,7 +441,8 @@ void add_volume(struct List *list,char *str, LONG num)
 		size = get_file_size(str);
 	}
 
-	for (;size>(50*1024);size/=1024)
+	//for (;size>(50*1024);size/=1024)
+	for (; size>8192; size/=1024)
 	{
 		v_unit++;
 	}
@@ -458,11 +459,14 @@ void add_volume(struct List *list,char *str, LONG num)
 		LBNCA_CopyText, TRUE,
 		LBNCA_Text, str_size,
 		LBNCA_Editable, FALSE,
+		LBNCA_HorizJustify, LCJ_RIGHT,
 
 		LBNA_Column, 2,
 		LBNCA_CopyText, TRUE,
-		LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : "",
+		//LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : "",
+		LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : _L(TXT_READ_WRITE),
 		LBNCA_Editable, FALSE,
+		LBNCA_HorizJustify, LCJ_CENTER,
 
 		TAG_DONE)))
 	{
@@ -476,7 +480,7 @@ void edit_volume(struct Node *node,char *str)
 	long long int size;
 	char str_size[30];
 	int 	v_unit;
-	const char *str_unit[]={"Byte","KByte","MByte","GByte"};
+	const char *str_unit[]={"B","KB","MB","GB"};
 
 	size = 0;
 	v_unit = 0;
@@ -510,11 +514,14 @@ void edit_volume(struct Node *node,char *str)
 		LBNCA_CopyText, TRUE,
 		LBNCA_Text, str_size,
 		LBNCA_Editable, FALSE,
+		LBNCA_HorizJustify, LCJ_RIGHT,
 
 		LBNA_Column, 2,
 		LBNCA_CopyText, TRUE,
-		LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : "",
+		//LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : "",
+		LBNCA_Text, read_only ? _L(TXT_READ_ONLY) : _L(TXT_READ_WRITE),
 		LBNCA_Editable, FALSE,
+		LBNCA_HorizJustify, LCJ_CENTER,
 
 		TAG_DONE);
 }
@@ -905,7 +912,6 @@ static void add_or_update_volume(ULONG add_new_volume)
 	switch( type )
 	{
 		case 0:	// partition
-
 				device  = device_names[ getv( obj[ID_PREFS_DEVICE_GAD], CHOOSER_Selected ) ];
 				unit = getv( obj[ID_PREFS_UNIT_GAD], INTEGER_Number );
 				partition = (STRPTR) getv( obj[ID_PREFS_PARTITION_NAME_GAD], STRINGA_TextVal );
@@ -913,7 +919,6 @@ static void add_or_update_volume(ULONG add_new_volume)
 				break;
 
 		case 1:	// diskimage
-
 				diskimage = (STRPTR) getv( obj[ID_PREFS_FILE_GAD], STRINGA_TextVal );
 				sprintf(str, "%s%s", read_only ? "*" : "", (STRPTR) diskimage );
 				break;
@@ -1056,6 +1061,8 @@ void add_edit_volume( int adding )
 
 	init_win_disks(win_disks,is_device, read_only);
 
+	SetAttrs(obj[ID_PREFS_READ_ONLY_GAD], GA_Selected,read_only, TAG_END);
+
 	if ( ( win[win_disks] = RA_OpenWindow( layout[win_disks] ) ) )
 	{
 		RSetAttrO( win_prefs, ID_PREFS_ADD_BOOTDISK_GAD , GA_Disabled, TRUE);
@@ -1078,7 +1085,7 @@ void add_edit_volume( int adding )
 		{
 			RSetAttrO( win_disks, ID_PREFS_FILE_GAD, STRINGA_TextVal, str);
 		}
-		RSetAttrO( win_prefs, ID_PREFS_READ_ONLY_GAD, GA_Selected, read_only );
+		//RSetAttrO( win_prefs, ID_PREFS_READ_ONLY_GAD, GA_Selected, read_only );
 	}
 
 	add_vol_opt = adding;
@@ -1120,9 +1127,7 @@ int get_r_event( int (*fn_event) (int id,int code) )
 		{
 			while ((result = RA_HandleInput( layout[n] ,&code)) != WMHI_LASTMSG)
 			{
-
 //				printf("Reaction event: result %x -- %x\n", result, code);
-
 				switch(result & WMHI_CLASSMASK)
 				{
 					case WMHI_GADGETUP:
@@ -1133,7 +1138,7 @@ int get_r_event( int (*fn_event) (int id,int code) )
 						if ( RA_Iconify( layout[ win_prefs ] ) )
 						win[ win_prefs ] = NULL;
 						break;
-								 
+
 					case WMHI_UNICONIFY:
 						win[ win_prefs ] = RA_OpenWindow( layout[ win_prefs] );
 						break;
@@ -1302,11 +1307,11 @@ int event(int id, int code)
 			DO_ASL ( asl_current_system_rom, asl_action_system_rom , FALSE);
 			break;
 
-    		case ID_PREFS_GFX_MODE_ID_SELECT_GAD:
+		case ID_PREFS_GFX_MODE_ID_SELECT_GAD:
 			DO_ASL_MODE_ID ( asl_mode_get_current_mode, asl_mode_action );
 			break;
 
-    		case ID_PREFS_ETHERNET_DEVICE_SELECT_GAD:
+		case ID_PREFS_ETHERNET_DEVICE_SELECT_GAD:
 			DO_ASL( asl_current_ethernet_device, asl_action_ethernet_device ,FALSE);
 			break;
 
@@ -1315,11 +1320,10 @@ int event(int id, int code)
 			break;
 
 		case ID_CREATE_OK_GAD:
-
 			create_volume( );
 			close_window(win_create_volume);
 			RefreshGList( (Gadget *) refresh[win_prefs], win[win_prefs], NULL, -1 );
- 			
+
 			RSetAttrO( win_prefs, ID_MAC_VOLUMES , GA_Disabled, FALSE);
 			RSetAttrO( win_prefs, ID_PREFS_ADD_BOOTDISK_GAD , GA_Disabled, FALSE);
 			RSetAttrO( win_prefs, ID_PREFS_ADD_GAD , GA_Disabled, FALSE);
@@ -1327,7 +1331,7 @@ int event(int id, int code)
 			break;
 
 		case ID_CREATE_CANCEL_GAD:
- 			close_window(win_create_volume);
+			close_window(win_create_volume);
 
 			RSetAttrO( win_prefs, ID_MAC_VOLUMES , GA_Disabled, FALSE);
 			RSetAttrO( win_prefs, ID_PREFS_ADD_BOOTDISK_GAD , GA_Disabled, FALSE);
@@ -1336,9 +1340,8 @@ int event(int id, int code)
 			break;
 
 		case ID_OK_GAD:
-
 			add_or_update_volume( add_vol_opt );	// 1 = add, 0 = update
- 			close_window(win_disks);
+			close_window(win_disks);
 			RefreshGList( (Gadget *) refresh[win_prefs], win[win_prefs], NULL, -1 );
 
 			RSetAttrO( win_prefs, ID_MAC_VOLUMES , GA_Disabled, FALSE);
@@ -1348,7 +1351,7 @@ int event(int id, int code)
 			break;
 
 		case ID_CANCEL_GAD:
- 			close_window(win_disks);
+			close_window(win_disks);
 
 			RSetAttrO( win_prefs, ID_MAC_VOLUMES , GA_Disabled, FALSE);
 			RSetAttrO( win_prefs, ID_PREFS_ADD_BOOTDISK_GAD , GA_Disabled, FALSE);
@@ -1389,17 +1392,21 @@ void FixColumnInfoNames(struct ColumnInfo *ci )
 void init_create_volume(int win_nr)
 {
 	layout[win_nr] = (Object*) WindowObject,
-			WA_ScreenTitle, ScreenTitle,
-			WA_Title, ScreenTitle,
-			WA_SizeGadget, TRUE,
-			WA_Width, 300,
-			WA_Left, 40,
-			WA_Top, 30,
-			WA_DepthGadget, TRUE,
-			WA_DragBar, TRUE,
-			WA_CloseGadget, TRUE,
-			WA_Activate, TRUE,
+			//WA_ScreenTitle, ScreenTitle,
+			//WA_Title, ScreenTitle,
+			WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
+			WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+
+			WA_SizeGadget,   TRUE,
+			//WA_Width, 300,
+			//WA_Left, 40,
+			//WA_Top, 30,
+			WA_DepthGadget,  TRUE,
+			WA_DragBar,      TRUE,
+			WA_CloseGadget,  TRUE,
+			WA_Activate,     TRUE,
 			WA_SmartRefresh, TRUE,
+			WINDOW_Position, WPOS_CENTERSCREEN,
 			WINDOW_ParentGroup, VLayoutObject,
 				LAYOUT_SpaceOuter, TRUE,
 				LAYOUT_DeferLayout, TRUE,
@@ -1407,16 +1414,20 @@ void init_create_volume(int win_nr)
 				LAYOUT_AddChild, HGroupObject,
 
 					LAYOUT_AddChild, MakeString(ID_CREATE_NAME_GAD), 
-					CHILD_Label, MakeLabel(ID_CREATE_NAME_GAD),
+					//CHILD_Label, MakeLabel(ID_CREATE_NAME_GAD),
 
 					LAYOUT_AddChild, MakeImageButton(ID_CREATE_NAME_ASL_GAD,BAG_POPDRAWER),
 					CHILD_WeightedWidth, 0,
 
-					LAYOUT_AddChild, MakeInteger(ID_CREATE_SIZE_GAD, 8),
-					CHILD_Label, MakeLabel(ID_CREATE_SIZE_GAD),
-
+					//LAYOUT_AddChild, MakeInteger(ID_CREATE_SIZE_GAD, 8),
+					//CHILD_Label, MakeLabel(ID_CREATE_SIZE_GAD),
 				LayoutEnd,
 				CHILD_WeightedHeight, 0,
+				CHILD_Label, MakeLabel(ID_CREATE_NAME_GAD),
+
+				//LAYOUT_AddChild, MakeInteger(ID_CREATE_SIZE_GAD, 8),
+				LAYOUT_AddChild, MakeInteger_min_max(ID_CREATE_SIZE_GAD, 8,0,2047),
+				CHILD_Label, MakeLabel(ID_CREATE_SIZE_GAD),
 
 				LAYOUT_AddChild, HGroupObject,
 					LAYOUT_AddChild, MakeButton(ID_CREATE_OK_GAD),
@@ -1432,17 +1443,21 @@ void init_create_volume(int win_nr)
 void init_win_disks(int win_nr, LONG is_device, LONG read_only)
 {
 	layout[win_nr] = (Object*) WindowObject,
-			WA_ScreenTitle, ScreenTitle,
-			WA_Title, ScreenTitle,
-			WA_SizeGadget, TRUE,
-			WA_Width, 300,
-			WA_Left, 40,
-			WA_Top, 30,
-			WA_DepthGadget, TRUE,
-			WA_DragBar, TRUE,
-			WA_CloseGadget, TRUE,
-			WA_Activate, TRUE,
+			//WA_ScreenTitle, ScreenTitle,
+			//WA_Title, ScreenTitle,
+			WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
+			WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+
+			WA_SizeGadget,   TRUE,
+			//WA_Width, 300,
+			//WA_Left, 40,
+			//WA_Top, 30,
+			WA_DepthGadget,  TRUE,
+			WA_DragBar,      TRUE,
+			WA_CloseGadget,  TRUE,
+			WA_Activate,     TRUE,
 			WA_SmartRefresh, TRUE,
+			WINDOW_Position, WPOS_CENTERSCREEN,
 			WINDOW_ParentGroup, VLayoutObject,
 				LAYOUT_SpaceOuter, TRUE,
 				LAYOUT_DeferLayout, TRUE,
@@ -1464,8 +1479,9 @@ void init_win_disks(int win_nr, LONG is_device, LONG read_only)
 					CLICKTAB_Current, (is_device == TRUE ? 0:1) ,
 				ClickTabEnd,
 
-				LAYOUT_AddChild, MakeCheck(ID_PREFS_READ_ONLY_GAD, read_only),
-					CHILD_Label, MakeLabel(ID_PREFS_READ_ONLY_GAD), 
+				//LAYOUT_AddChild, MakeCheck(ID_PREFS_READ_ONLY_GAD, read_only),
+				//CHILD_Label, MakeLabel(ID_PREFS_READ_ONLY_GAD), 
+				LAYOUT_AddChild, MakeCheckR(ID_PREFS_READ_ONLY_GAD, FALSE),
 
 				LAYOUT_AddChild, HGroupObject,
 					LAYOUT_AddChild, MakeButton(ID_OK_GAD),
@@ -1480,19 +1496,22 @@ void init_win_disks(int win_nr, LONG is_device, LONG read_only)
 void init_win_runtime(int win_nr)
 {
 	layout[win_nr] = (Object *) WindowObject,
-		
 				WA_IDCMP, IDCMP_RAWKEY | IDCMP_GADGETUP  | IDCMP_GADGETDOWN,
-				WA_Top, 0,
-				WA_Left, 0,
-				WA_Width, 150,
-				WA_SizeGadget, FALSE,
+				//WA_Top, 0,
+				//WA_Left, 0,
+				//WA_Width, 150,
+				WA_SizeGadget,  FALSE,
 				WA_DepthGadget, TRUE,
-				WA_DragBar, TRUE,
+				WA_DragBar,     TRUE,
 				WA_CloseGadget, FALSE,
-				WA_Activate, TRUE,
-								
-				WA_Title, "BasiliskII-0.9",
-				WA_ScreenTitle, ScreenTitle,
+				WA_Activate,    TRUE,
+
+				//WA_Title, "BasiliskII-0.9",
+				//WA_ScreenTitle, ScreenTitle,
+				WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
+				WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+
+				WINDOW_Position, WPOS_CENTERSCREEN,
 
 				WINDOW_ParentGroup,(Object *)  VGroupObject,
 					LAYOUT_SpaceOuter, TRUE,
@@ -1513,33 +1532,32 @@ void init_win_prefs(int win_nr)
 				
 				/* these tags describe the window 
 				 */
-		
 				WA_IDCMP, IDCMP_RAWKEY | IDCMP_GADGETUP  | IDCMP_GADGETDOWN,
-				WA_Top, 20,
-				WA_Left, 20,
-				WA_Width, 500,
-				WA_Height, 400,
-				WA_SizeGadget, TRUE,
+				//WA_Top, 20,
+				//WA_Left, 20,
+				//WA_Width, 500,
+				//WA_Height, 400,
+				WA_SizeGadget,  TRUE,
 				WA_DepthGadget, TRUE,
-				WA_DragBar, TRUE,
+				WA_DragBar,     TRUE,
 				WA_CloseGadget, FALSE,
-				WA_Activate, TRUE,
-								
-				WA_Title, "BasiliskII 1.0" ,
-				WA_ScreenTitle, "BasiliskII 1.0",
-				
+				WA_Activate,    TRUE,
+
+				//WA_Title, "BasiliskII 1.0" ,
+				//WA_ScreenTitle, "BasiliskII 1.0",
+				WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
+				WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+
 				/* Turn on gadget help in the window  */
-				
 				// WINDOW_GadgetHelp, TRUE,
-				
+
 				/* Add an iconification gadget. If you have this, you must listen to
 				 * WMHI_ICONIFY.
 				 */
-				 
 				WINDOW_IconifyGadget, FALSE,
-				
+
+				WINDOW_Position, WPOS_CENTERSCREEN,
 				/* Below is the layout of the window  */
-				
 				WINDOW_ParentGroup,(Object *)  VGroupObject,
 					LAYOUT_SpaceOuter, TRUE,
 					LAYOUT_BevelStyle, BVS_THIN,
@@ -1569,7 +1587,7 @@ void init_win_prefs(int win_nr)
 				LayoutEnd,
 				CHILD_WeightedHeight, 0,
 
-					EndGroup,					
+					EndGroup,
 				EndGroup,
 			EndWindow;
 }
