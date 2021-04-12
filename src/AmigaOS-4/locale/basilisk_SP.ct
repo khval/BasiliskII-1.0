@@ -1,0 +1,785 @@
+## version $VER: basilisk.catalog 1.0 (10.04.2021)
+## codeset 4
+## language spanish
+;
+;
+MSG_AUTHOR_INFORMATION
+Basilisk II 1.0 por Christian Bauer\n\
+(C) Copyright 1997-2001\n\
+General Public License (GPL)
+; \33cBasilisk II 1.0 by Christian Bauer\n Copyright 1997-2001\nDistribtion under General Public License (GPL)
+;
+MSG_PORT_INFORMATION
+Versión AmigaOS4 por Kjetil Hvalstrand, 2007-2020
+; AmigaOS 4.X (PowerPC) port by Kjetil Hvalstrand, 2007-2020
+;
+MSG_GFX_INFORMATION
+Iconos por Christian Rosentereter
+; Basilisk icons by Christian Rosentereter
+;
+MSG_TRANSLATION_INFORMATION
+Traducción por Javier de las Rivas
+; Translation by: xxxxx
+;
+MSG_DESCRIPTION
+Emulador MacIntosh 68k
+; 68k MacIntosh emulator
+;
+MSG_QUIT_WHILE_RUNING_INFORMATION
+Salir de esta forma puede corromper datos en\n\
+MacOS o en el sistema de ficheros del equipo.\n\
+Es parecido a \"forzar apagado\" del ordenador.
+; Quiting this way can result in corrupt MacOS files or filesystem.\nThis is the same as pulling the power plug while computer is running.
+;
+MSG_OK_GAD
+_Aceptar
+; _Ok
+;
+MSG_CANCEL_GAD
+_Cancelar
+; _Cancel
+;
+MSG_PREFS_TYPE_GAD
+_Tipo
+; _Type
+;
+MSG_PREFS_READ_ONLY_GAD
+Sólo lectu_ra
+; _Read Only
+;
+MSG_PREFS_FILE_GAD
+_Fichero:
+; _File
+;
+MSG_PREFS_DEVICE_GAD
+_Dispositivo
+; _Device
+;
+MSG_PREFS_CREATE_GAD
+Crear
+; Create
+;
+MSG_PREFS_UNIT_GAD
+_Unidad:
+; _Unit
+;
+MSG_PREFS_FLAGS_GAD
+_Atributos
+; _Flags
+;
+MSG_PREFS_START_BLOCK_GAD
+Bloque _inicial
+; _Start Block
+;
+MSG_PREFS_BLOCKS_GAD
+_Bloques
+; _Blocks
+;
+MSG_PREFS_BLOCK_SIZE_GAD
+Tamaño bloque
+; Block Size
+;
+MSG_PREFS_RAMSIZE_GAD
+%ldMB
+; %ldMB
+;
+MSG_PREFS_ADD_GAD
+Añadir
+; _Add...
+;
+MSG_PREFS_EDIT_GAD
+_Editar
+; _Edit...
+;
+MSG_PREFS_REMOVE_GAD
+Elimina_r
+; _Remove
+;
+MSG_PREFS_CD_DEVICE_GAD
+_Dispositivo
+; _Device
+;
+MSG_PREFS_CD_UNIT_GAD
+_Unidad:
+; _Unit
+;
+MSG_PREFS_CD_BOOT_GAD
+_Arrancar desde CD
+; _Boot from CD
+;
+MSG_PREFS_CD_DISABLE_DRIVER_GAD
+Desactivar CD-ROM
+; Disable CD-ROM driver
+;
+;MSG_PREFS_MORPHOS_ROOT_GAD
+;Raíz AmigaOS4:
+; AmigaOS root
+;
+MSG_PREFS_VOLUMETYPE_FILE_GAD
+Fichero
+; File
+;
+MSG_PREFS_VOLUMETYPE_DEVICE_GAD
+Dispositivo
+; Device
+;
+MSG_PREFS_ID_0_DEVICE_GAD
+ID _0:
+; ID _0 Device
+;
+MSG_PREFS_ID_1_DEVICE_GAD
+ID _1:
+; ID _1 Device
+;
+MSG_PREFS_ID_2_DEVICE_GAD
+ID _2:
+; ID _2 Device
+;
+MSG_PREFS_ID_3_DEVICE_GAD
+ID _3:
+; ID _3 Device
+;
+MSG_PREFS_ID_4_DEVICE_GAD
+ID _4:
+; ID _4 Device
+;
+MSG_PREFS_ID_5_DEVICE_GAD
+ID _5:
+; ID _5 Device
+;
+MSG_PREFS_ID_6_DEVICE_GAD
+ID _6:
+; ID _6 Device
+;
+MSG_PREFS_SCSI_UNIT_GAD
+Unidad:
+; Unit
+;
+MSG_PREFS_MODEM_DEVICE_GAD
+Dispositivo:
+; Device
+;
+MSG_PREFS_MODEM_UNIT_GAD
+Unidad:
+; Unit
+;
+MSG_PREFS_MODEM_PARALLEL_GAD
+Usar dispositivo paralelo
+; Parallel device
+;
+;MSG_PREFS_ETHERNET_DEVICE_GAD
+;Dispositivo:
+; Device
+;
+;MSG_PREFS_ETHERNET_UNIT_GAD
+;Unidad:
+; Unit
+;
+;MSG_PREFS_PRINTER_DEVICE_GAD
+;Dispositivo:
+; Device
+;
+;MSG_PREFS_PRINTER_UNIT_GAD
+;Unidad:
+; Unit
+;
+;MSG_PREFS_PRINTER_PARALLEL_GAD
+;Usar dispositivo paralelo
+; Parallel device
+;
+MSG_PREFS_GFX_WIDTH_GAD
+Anc_ho:
+; _Width
+;
+MSG_PREFS_GFX_HEIGHT_GAD
+Al_to:
+; _Height
+;
+ID_PREFS_GFX_FULLSCREEN_GAD
+_Pantalla completa
+; _Full screen
+;
+ID_PREFS_GFX_8BIT_GAD
+_256 colores
+; _8bit mode
+;
+;MSG_PREFS_GFX_FRAMESKIP_GAD
+;Re_fresco:
+; _Frame skip
+;
+;MSG_PREFS_DISABLE_SOUND
+;_Desactivar sonido
+; _Disable sound
+;
+;MSG_PREFS_SYSTEM_RAM_GAD
+;RAM MacOS
+; MacOS RAM
+;
+;MSG_PREFS_SYSTEM_MODEL_GAD
+;Modelo Mac
+; Mac Model
+;
+;MSG_PREFS_SYSTEM_ROM_GAD
+;Fiche_ro ROM:
+; _ROM File
+;
+;MSG_PREFS_START_GAD
+;Iniciar
+; Start
+;
+;MSG_PREFS_QUIT_GAD
+;Salir
+; Quit
+;
+MSG_MAC_VOLUMES
+Volúmenes/Imágenes A Montar
+; Mac Volumes
+;
+MSG_CDROM
+CD-ROM
+; CD-ROM
+;
+MSG_VIRTUAL_SCSI_DEVICES
+Dispositivos SCSI Virtuales
+; Virtual SCSI devices
+;
+MSG_MODEM
+Modem
+; Modem
+;
+MSG_ETHERNET
+Red
+; Ethernet
+;
+MSG_PRINTER
+Impresora
+; Printer
+;
+MSG_GRAPHICS
+Gráficos
+; Graphics
+;
+MSG_SOUND
+Sonido
+; Sound
+;
+MSG_SYSTEM
+Sistema
+; System message
+;
+MSG_SIZE
+Tamaño
+; Size
+;
+MSG_MB
+MB
+; MB
+;
+MSG_TITLE_BASILISK_SETTINGS
+Basilisk II: Ajustes
+; Basilisk II Settings
+;
+MSG_TITLE_ADD_VOLUME
+Añadir volumen
+; Add Volume
+;
+MSG_TITLE_EDIT_VOLUME
+Editar volumen
+; Edit Volume
+;
+MSG_PAGE_VOLUMES
+Volúmenes
+; Volumes
+;
+MSG_PAGE_SCSI
+SCSI
+; SCSI
+;
+MSG_PAGE_COMMUNICATION
+Comms.
+; Communication
+;
+MSG_PAGE_EMULATION
+Emulación
+; Emulation
+;
+MSG_MENU_TITLE_BASILISK
+Basilisk
+; Basilisk
+;
+MSG_MENU_BASILISK_ABOUT
+?\000Acerca de...
+; ?\0About...
+;
+MSG_MENU_BASILISK_START
+S\000Iniciar
+; S\0Start
+;
+MSG_MENU_BASILISK_QUIT
+Q\000Salir
+; Q\0Quit
+;
+ID_GRAPHICS
+Gráficos
+; Graphics
+;
+ID_PREFS_GFX_MODE_GAD
+_Modo
+; Gfx mode
+;
+ID_PREFS_GFX_WIDTH_GAD
+Anc_ho:
+; Gfx Width
+;
+ID_PREFS_GFX_HEIGHT_GAD
+ Al_to:
+; Gfx height
+;
+ID_PREFS_GFX_MODE_ID_SELECT_GAD
+ModoID (he_x.):
+; Select screen mode
+;
+ID_PREFS_GFX_MODE_ID_GAD
+ID (hex.)
+; Screen mode id
+;
+ID_PREFS_GFX_WINDOW_DEPTH_GAD
+C_olores
+; Window depth
+;
+ID_PREFS_GFX_RENDER_METHOD_GAD
+_Render
+; Render mode
+;
+ID_PREFS_GFX_LOCK_GAD
+_Bloquear pantalla
+; Screem lock
+;
+ID_ACTIVE_WINDOW_GAD
+Ventana Activa
+; Active window
+;
+ID_ACTIVE_WINDOW_FRAMESKIP_GAD
+Refresco:
+; Frame skip
+;
+ID_ACTIVE_WINDOW_LINESKIP_GAD
+ Saltar líneas:
+; Line skip
+;
+ID_DEACTIVE_WINDOW_GAD
+Ventana Inactiva
+; Deactive window
+;
+ID_DEACTIVE_WINDOW_FRAMESKIP_GAD
+Refresco:
+; Frame skip
+;
+ID_DEACTIVE_WINDOW_LINESKIP_GAD
+ Saltar líneas:
+; Line skip
+;
+;ID_PREFS_GFX_FRAMESKIP_GAD
+;Re_fresco:
+; Frame skip
+;
+;ID_PREFS_GFX_LINESKIP_GAD
+; Saltar líneas:
+; Lineskip
+;
+ID_SOUND
+Sonido
+; Sound
+;
+ID_PREFS_DISABLE_SOUND
+_Desactivar sonido
+; Disable sound
+;
+ID_VIRTUAL_SCSI_DEVICES
+Dispositivos SCSI Virtuales
+;SCSI
+; Scsi devices
+;
+ID_PREFS_ID_0_DEVICE_GAD
+ID _0:
+; Device 0
+;
+ID_PREFS_ID_0_UNIT_GAD
+:
+; Unit 0
+;
+ID_PREFS_ID_1_DEVICE_GAD
+ID _1:
+; Device 1
+;
+ID_PREFS_ID_1_UNIT_GAD
+:
+; Unit 1
+;
+ID_PREFS_ID_2_DEVICE_GAD
+ID _2:
+; Device 2
+;
+ID_PREFS_ID_2_UNIT_GAD
+:
+; Unit 2
+;
+ID_PREFS_ID_3_DEVICE_GAD
+ID _3:
+; Device 3
+;
+ID_PREFS_ID_3_UNIT_GAD
+:
+; Uinit 3
+;
+ID_PREFS_ID_4_DEVICE_GAD
+ID _4:
+; Device 4
+;
+ID_PREFS_ID_4_UNIT_GAD
+:
+; unit 4
+;
+ID_PREFS_ID_5_DEVICE_GAD
+ID _5:
+; Device 5
+;
+ID_PREFS_ID_5_UNIT_GAD
+:
+; unit 6
+;
+ID_PREFS_ID_6_DEVICE_GAD
+ID _6:
+; Device 6
+;
+ID_PREFS_ID_6_UNIT_GAD
+:
+; Unit 6
+;
+ID_PREFS_START_GAD
+Iniciar
+; Start
+;
+ID_PREFS_QUIT_GAD
+Salir
+; Quit
+;
+ID_PREFS_EDIT_GAD
+_Editar
+; Edit
+;
+ID_PREFS_REMOVE_GAD
+Elimina_r
+; Remove
+;
+ID_HARDWARE
+Hardware
+; Hardware
+;
+ID_CPU
+CPU
+; CPU
+;
+ID_PREFS_SYSTEM_CPU_GAD
+C_PU Mac
+; CPU
+;
+ID_PREFS_SYSTEM_FPU_GAD
+_FPU
+; FPU
+;
+ID_CPU_PRI
+Prioridad CPU
+; CPU priority
+;
+ID_CPU_ACTIVE_GAD
+Ventana a_ctiva:
+; CPU active window
+;
+ID_CPU_INACTIVE_GAD
+Ventana i_nactiva:
+; CPU inactive window
+;
+ID_RAM
+RAM
+; RAM
+;
+ID_PREFS_SYSTEM_RAM_GAD
+RA_M Mac
+; RAM
+;
+ID_SYSTEM
+Sistema
+; System
+;
+ID_PREFS_SYSTEM_MODEL_GAD
+Mo_delo Mac
+; Mac model
+;
+ID_PREFS_SYSTEM_ROM_SELECT_GAD
+Fiche_ro ROM:
+; Select rom
+;
+ID_PREFS_SYSTEM_ROM_GAD
+Fiche_ro ROM
+; Rom
+;
+ID_MODEM
+Modem (serial A)
+; Modem
+;
+ID_PREFS_MODEM_DEVICE_GAD
+Dispositivo:
+; Modem device
+;
+ID_PREFS_MODEM_UNIT_GAD
+Unidad:
+; Modem unit
+;
+ID_PREFS_MODEM_PARALLEL_GAD
+ Usar dispositivo paralelo
+; Modem parallel
+;
+ID_PRINTER
+Impresora (serial B)
+; Printer
+;
+ID_PREFS_PRINTER_DEVICE_GAD
+Dispositivo:
+; Printer device
+;
+ID_PREFS_PRINTER_UNIT_GAD
+Unidad:
+; Printer unit
+;
+ID_PREFS_PRINTER_PARALLEL_GAD
+ Usar dispositivo paralelo
+; Printer parallel
+;
+ID_ETHERNET
+Red
+; Ethernet
+;
+ID_PREFS_ETHERNET_DEVICE_SELECT_GAD
+Dispositivo:
+; Select ethernet device
+;
+ID_PREFS_ETHERNET_DEVICE_GAD
+Dispositivo
+; Ethernet device
+;
+ID_PREFS_ETHERNET_UNIT_GAD
+Unidad:
+; Ethernet unit
+;
+ID_PREFS_ETHERNET_MONITOR_GAD
+Monitor
+; Monitor
+;
+ID_MAC_VOLUMES
+Volúmenes
+; Volumes
+;
+ID_PREFS_ADD_BOOTDISK_GAD
+Disco arranque
+; Boot disk
+;
+ID_PREFS_ADD_GAD
+Añadir
+; Add
+;
+ID_PREFS_CREATE_GAD
+Crear
+; Create
+;
+ID_CDROM
+CDROM
+; Cdrom
+;
+ID_PREFS_CD_DEVICE_GAD
+Dispositivo
+; Cd device
+;
+ID_PREFS_CD_UNIT_GAD
+Unidad:
+; Cd unit
+;
+ID_PREFS_CD_BOOT_GAD
+Arrancar desde CD
+; Cd boot
+;
+ID_PREFS_CD_DISABLE_DRIVER_GAD
+Desactivar CD-ROM
+; Disable cd device
+;
+ID_PREFS_AMIGAOS4_ROOT_SELECT_GAD
+Dir. compartido:
+; Shared directory
+;
+ID_PREFS_AMIGAOS4_ROOT_GAD
+Dir. compartido
+; Shared directory
+;
+ID_PREFS_VOLUMETYPE_FILE_GAD
+Fichero
+; File volume type
+;
+ID_PREFS_VOLUMETYPE_DEVICE_GAD
+Dispositivo
+; Device volume type
+;
+ID_PREFS_TYPE_GAD
+Tipo
+; Type
+;
+ID_PREFS_DEVICE_GAD
+Dispositivo
+; Device
+;
+ID_PREFS_UNIT_GAD
+Unidad:
+; Unit
+;
+ID_PREFS_PARTITION_NAME_GAD
+Volumen:
+; Partition name
+;
+ID_PREFS_READ_ONLY_GAD
+Sólo lectura
+; Read only
+;
+ID_PREFS_FILE_GAD
+Fichero
+; File
+;
+ID_PREFS_FILE_SELECT_GAD
+Fichero:
+; File
+;
+ID_CREATE_NAME_ASL_GAD
+Nombre
+; Name
+;
+ID_CREATE_NAME_GAD
+Nombre:
+; Name
+;
+ID_CREATE_OK_GAD
+Aceptar
+; Ok
+;
+ID_CREATE_CANCEL_GAD
+Cancelar
+; Cancel
+;
+ID_CREATE_SIZE_GAD
+ Tamaño (MB):
+; Size
+;
+ID_OK_GAD
+Aceptar
+; Ok
+;
+ID_CANCEL_GAD
+Cancelar
+; Cancel
+;
+;ID_ZERO
+;\0
+;
+LIST_WINDOW_DEPTH_DEFAULT_ITEM
+Por defecto
+; Default
+;
+LIST_WINDOW_DEPTH_BW_ITEM
+Blanco y Negro
+; Black & White
+;
+LIST_WINDOW_DEPTH_4COLORS_ITEM
+4 colores (2bit)
+; 4 colors (2bit)
+;
+LIST_WINDOW_DEPTH_16COLORS_ITEM
+16 colores (4bit)
+; 16 colors (4bit)
+;
+LIST_WINDOW_DEPTH_256COLORS_ITEM
+256 colores (8bit)
+; 256 colors (8bit)
+;
+LIST_WINDOW_DEPTH_15BIT_ITEM
+32.767 colores (15bit)
+; 32 767 colors (15bit)
+;
+LIST_WINDOW_RENDER_INTERNAL_CONVERTION
+Interno
+; Internal convertion
+;
+LIST_WINDOW_RENDER_WPA
+Del sistema (WritePixelArray)
+; System Write Pixel Array
+;
+LIST_WINDOW_RENDER_DIRECT
+Directo (si es posible)
+; Direct write (if possible)
+;
+LIST_MODENAMES_WINDOW
+Ventana
+; Window
+;
+LIST_MODENAMES_COMPOSITION_WINDOW
+Ventana (ef. de composición)
+; Composition window
+;
+LIST_MODENAMES_FULL_SCREEN
+Pantalla completa
+; Full screen
+;
+LIST_CATEGORYTABS_DISK
+Discos
+; Disk
+;
+LIST_CATEGORYTABS_SCSI
+SCSI
+; SCSI
+;
+LIST_CATEGORYTABS_IO
+E/S
+; IO
+;
+LIST_CATEGORYTABS_CPU
+CPU
+; CPU
+;
+LIST_CATEGORYTABS_GRAPHICS
+Gráficos
+; Graphics
+;
+LIST_DISKTYPES_PARTITION
+Partición
+; Partition
+;
+LIST_DISKTYPES_DISKIMAGE
+Imagen
+; Diskimage
+;
+LIST_VOLUMES_NAME_COLUMN
+Nombre
+; Name
+;
+LIST_VOLUMES_SIZE_COLUMN
+Tamaño
+; Size
+;
+LIST_VOLUMES_RW_COLUMN
+R/W
+; RW
+;
+TXT_READ_ONLY
+Sólo lectura
+; Read Only
+;
+ID_END
+--- EOF ---
+; --- EOF ---
+;
