@@ -35,6 +35,21 @@
 	GA_Selected, v,		\
 	CheckBoxEnd
 
+// LEFT location of checkbox text label
+#define MakeCheckL(n, v) obj[n] = (Object*) CheckBoxObject, \
+ GA_ID,              n,              \
+ GA_Selected,        v,              \
+ GA_Text,            _L(n),          \
+ CHECKBOX_TextPlace, PLACETEXT_LEFT, \
+ TAG_END)
+
+// RIGHT location of checkbox text label
+#define MakeCheckR(n, v) obj[n] = (Object*) CheckBoxObject, \
+ GA_ID,       n,     \
+ GA_Selected, v,     \
+ GA_Text,     _L(n), \
+ TAG_END)
+
 #define MakeString(n) obj[n] =  (Object*) StringObject, \
 	GA_ID, n,				\
 	GA_Text, _L(n),		\
@@ -47,12 +62,15 @@
 	GA_RelVerify, TRUE,		\
 	STRINGA_HookType, SHK_HEXIDECIMAL, \
 	StringEnd
-
 // 	STRINGA_TextVal, _L(n)	
 
 #define MakeLabel(n)  LabelObject, \
 	GA_ID, n,				\
 	LABEL_Text, _L(n),		\
+	LabelEnd
+
+#define MakeLabelEmpty()  LabelObject, \
+	LABEL_Text, "",		\
 	LabelEnd
 
 #define MakePopFile(n,l,v)  obj[n] = (Object*) StringObject, \
