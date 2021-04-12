@@ -30,8 +30,10 @@ PAGE_Add, VGroupObject,
 		LAYOUT_AddChild, MakeCycle(ID_PREFS_GFX_RENDER_METHOD_GAD, window_render_method_names),
 		CHILD_Label, MakeLabel(ID_PREFS_GFX_RENDER_METHOD_GAD), 
 
-		LAYOUT_AddChild, MakeCheck(ID_PREFS_GFX_LOCK_GAD, 0),
-		CHILD_Label, MakeLabel(ID_PREFS_GFX_LOCK_GAD),
+		//LAYOUT_AddChild, MakeCheck(ID_PREFS_GFX_LOCK_GAD, 0),
+		//CHILD_Label, MakeLabel(ID_PREFS_GFX_LOCK_GAD),
+		LAYOUT_AddChild, MakeCheckR(ID_PREFS_GFX_LOCK_GAD, FALSE),
+		CHILD_Label, MakeLabelEmpty(),
 
 	LayoutEnd,
 	CHILD_WeightedHeight, 0,
