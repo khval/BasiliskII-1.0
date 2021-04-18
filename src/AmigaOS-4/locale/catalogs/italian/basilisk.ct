@@ -1,4 +1,4 @@
-## version $VER: basilisk.catalog 1.8 (8.04.2021)
+## version $VER: basilisk.catalog 1.8 (18.04.2021)
 ## codeset 0
 ## language italiano
 ## chunk AUTH Translated by Samir Hawamdeh (http://www.betatesting.it/backforthefuture)
@@ -714,14 +714,18 @@ Dimensione
 ; Size
 ;
 LIST_VOLUMES_RW_COLUMN
-LS
-; RW
+Modalità
+; Mode
 ;
 TXT_READ_ONLY
-Sola Lettura
-; Read Only
+sola lettura
+; read only
+;
+TXT_READ_WRITE
+lettura/scrittura
+; read/write
 ;
 ID_END
---- FINE DELLA LINEA ---
+--- FINE LINEA ---
 ; --- EOF ---
 ;
