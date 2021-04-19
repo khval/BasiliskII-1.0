@@ -52,6 +52,7 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
 	req.cpp \
 	comp.cpp \
 	asl.cpp \
+	version.cpp \
 	DeviceClip.cpp \
 	../debug.cpp \
 	video_driver_screen.cpp \
@@ -68,7 +69,7 @@ APP = BasiliskII
 .SUFFIXES:
 .SUFFIXES: .c .cpp .asm .o .h
 
-all: locale $(APP)
+all: update_builddate make_locale $(APP)
 
 OBJ_DIR = obj
 $(OBJ_DIR)::
@@ -98,7 +99,7 @@ clean:
 dump:
 	objdump --disassemble BasiliskII.db >BasiliskII.s
 
-locale: locale/locale.c locale/locale.h
+make_locale: locale/locale.c locale/locale.h
 
 locale/basilisk.ct: locale/basilisk.cd
 	@$(CATCOMP) locale/basilisk.cd CTFILE locale/basilisk.ct
@@ -162,6 +163,13 @@ cpudefs.cpp: $(OBJ_DIR)/build68k /uae_cpu/table68k
 cpuemu.cpp: $(OBJ_DIR)/gencpu
 	$(COMPILING)
 	@$(OBJ_DIR)/gencpu
+
+update_builddate: update_builddate1 version.o
+
+update_builddate1:
+	@echo "#include <version.h>" > version.cpp
+	@c:date LFORMAT "const char **ScreenTitle=VERSION_STRING*" (%d.%m.%Y)*";" >> version.cpp
+	@echo "" >> version.cpp
 
 cpustbl.cpp: cpuemu.cpp
 cputbl.h: cpuemu.cpp

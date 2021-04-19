@@ -273,6 +273,7 @@ driver_window::driver_window(Amiga_monitor_desc &m, const video_mode &mode)
 		WA_CloseGadget, TRUE,
 		WA_UserPort,  periodic_msgPort ,
 		WA_Title, (ULONG) GetString(STR_WINDOW_TITLE),
+		WA_ScreenTitle, ScreenTitle,
 		WA_IDCMP, IDCMP_common,
 		TAG_END
 	);

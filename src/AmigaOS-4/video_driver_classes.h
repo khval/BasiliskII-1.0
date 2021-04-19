@@ -1,4 +1,6 @@
 
+extern const char *ScreenTitle;
+
 class Amiga_monitor_desc : public monitor_desc {
 public:
 	Amiga_monitor_desc(const vector<video_mode> &available_modes, video_depth default_depth, uint32 default_id, int default_display_type) 

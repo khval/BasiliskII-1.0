@@ -63,7 +63,7 @@ struct List list_files;
 
 extern struct Catalog *catalog;
 
-//#define ScreenTitle "BasiliskII II 1.0"
+extern const char *ScreenTitle;
 #include "../include/version.h"
 
 #include "cdrom.h"
@@ -1393,7 +1393,7 @@ void init_create_volume(int win_nr)
 {
 	layout[win_nr] = (Object*) WindowObject,
 			WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
-			WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+			WA_ScreenTitle, ScreenTitle,
 
 			WA_SizeGadget,   TRUE,
 			WA_DepthGadget,  TRUE,
@@ -1436,7 +1436,7 @@ void init_win_disks(int win_nr, LONG is_device, LONG read_only)
 	layout[win_nr] = (Object*) WindowObject,
 
 			WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
-			WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+			WA_ScreenTitle, ScreenTitle,
 
 			WA_SizeGadget,   TRUE,
 			WA_DepthGadget,  TRUE,
@@ -1522,7 +1522,7 @@ void init_win_prefs(int win_nr)
 				WA_Activate,    TRUE,
 
 				WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
-				WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+				WA_ScreenTitle, ScreenTitle,
 
 				/* Add an iconification gadget. If you have this, you must listen to
 				 * WMHI_ICONIFY.
