@@ -1392,15 +1392,10 @@ void FixColumnInfoNames(struct ColumnInfo *ci )
 void init_create_volume(int win_nr)
 {
 	layout[win_nr] = (Object*) WindowObject,
-			//WA_ScreenTitle, ScreenTitle,
-			//WA_Title, ScreenTitle,
 			WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
 			WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
 
 			WA_SizeGadget,   TRUE,
-			//WA_Width, 300,
-			//WA_Left, 40,
-			//WA_Top, 30,
 			WA_DepthGadget,  TRUE,
 			WA_DragBar,      TRUE,
 			WA_CloseGadget,  TRUE,
@@ -1414,18 +1409,14 @@ void init_create_volume(int win_nr)
 				LAYOUT_AddChild, HGroupObject,
 
 					LAYOUT_AddChild, MakeString(ID_CREATE_NAME_GAD), 
-					//CHILD_Label, MakeLabel(ID_CREATE_NAME_GAD),
 
 					LAYOUT_AddChild, MakeImageButton(ID_CREATE_NAME_ASL_GAD,BAG_POPDRAWER),
 					CHILD_WeightedWidth, 0,
 
-					//LAYOUT_AddChild, MakeInteger(ID_CREATE_SIZE_GAD, 8),
-					//CHILD_Label, MakeLabel(ID_CREATE_SIZE_GAD),
 				LayoutEnd,
 				CHILD_WeightedHeight, 0,
 				CHILD_Label, MakeLabel(ID_CREATE_NAME_GAD),
 
-				//LAYOUT_AddChild, MakeInteger(ID_CREATE_SIZE_GAD, 8),
 				LAYOUT_AddChild, MakeInteger_min_max(ID_CREATE_SIZE_GAD, 8,0,2047),
 				CHILD_Label, MakeLabel(ID_CREATE_SIZE_GAD),
 
@@ -1443,15 +1434,11 @@ void init_create_volume(int win_nr)
 void init_win_disks(int win_nr, LONG is_device, LONG read_only)
 {
 	layout[win_nr] = (Object*) WindowObject,
-			//WA_ScreenTitle, ScreenTitle,
-			//WA_Title, ScreenTitle,
+
 			WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
 			WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
 
 			WA_SizeGadget,   TRUE,
-			//WA_Width, 300,
-			//WA_Left, 40,
-			//WA_Top, 30,
 			WA_DepthGadget,  TRUE,
 			WA_DragBar,      TRUE,
 			WA_CloseGadget,  TRUE,
@@ -1497,19 +1484,14 @@ void init_win_runtime(int win_nr)
 {
 	layout[win_nr] = (Object *) WindowObject,
 				WA_IDCMP, IDCMP_RAWKEY | IDCMP_GADGETUP  | IDCMP_GADGETDOWN,
-				//WA_Top, 0,
-				//WA_Left, 0,
-				//WA_Width, 150,
 				WA_SizeGadget,  FALSE,
 				WA_DepthGadget, TRUE,
 				WA_DragBar,     TRUE,
 				WA_CloseGadget, FALSE,
 				WA_Activate,    TRUE,
 
-				//WA_Title, "BasiliskII-0.9",
-				//WA_ScreenTitle, ScreenTitle,
 				WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
-				WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
+				WA_ScreenTitle, ScreenTitle,
 
 				WINDOW_Position, WPOS_CENTERSCREEN,
 
@@ -1533,23 +1515,14 @@ void init_win_prefs(int win_nr)
 				/* these tags describe the window 
 				 */
 				WA_IDCMP, IDCMP_RAWKEY | IDCMP_GADGETUP  | IDCMP_GADGETDOWN,
-				//WA_Top, 20,
-				//WA_Left, 20,
-				//WA_Width, 500,
-				//WA_Height, 400,
 				WA_SizeGadget,  TRUE,
 				WA_DepthGadget, TRUE,
 				WA_DragBar,     TRUE,
 				WA_CloseGadget, FALSE,
 				WA_Activate,    TRUE,
 
-				//WA_Title, "BasiliskII 1.0" ,
-				//WA_ScreenTitle, "BasiliskII 1.0",
 				WA_Title,       _L(MSG_TITLE_BASILISK_SETTINGS),
 				WA_ScreenTitle, VERSION_STRING" ("__AMIGADATE__")",
-
-				/* Turn on gadget help in the window  */
-				// WINDOW_GadgetHelp, TRUE,
 
 				/* Add an iconification gadget. If you have this, you must listen to
 				 * WMHI_ICONIFY.
