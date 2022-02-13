@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		if (argc==2)
+		if (argc>=2)
 		{
 			if ((strlen(argv[1])>3)&&(argv[1][0]!='-')&&(argv[1][1]!='-'))
 			{
@@ -281,12 +281,10 @@ int main(int argc, char **argv)
 					MERGE_STR(XPRAM_FILE_NAME,		argv[1],	only_xpram_filename);
 				}
 			}
+
+			argc--; argv++;
 		}
-
-		printf(GetString(STR_ABOUT_TEXT1), VERSION_MAJOR, VERSION_MINOR);
-		printf(" %s\n", GetString(STR_ABOUT_TEXT2));
 	}
-
 
 	if (dobj == NULL)
 	{
