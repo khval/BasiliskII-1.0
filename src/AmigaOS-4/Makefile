@@ -3,16 +3,16 @@
 ## System specific configuration
 STRIP = echo
 
-CC = g++ -noixemul -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
-CXX = g++ -noixemul -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
-CXXFLAGS = -g  -funroll-loops -finline-functions -ffast-math -mcpu=740 -mstring -mmultiple ## -Wall -Wno-multichar
+CC = g++   -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
+CXX = g++   -D__USE_INLINE__  # -DENABLE_EXCLUSIVE_SPCFLAGS
+CXXFLAGS = -athread=native -g  -funroll-loops -finline-functions -ffast-math -mcpu=740  -mmultiple ## -Wall -Wno-multichar
 
-CPUDIR = ../uae_cpu
+CPUDIR = cpu_build
 
 CPPFLAGS = -I../include -I${CPUDIR} -I.
-DEFS = -DUSE_SDL
-LDFLAGS = -noixemul
-LIBS = -lsdl 
+DEFS = 
+LDFLAGS =  -lpthread
+LIBS = 
 AS = as
 ASFLAGS =
 CATCOMP = catcomp
@@ -31,7 +31,7 @@ ARCHIVING = @$(ECHE) "archiving $(BOLD)$@$(NRML)..."
 
 ## Files
 CPUSRCS = $(CPUDIR)/basilisk_glue.cpp $(CPUDIR)/newcpu.cpp $(CPUDIR)/memory.cpp	\
-	$(CPUDIR)/readcpu.cpp $(CPUDIR)/fpu/fpu_uae.cpp cpustbl.cpp cpudefs.cpp cpuemu.cpp
+	$(CPUDIR)/readcpu.cpp $(CPUDIR)/fpu/fpu_uae.cpp cpustbl.cpp $(CPUDIR)/cpudefs.cpp cpuemu.cpp
 
 #CPUSRCS = ../powerrom_cpu/powerrom_cpu.cpp
 
@@ -42,9 +42,7 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
     timer_amigaos4.cpp clip_amigaos4.cpp ../adb.cpp ../serial.cpp \
     serial_amiga.cpp  ../ether.cpp  ../sony.cpp ../disk.cpp \
     ../cdrom.cpp ../scsi.cpp scsi_amiga.cpp ../video.cpp \
-	ether_amiga.cpp \
 	video_amigaos4.cpp \
-	video_convert.cpp \
 	window_icons.cpp \
 	iconify.cpp \
 	spawn.cpp \
@@ -58,9 +56,18 @@ SRCS = ../main.cpp main_amiga.cpp stccpy.cpp ../prefs.cpp ../prefs_items.cpp \
 	video_driver_screen.cpp \
 	video_driver_window.cpp \
 	video_driver_window_comp.cpp \
-    ../audio.cpp ../sdl/audio_sdl.cpp ../extfs.cpp  ../extfs_amigaos4.cpp \
+    ../audio.cpp  ../extfs.cpp  ../extfs_amigaos4.cpp \
     ../user_strings.cpp user_strings_amigaos4.cpp prefs_editor_amigaos4.cpp   \
 	$(CPUSRCS)
+
+# SRCS +=	ether_amiga.cpp 
+	SRCS += ../dummy/ether_dummy.cpp
+
+	SRCS += audio_amigaos4.cpp
+#	SRCS += ../dummy/audio_dummy.cpp
+
+# SRCS += video_convert.cpp 
+# SRCS += ../sdl/audio_sdl.cpp
 
 APP = BasiliskII
 
@@ -87,7 +94,7 @@ VPATH += $(addprefix :, $(subst  ,:, $(filter-out $($(subst, :, ,$(VPATH))), $(S
 
 $(APP): $(OBJ_DIR) $(OBJS)
 	$(LINKING)
-	$(CXX) -o $(APP).db $(LDFLAGS) $(OBJS) $(LIBS)  -ggdb
+	$(CXX) -athread=native -o $(APP).db $(LDFLAGS) $(OBJS) $(LIBS)  -ggdb
 	@;$(STRIPPING)
 	@;$(STRIP) --remove-section=.comment $(APP).db -o $(APP)
 	@;protect $(APP) +e
@@ -146,20 +153,25 @@ $(OBJ_DIR)/%.o : %.cpp
 
 $(OBJ_DIR)/%.o : %.c
 	$(COMPILING)
-	@$(CC) -noixemul $(CPPFLAGS) $(DEFS) $(CXXFLAGS) -c $< -o $@
+	@$(CC)   $(CPPFLAGS) $(DEFS) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/cpuopti: $(OBJ_DIR)/cpuopti.o
 	$(COMPILING)
 	@$(CC) $(LDFLAGS) -o $(OBJ_DIR)/cpuopti $(OBJ_DIR)/cpuopti.o
-$(OBJ_DIR)/build68k: $(OBJ_DIR)/build68k.o
+$(CPUDIR)/build68k: $(OBJ_DIR)/build68k.o
 	$(COMPILING)
-	@$(CC) $(LDFLAGS) -o $(OBJ_DIR)/build68k $(OBJ_DIR)/build68k.o
+	@$(CC) $(LDFLAGS) -o $(CPUDIR)/build68k $(OBJ_DIR)/build68k.o
 $(OBJ_DIR)/gencpu: $(OBJ_DIR)/gencpu.o $(OBJ_DIR)/readcpu.o $(OBJ_DIR)/cpudefs.o
 	$(COMPILING)
-	@$(CC) $(LDFLAGS) -o $(OBJ_DIR)/gencpu $(OBJ_DIR)/gencpu.o $(OBJ_DIR)/readcpu.o $(OBJ_DIR)/cpudefs.o
-cpudefs.cpp: $(OBJ_DIR)/build68k /uae_cpu/table68k
+	$(CC)  -athread=native $(LDFLAGS) -o $(OBJ_DIR)/gencpu $(OBJ_DIR)/gencpu.o $(OBJ_DIR)/readcpu.o $(OBJ_DIR)/cpudefs.o
+
+$(CPUDIR)/cpudefs.cpp: $(CPUDIR)/build68k $(CPUDIR)/table68k
 	$(COMPILING)
-	@$(OBJ_DIR)/build68k < /uae_cpu/table68k >cpudefs.cpp
+	@$(CPUDIR)/build68k < $(CPUDIR)/table68k > $(CPUDIR)/cpudefs.cpp
+
+$(CPUDIR)/table68k:
+	copy /uae_cpu_OLD/#? $(CPUDIR) ALL
+
 cpuemu.cpp: $(OBJ_DIR)/gencpu
 	$(COMPILING)
 	@$(OBJ_DIR)/gencpu
