@@ -21,9 +21,10 @@
 #include "sysdeps.h"
 
 #include <dos/dostags.h>
-#include <devices/ahi.h>
+///#include <devices/ahi.h>
 #include <proto/dos.h>
 #include <proto/exec.h>
+#include <proto/ahi.h>
 
 #include "cpu_emulation.h"
 #include "main.h"
@@ -35,21 +36,15 @@
 #define DEBUG 0
 #include "debug.h"
 
-
-
-// Prototypes
-void audio_set_sample_rate_byval(uint32 value);
-void audio_set_sample_size_byval(uint32 value);
-void audio_set_channels_byval(uint32 value);
-
+bool AHIDevice = -1;
+extern struct AHIIFace	*IAHI;
 
 #define AUDIO_FREQUENCY	48000
 
-// Supported sample rates, sizes and channels
-int audio_num_sample_rates = 1;
-int audio_num_sample_sizes = 1;
-int audio_num_channel_counts = 1;
-
+// The currently selected audio parameters (indices in audio_sample_rates[] etc. vectors)
+static int audio_sample_rate_index = 0;
+static int audio_sample_size_index = 0;
+static int audio_channel_count_index = 0;
 
 // Global variables
 extern struct MsgPort	*StartupMsgPort;
@@ -59,6 +54,16 @@ extern ULONG			SubTaskCount;
 static long sound_buffer_size;					// Size of one audio buffer in bytes
 static int audio_block_fetched = 0;				// Number of audio blocks fetched by interrupt routine
 static int play_audio = 0;
+
+int max_channels = 2;
+int frequencies = AUDIO_FREQUENCY;
+int ahi_id = 0;
+AHIAudioCtrl* ahi_ctrl = NULL;
+int sample_rate = 0;
+
+ULONG	audio_irq_done;
+
+bool open_audio(void);
 
 /*
  *  Audio
@@ -107,7 +112,6 @@ static VOID SoundFunc(void)
 	if (OpenDevice(AHINAME, AHI_DEFAULT_UNIT, (struct IORequest *)&req1, 0) == 0)
 	{
 		struct AudioBlock ab[2];
-		ULONG	ahimask;
 
 		ab[0].buffer	= buf1;
 		ab[0].cleared	= 1;
@@ -126,7 +130,7 @@ static VOID SoundFunc(void)
 		memset(buf1, 0, sound_buffer_size);
 		memset(buf2, 0, sound_buffer_size);
 
-		ahimask	= 1 << port->mp_SigBit;
+		audio_irq_done	= 1 << port->mp_SigBit;
 
 		req1.ahir_Std.io_Data	= buf1;
 		req2.ahir_Std.io_Data	= buf2;
@@ -143,7 +147,7 @@ static VOID SoundFunc(void)
 			struct AHIRequest *io;
 			ULONG	sigs;
 
-			sigs	= Wait(ahimask | SIGBREAKF_CTRL_C);
+			sigs	= Wait(audio_irq_done | SIGBREAKF_CTRL_C);
 
 			if (sigs & SIGBREAKF_CTRL_C)
 			{
@@ -222,35 +226,19 @@ static VOID SoundFunc(void)
  *  Initialization
  */
 
+
+struct TagItem tags_SHARED[] = {
+	{AVT_Type,MEMF_SHARED},
+	{AVT_ClearWithValue, 0},
+	{TAG_END,0}};
+
+
 void AudioInit(void)
 {
-	struct Message *msg;
-	APTR	buf1, buf2;
-
-
-	AHI_GetAudioAttrs(ahi_id, ahi_ctrl,
-		AHIDB_MaxChannels, (ULONG) &max_channels,
-		AHIDB_Frequencies, (ULONG) &frequencies,
-		TAG_END);
-
-	for (int n=0; n<frequencies; n++)
-		{
-		AHI_GetAudioAttrs(ahi_id, ahi_ctrl,
-			AHIDB_FrequencyArg, n,
-			AHIDB_Frequency, (ULONG) &sample_rate,
-			TAG_END);
-
-		D(bug("AudioInit: f=%ld Hz\n", sample_rate));
-		audio_sample_rates.push_back(sample_rate << 16);
-		}
-
-
-	printf("AudioStatus.sample_rate\n");
-
 	// Init audio status and feature flags
-	AudioStatus.sample_rate = audio_sample_rates[0];
-	AudioStatus.sample_size = audio_sample_sizes[0];
-	AudioStatus.channels = audio_channel_counts[0];
+	AudioStatus.sample_rate = 44100 << 16;
+	AudioStatus.sample_size = 16;
+	AudioStatus.channels = 2;
 	AudioStatus.mixer = 0;
 	AudioStatus.num_sources = 0;
 	audio_component_flags = cmpWantsRegisterMessage | kStereoOut | k16BitOut;
@@ -262,27 +250,23 @@ void AudioInit(void)
 		return;
 	}
 
-	printf("AHI available?\n");
+	// Open and initialize audio device
+	open_audio();
 
-#if 0
-	// AHI available?
-	if (AHIBase == NULL) {
-		WarningAlert(GetString(STR_NO_AHI_WARN));
-		return;
-	}
-#endif
+}
+
+
+bool open_audio(void)
+{
+	struct Message *msg;
+	APTR	buf1, buf2;
 
 	audio_frames_per_block = 2048;
 	sound_buffer_size = (AudioStatus.sample_size >> 3) * AudioStatus.channels * audio_frames_per_block;
 
-	printf("--- buf1	= AllocVec(sound_buffer_size , MEMF_SHARED | MEMF_CLEAR);\n");
-
-	buf1	= AllocVec(sound_buffer_size , MEMF_SHARED | MEMF_CLEAR);
-	buf2	= AllocVec(sound_buffer_size , MEMF_SHARED | MEMF_CLEAR);
-	msg	= (struct Message *)AllocVec( sizeof(*msg) , MEMF_SHARED | MEMF_CLEAR );
-
-
-	printf("(buf1 && buf2 && msg)\n");
+	buf1	= AllocVecTagList(sound_buffer_size , tags_SHARED);
+	buf2	= AllocVecTagList(sound_buffer_size , tags_SHARED);
+	msg	= (struct Message *) AllocVecTagList( sizeof(*msg) , tags_SHARED );
 
 	if (buf1 && buf2 && msg)
 	{
@@ -308,20 +292,38 @@ void AudioInit(void)
 			SubTaskCount++;
 			audio_open	= true;
 			printf("Audio open true?\n");
+
+			return true;
 		}
 	}
-	else
-	{
-		printf("Buffers failed\n");
-	}
+
+	return false;
 }
 
 /*
  *  Deinitialization
  */
 
+static void close_audio(void)
+{
+	// Close audio device
+
+	if (Sound_Proc)
+	{
+		Signal( (Task *) Sound_Proc, SIGBREAKF_CTRL_C);
+		while (Sound_Proc) Delay(1);
+	}
+
+	audio_open = false;
+}
+
+
 void AudioExit(void)
 {
+	// closed and opened in the process!!
+
+	close_audio();
+
 }
 
 
@@ -376,53 +378,25 @@ void AudioInterrupt(void)
  *  It is guaranteed that AudioStatus.num_sources == 0
  */
 
-void audio_set_sample_rate_byval(uint32 value)
-{
-	bool changed = (AudioStatus.sample_rate != value);
-	if(changed)
-		{
-		ULONG sample_rate_index;
-
-		D(bug(" audio_set_sample_rate_byval requested rate=%ld Hz\n", value >> 16));
-
-		AudioStatus.sample_rate = audio_sample_rates[sample_rate_index];
-		}
-
-	D(bug(" audio_set_sample_rate_byval rate=%ld Hz\n", AudioStatus.sample_rate >> 16));
-}
-
-
-
-void audio_set_channels_byval(uint32 value)
-{
-	bool changed = (AudioStatus.channels != value);
-	if(changed) {
-//		AudioStatus.channels = value;
-//		update_sound_parameters();
-//		WritePrivateProfileInt( "Audio", "Channels", AudioStatus.channels, ini_file_name );
-	}
-	D(bug(" audio_set_channels_byval %d\n", AudioStatus.channels));
-}
-
-
 bool audio_set_sample_rate(int index)
 {
-	if(index >= 0 && index < audio_sample_rates.size() ) {
-		audio_set_sample_rate_byval( audio_sample_rates[index] );
-		D(bug(" audio_set_sample_rate index=%ld rate=%ld\n", index, AudioStatus.sample_rate >> 16));
-	}
-
-	return true;
+	close_audio();
+	audio_sample_rate_index = index;
+	return open_audio();
 }
 
 bool audio_set_sample_size(int index)
 {
-	return false;
+	close_audio();
+	audio_sample_size_index = index;
+	return open_audio();
 }
 
 bool audio_set_channels(int index)
 {
-	return false;
+	close_audio();
+	audio_channel_count_index = index;
+	return open_audio();
 }
 
 
