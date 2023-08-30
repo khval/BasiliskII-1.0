@@ -184,9 +184,9 @@ uint32 find_mode_for_depth( int get_w, int get_h , uint32 get_depth)
 	ULONG ID;
 	struct DisplayInfo dispi;
 	struct DimensionInfo di;
-	uint32_t w,h;
-	uint32_t dx=~0,dy=~0,dz=~0,dd=~0;
-	uint32_t last_dz=~0,last_dd=~0;
+	uint32 w,h;
+	uint32 dx=~0,dy=~0,dz=~0,dd=~0;
+	uint32 last_dz=~0,last_dd=~0;
 
 	uint32 found_mode, closed_match_found_mode;
 
@@ -251,7 +251,7 @@ int add_modes(int mode_id, video_depth depth)
 	struct List *ml;
 	struct DisplayInfo di;
 	struct DimensionInfo dimi;
-	uint32_t DisplayID;
+	uint32 DisplayID;
 
 	int lw=0,lh=0;
 	int w,h;
@@ -355,7 +355,7 @@ bool VideoInit(bool classic)
 #if DEBUG==1
 	if (!video_debug_out ) video_debug_out = Open("CON:0/0/640/500",MODE_NEWFILE);
 #else
-	video_debug_out = NULL;
+	video_debug_out = 0;
 #endif
 
 	boot_depth = PrefsFindInt32("windowdepth");
@@ -1302,8 +1302,8 @@ void window_draw_internal( driver_base *drv )
 	int to_bpr;  
 	int to_bpp;
 	APTR BMLock;
-	uint32_t iw,ih;
-	uint32_t dx,dy;
+	uint32 iw,ih;
+	uint32 dx,dy;
 
 	if (drv == NULL) return;
 	if (drv -> convert == NULL) return;
@@ -1342,8 +1342,8 @@ void window_draw_internal_no_lock( driver_base *drv )
 	uint32 to_bpr = drv->the_win->RPort ->BitMap -> BytesPerRow;  
 	uint32 to_bpp;
 	APTR BMLock;
-	uint32_t iw,ih;
-	uint32_t dx,dy;
+	uint32 iw,ih;
+	uint32 dx,dy;
 
 	to_bpp = GetBitMapAttr(drv->the_win->RPort ->BitMap, BMA_BYTESPERPIXEL);
 
@@ -1370,8 +1370,8 @@ void bitmap_draw_internal( driver_base *drv )
 	char *to_mem ;
 	int to_bpr;  
 	APTR BMLock;
-	uint32_t iw,ih;
-	uint32_t dx,dy;
+	uint32 iw,ih;
+	uint32 dx,dy;
 
 	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
 	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
@@ -1411,8 +1411,8 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 	int to_bpr = drv->the_bitmap -> BytesPerRow;  
 	APTR BMLock;
 
-	uint32_t iw,ih;
-	uint32_t dx,dy;
+	uint32 iw,ih;
+	uint32 dx,dy;
 
 	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
 	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
@@ -1438,8 +1438,8 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 
 void window_draw_wpa ( driver_base *drv )
 {
-	uint32_t iw,ih;
-	uint32_t dx,dy;
+	uint32 iw,ih;
+	uint32 dx,dy;
 
 	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
 	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
@@ -1527,7 +1527,7 @@ void *get_convert( uint32_t scr_depth, uint32_t depth )	// this thing is stupid 
 }
 
 
-void *get_convert_v2( uint32_t scr_depth, uint32_t depth )
+void *get_convert_v2( uint32 scr_depth, uint32 depth )
 {
 	void *convert = NULL;
 
