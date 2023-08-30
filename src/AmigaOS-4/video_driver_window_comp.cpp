@@ -20,7 +20,16 @@
 #include "user_strings.h"
 #include "video.h"
 
-#include "video_convert.h"
+#ifdef _old_converts
+	#include "video_convert.h"
+#else
+	#include <libraries/gfxconvert.h>
+	#include <proto/gfxconvert.h>
+	extern struct gc_functions gc;
+	extern void *v_lookup;
+#endif
+
+
 #include "window_icons.h"
 #include "common_screen.h"
 
@@ -51,6 +60,12 @@ extern struct MsgPort *periodic_msgPort;
 #define IDCMP_common IDCMP_INACTIVEWINDOW | IDCMP_ACTIVEWINDOW | IDCMP_GADGETUP | IDCMP_CLOSEWINDOW| IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE | IDCMP_RAWKEY |  IDCMP_EXTENDEDMOUSE | IDCMP_DELTAMOVE
 
 extern void (*set_palette_fn)(uint8 *pal, uint32 num, int maxcolors) ;
+
+#define AllocShared(size) AllocVecTags(size,	\
+		AVT_Type, MEMF_SHARED,		\
+		AVT_ClearWithValue, 0,			\
+		TAG_END)
+
 
 static bool refreash_all_colors = true;
 // extern void set_fn_set_palette( uint32 PixelFormat);
@@ -140,7 +155,7 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
-	set_fn_set_palette2( mode.depth, dispi.PixelFormat );
+//	set_fn_set_palette2( mode.depth, dispi.PixelFormat );
 
 	maxpalcolors =	get_max_palette_colors( mode.depth );
 
@@ -149,12 +164,23 @@ driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &
 	{
 		case rm_internal: 
 
+#ifdef _old_converts
 			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
-
 			if (convert == (void (*)(char*, char*, int)) convert_4bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_4bit_lookup_to_16bit_2pixels; 
 			if (convert == (void (*)(char*, char*, int)) convert_8bit_lookup_to_16bit) convert = (void (*)(char*, char*, int))  convert_8bit_lookup_to_16bit_2pixels; 
+#else
+			gc = GC_GetMacFunctions( mode.depth, dispi.PixelFormat );
+			convert = gc.gc_fn;
 
-			if (  convert )
+			if (v_lookup) FreeVec( v_lookup );
+			v_lookup = NULL;	// maybe not allocated again.
+
+			if (gc.LookupSizeInBytes) v_lookup = AllocShared( gc.LookupSizeInBytes ) ;
+
+			if ( (gc.gc_initLookup) && (v_lookup) ) gc.gc_initLookup( NULL, v_lookup );
+#endif
+
+			if ( convert )
 			{
 				ULONG depth = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_DEPTH);
 				the_bitmap =AllocBitMap( mode.x, mode.y+2, depth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
@@ -243,6 +269,8 @@ int driver_window_comp::draw()
 
 #endif
 
+#ifdef _old_converts
+
 void set_palette_16bit_le(uint8 *pal, int num)
 {
 	int n;
@@ -265,7 +293,7 @@ void set_palette_16bit_le(uint8 *pal, int num)
 			b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
 			rgb = r << 8 | g << 3 | b >> 3;	
 
-			vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+			v_lookup[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
 			refreash_all_colors = false;
 		}
 	}
@@ -277,7 +305,7 @@ void set_palette_16bit_le(uint8 *pal, int num)
 		b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
 		rgb = r << 8 | g << 3 | b >> 3;	
 
-		vpal16[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
+		v_lookup[num] = ((rgb & 0xFF00) >> 8) | ((rgb & 0xFF) <<8);		// to LE
 	}
 }
 
@@ -295,7 +323,7 @@ void set_palette_16bit_be(uint8 *pal, int num)
 	r = pal[n] & 0xF8;		// 4+1 = 5 bit
 	g = pal[n+1]  & 0xFC;	// 4+2 = 6 bit
 	b = pal[n+2]  & 0xF8;	// 4+1 = 5 bit
-	vpal16[num] = r << 8 | g << 3 | b >> 3;
+	v_lookup[num] = r << 8 | g << 3 | b >> 3;
 }
 
 
@@ -312,7 +340,7 @@ void set_palette_32bit_4pixels_le(uint8 *pal, int num)
 	for (num=0;num<256;num++)
 	{
 		n=num*3;
-		d = vpal32 + num*8;
+		d = v_lookup + num*8;
 
 		d[0]= _LE_ARGB( (n>>6)&3 );
 		d[1]= _LE_ARGB( (n>>4)&3 );
@@ -330,7 +358,7 @@ void set_palette_32bit_4pixels_be(uint8 *pal, int num)
 	for (num=0;num<256;num++)
 	{
 		n=num*3;
-		d = vpal32 + num*8;
+		d = v_lookup + num*8;
 
 		d[0]= _BE_ARGB( (n>>6)&3 );
 		d[1]= _BE_ARGB( (n>>4)&3 );
@@ -346,7 +374,7 @@ void set_palette_32bit_le(uint8 *pal, int num)
 	for (num=0;num<256;num++)
 	{
 		n=num*3;
-		vpal32[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
+		v_lookup[num]=0xFF + (pal[n] << 8) +  (pal[n+1] << 16) + (pal[n+2] << 24) ;
 	}
 }
 
@@ -357,9 +385,11 @@ void set_palette_32bit_be(uint8 *pal, int num)
 	for (num=0;num<256;num++)
 	{
 		n=num*3;
-		vpal32[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
+		v_lookup[num]=0xFF000000 + (pal[n] << 16) +  (pal[n+1] << 8) + pal[n+2]  ;
 	 }
 }
+
+#endif
 
 void driver_window_comp::set_palette(uint8 *pal, int num)
 {
@@ -460,7 +490,7 @@ void bitmap_comp_draw_internal( driver_base *drv )
 		for (nn=0; nn<drv ->mode.y;nn++)
 		{
 			n = nn;
-			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+			drv -> convert( v_lookup, (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 		}
 
 		UnlockBitMap(BMLock);

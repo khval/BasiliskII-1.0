@@ -11,6 +11,13 @@
 #include <proto/graphics.h>
 #include <proto/layers.h>
 
+#ifdef _old_converts
+#include "video_convert.h"
+#else
+#include <proto/gfxconvert.h>
+#endif
+
+
 #include "video.h"
 #include "video_driver_classes.h"
 #include "common_screen.h"

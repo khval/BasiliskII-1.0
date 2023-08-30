@@ -34,6 +34,7 @@
 #include <proto/dos.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
+#include "proto/gfxconvert.h"
 
 #include "sysdeps.h"
 #include "cpu_emulation.h"
@@ -43,7 +44,7 @@
 #include "user_strings.h"
 #include "video.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #include "debug.h"
 
 #ifdef _L
@@ -54,16 +55,20 @@
 #define CATCOMP_NUMBERS
 #include "locale/locale.h"
 
+
+#ifdef _old_converts
 #include "video_convert.h"
+#else
+#include <proto/gfxconvert.h>
+struct gc_functions gc;
+#endif
+
 #include "window_icons.h"
 #include "common_screen.h"
 
 #include "video_driver_classes.h"
 
 extern const char *(*_L) (unsigned int num) ;
-
-
-
 
 #define MAC_CURSOR_UP	0x3E
 #define MAC_CURSOR_DOWN	0x3D
@@ -74,8 +79,7 @@ extern const char *(*_L) (unsigned int num) ;
 int last_wheel = 0;
 int delta_wheel = 0;
 
-uint32 *vpal32 = NULL;
-uint16 *vpal16 = NULL;
+void *v_lookup = NULL;
 
 extern bool quit_program_gui;
 
@@ -307,9 +311,9 @@ int add_modes(int mode_id, video_depth depth)
 	return mode_id;
 }
 
-#define AllocShared(size) AllocVecTags(size,	\ 
-		AVT_Type, MEMF_SHARED,		\
-		AVT_ClearWithValue, 0,			\
+#define AllocShared(size) AllocVecTags(size, \
+		AVT_Type, MEMF_SHARED, \
+		AVT_ClearWithValue, 0, \
 		TAG_END)
 
 
@@ -479,7 +483,7 @@ bool VideoInit(bool classic)
 			break;
 	}
 
-
+#if 0
 #if DEBUG==1
 	bug("Available video modes:\n");
 	vector<video_mode>::const_iterator i = VideoModes.begin(), end = VideoModes.end();
@@ -487,6 +491,7 @@ bool VideoInit(bool classic)
 		bug(" %ld x %ld (ID %02lx), %ld colors\n", i->x, i->y, i->resolution_id, 1 << bits_from_depth(i->depth));
 		++i;
 	}
+#endif
 #endif
 
 	D(bug("VideoInit/%ld: def_width=%ld  def_height=%ld  def_depth=%ld\n", \
@@ -515,14 +520,15 @@ bool VideoInit(bool classic)
 
 	} else {
 
-		if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld - VideoModes size is not 1 \n",__FUNCTION__,__LINE__);
+		if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - VideoModes size is not 1 \n",__FUNCTION__,__LINE__);
 
 
 		// Find mode with specified dimensions
 		std::vector<video_mode>::const_iterator i, end = VideoModes.end();
 		for (i = VideoModes.begin(); i != end; ++i)
 		{
-			D(bug("VideoInit/%ld: w=%ld  h=%ld  d=%ld\n", __LINE__, i->x, i->y, bits_from_depth(i->depth)));
+//			D(bug("VideoInit/%ld: w=%ld  h=%ld  d=%ld\n", __LINE__, i->x, i->y, bits_from_depth(i->depth)));
+
 			if (i->x == default_width && i->y == default_height && i->depth == default_depth)
 			{
 				// Create Amiga_monitor_desc for this (the only) display
@@ -641,9 +647,17 @@ void Amiga_monitor_desc::video_close()
 		Wait(SIGF_SINGLE);
 	}
 
+#if !defined(_old_converts)
+
+
+#else
+
 	// clean up if we used a lookup....
 	if (lookup16bit) free(lookup16bit);
 	lookup16bit = NULL;
+
+#endif
+
 }
 
 
@@ -663,16 +677,16 @@ void VideoExit(void)
 	D(bug("VideoExit(void) %d\n",__LINE__));
 
 
-	if (vpal16)
+	if (v_lookup)
 	{
-		FreeVec(vpal16);
-		vpal16 = NULL;
+		FreeVec(v_lookup);
+		v_lookup = NULL;
 	}
 
-	if (vpal32) 
+	if (v_lookup) 
 	{
-		FreeVec(vpal32);
-		vpal32 = NULL;
+		FreeVec(v_lookup);
+		v_lookup = NULL;
 	}
 
 	if (null_pointer)
@@ -684,7 +698,7 @@ void VideoExit(void)
 	if (video_debug_out) 
 	{
 		Close(video_debug_out);
-		video_debug_out = NULL;
+		video_debug_out = 0;
 	}
 
 	D(bug("VideoExit(void) END %d\n",__LINE__));
@@ -900,7 +914,7 @@ static void periodic_func(void)
 							frame_skip = PrefsFindInt32("active_window_frameskip") +1;
 							line_skip = PrefsFindInt32("active_window_lineskip") + 1;
 
-						 	if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
+						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld - active window\n",__FUNCTION__,__LINE__);
 							if (main_task) 
 							{
 								Forbid();
@@ -914,7 +928,7 @@ static void periodic_func(void)
 							frame_skip = PrefsFindInt32("deactive_window_frameskip") + 1;
 							line_skip = PrefsFindInt32("deactive_window_lineskip") + 1;
 
-						 	if (video_debug_out) D(FPrintf)( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
+						 	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld -inactive window\n",__FUNCTION__,__LINE__);
 							if (main_task)
 							{
 								Forbid();
@@ -1328,7 +1342,7 @@ void window_draw_internal( driver_base *drv )
 		for (nn=0; nn<drv ->mode.y;nn++)
 		{
 			n = nn;
-			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+			drv -> convert( v_lookup, (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 		}
 
 		UnlockBitMap(BMLock);
@@ -1358,7 +1372,7 @@ void window_draw_internal_no_lock( driver_base *drv )
 	for (nn=0; nn<drv ->mode.y;nn++)
 	{
 		n = nn;
-		drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+		drv -> convert( v_lookup, (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 	}
 }
 
@@ -1391,7 +1405,7 @@ void bitmap_draw_internal( driver_base *drv )
 		for (nn=line_skip_start; nn<drv ->mode.y;nn+=line_skip)
 		{
 			n = nn;
-			drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+			drv -> convert( v_lookup, (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 		}
 
 		UnlockBitMap(BMLock);
@@ -1425,7 +1439,7 @@ void bitmap_draw_internal_no_lock( driver_base *drv )
 	for (nn=line_skip_start; nn<drv ->mode.y;nn+=line_skip)
 	{
 		n = nn;
-		drv -> convert( (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
+		drv -> convert( v_lookup, (char *) drv -> VIDEO_BUFFER + (n* drv -> mode.bytes_per_row),  (char *) to_mem + (n*to_bpr),  drv -> mode.x  );
 	}
 
 	BltBitMapRastPort( drv->the_bitmap, 0, 0,drv->the_win->RPort, 
@@ -1483,7 +1497,11 @@ void window_draw_wpa ( driver_base *drv )
 }
 
 
-void *get_convert( uint32_t scr_depth, uint32_t depth )	// this thing is stupid needs to be replaced.
+#ifdef _old_converts
+
+
+
+void *get_convert( uint32 scr_depth, uint32 depth )	// this thing is stupid needs to be replaced.
 {
 	void *convert = NULL;
 
@@ -1561,9 +1579,9 @@ void *get_convert_v2( uint32 scr_depth, uint32 depth )
 		case PIXF_R5G6B5:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
-			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in vpal16
-			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in vpal16
-			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in vpal16
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in v_lookup
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in v_lookup
+			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in v_lookup
 
 			if (depth == VDEPTH_16BIT)
 			{
@@ -1584,16 +1602,16 @@ void *get_convert_v2( uint32 scr_depth, uint32 depth )
 		case PIXF_R5G6B5PC:
 
 			if (depth == VDEPTH_1BIT)	convert = (void *) &convert_1bit_to_16bit;		//  black and white is the same in be and le
-			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in vpal16
-			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in vpal16
-			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in vpal16
+			if (depth == VDEPTH_2BIT)	convert = (void *) &convert_2bit_lookup_to_16bit;	// endiness is set in v_lookup
+			if (depth == VDEPTH_4BIT)	convert = (void *) &convert_4bit_lookup_to_16bit;	// endiness is set in v_lookup
+			if (depth == VDEPTH_8BIT)	convert = (void *) &convert_8bit_lookup_to_16bit;	// endiness is set in v_lookup
 
 			if (depth == VDEPTH_16BIT)
 			{
 				init_lookup_15bit_to_16bit_le();
 				if (lookup16bit)
 				{
-					convert = (void *) &convert_16bit_lookup_to_16bit; // endiness is set in vpal16
+					convert = (void *) &convert_16bit_lookup_to_16bit; // endiness is set in v_lookup
 				}
 				else
 				{
@@ -1620,3 +1638,4 @@ void *get_convert_v2( uint32 scr_depth, uint32 depth )
 }
 
 
+#endif

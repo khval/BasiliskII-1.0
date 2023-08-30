@@ -19,7 +19,12 @@
 #include "user_strings.h"
 #include "video.h"
 
+#if 0
 #include "video_convert.h"
+#else
+#include <proto/gfxconvert.h>
+#endif
+
 #include "window_icons.h"
 #include "common_screen.h"
 
@@ -93,76 +98,6 @@ void WbToFront()
 		ScreenToFront( screen );
 		UnlockScreen( screen);
 	}
-}
-
-static void set_fn_set_palette( uint32 PixelFormat)
-{
-	if (vpal16)
-	{
-		FreeVec(vpal16);
-		vpal16 = NULL;
-	}
-
-	if (vpal32) 
-	{
-		FreeVec(vpal32);
-		vpal32 = NULL;
-	}
-
-	switch (PixelFormat)
-	{
-		case PIXF_NONE:	// not RTG format.
-		case PIXF_CLUT: 
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_screen_palette_8bit;	
-				break;
-
-		case PIXF_R5G6B5:
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_16bit_be;
-				vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
-				break;
-
-		case PIXF_R5G6B5PC:	
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_16bit_le;	
-				vpal16 = (uint16 *) AllocShared (sizeof(uint16) * 256);	// 1 pixels , 256 colors, 1 x 16 bit pixel
-				break;
-
-		case PIXF_A8R8G8B8: 
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_32bit_be;
-				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
-				break;
-
-		case PIXF_B8G8R8A8: 
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = set_vpal_32bit_le;
-				vpal32 = (uint32 *) AllocShared (sizeof(uint32) * 256  );	// 1 input pixel , 256 colors,  1 x 32bit output pixel.
-				break;
-
-		default:
-			if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
-				set_palette_fn = NULL;
-	}
-}
-
-void show_set_palette_fn()
-{
-	const char *name = "<none>";
-
-	if (set_palette_fn == set_screen_palette_8bit) name = "set_screen_palette_8bit";
-	if (set_palette_fn == set_vpal_16bit_be) name = "set_vpal_16bit_be";
-	if (set_palette_fn == set_vpal_16bit_le) name = "set_vpal_16bit_le";	
-	if (set_palette_fn == set_vpal_32bit_be) name = "set_vpal_32bit_be";
-	if (set_palette_fn == set_vpal_32bit_le) name ="set_vpal_32bit_le";
-
-	if (video_debug_out) FPrintf( video_debug_out, "set_palette_fn is %s\n",name);
-}
-
-void convert_nop( char *from, char *to,int  pixels )
-{
-//	if (video_debug_out) FPrintf( video_debug_out, "%s:%ld \n",__FUNCTION__,__LINE__);
 }
 
 // Open Picasso screen
@@ -319,8 +254,7 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 
 	dispi.PixelFormat = GetBitMapAttr( the_win -> RPort -> BitMap,    BMA_PIXELFORMAT);
 
-	set_fn_set_palette( dispi.PixelFormat );
-	show_set_palette_fn();
+//	set_fn_set_palette( dispi.PixelFormat );
 
 	maxpalcolors =	get_max_palette_colors( mode.depth );
 
@@ -336,9 +270,8 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 	{
 		case rm_internal: 
 
-			convert = convert_nop;	// do nothing safe...
+//			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
 
-			convert = (convert_type) get_convert_v2( dispi.PixelFormat, mode.depth );
 			if (  convert )
 			{
 				const char *name;
@@ -346,11 +279,13 @@ driver_screen::driver_screen(Amiga_monitor_desc &m, const video_mode &mode, ULON
 				the_bitmap =AllocBitMap( mode.x, mode.y+2, depth, BMF_DISPLAYABLE, the_win ->RPort -> BitMap);	
 				do_draw = window_draw_internal;
 
+#if 0
 				name = get_name_converter_fn_ptr( (void *) convert );
+#else
+				name = GC_GetNameOfConverter( convert );
+#endif
 
 				if (video_debug_out) FPrintf(video_debug_out,"converter used : %s\n", name ? name : "<no name found>"); 
-
-				show_set_palette_fn();
 
 			}
 			else

@@ -76,6 +76,9 @@ struct GraphicsIFace	*IGraphics = NULL;
 struct Library			*LayersBase = NULL;
 struct LayersIFace		*ILayers = NULL;
 
+struct Library			*gfxconvertBase = NULL;
+struct gfxconvertIFace	*Igfxconvert = NULL;
+
 struct Library			*IFFParseBase = NULL;
 struct IFFParseIFace		*IIFFParse = NULL;
 
@@ -157,6 +160,7 @@ BOOL openlibs()
 	if ( ! open_lib( "workbench.library", 53 , "main", 1, &WorkbenchBase, (struct Interface **) &IWorkbench ) ) return FALSE;
 	if ( ! open_lib( "icon.library", 53, "main", 1, &IconBase, (struct Interface **) &IIcon) ) return FALSE;
 	if ( ! open_lib( "iffparse.library", 53, "main", 1, &IFFParseBase, (struct Interface **) &IIFFParse) ) return FALSE;
+	if ( ! open_lib( "gfxconvert.library", 1, "main", 1, &gfxconvertBase, (struct Interface **) &Igfxconvert) ) return FALSE;
 
 	if ( ! open_lib( "string.gadget", 53, "main", 1, &StringBase, (struct Interface **) &IString) ) return FALSE;
 	if ( ! open_lib( "layout.gadget", 53, "main", 1, &LayoutBase, (struct Interface **) &ILayout) ) return FALSE;
@@ -233,6 +237,9 @@ void closedown()
 #endif
 
 	if (IDebug) DropInterface((struct Interface*) IDebug); IDebug = 0;
+
+	if (Igfxconvert) DropInterface((struct Interface*) Igfxconvert); Igfxconvert = 0;
+	if (gfxconvertBase) CloseLibrary(gfxconvertBase); gfxconvertBase = 0;
 
 	if (IIcon) DropInterface((struct Interface*) IIcon); IIcon = 0;
 	if (IconBase) CloseLibrary(IconBase); IconBase = 0;
