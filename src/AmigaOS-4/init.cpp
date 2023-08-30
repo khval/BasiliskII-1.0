@@ -22,7 +22,6 @@
 #include <proto/wb.h>
 #include <proto/intuition.h>
 #include <intuition/pointerclass.h>
-#include <proto/retroMode.h>
 
 struct Catalog *catalog = NULL;
 
@@ -33,13 +32,13 @@ struct Process *main_task = NULL;
 struct Library				*DataTypesBase = NULL;
 struct DataTypesIFace		*IDataTypes = NULL;
 
-extern struct Library		 	*DOSBase ;
+extern struct Library		*DOSBase ;
 extern struct DOSIFace		*IDOS ;
 
 struct DebugIFace		*IDebug = NULL;
 
 struct Library 			*AHIBase = NULL;
-struct AHIIFace			*IAHI = NULL;
+struct AHIIFace		*IAHI = NULL;
 
 struct Library 			*AslBase = NULL;
 struct AslIFace			*IAsl = NULL;
@@ -72,13 +71,13 @@ struct Library			*IntuitionBase = NULL;
 struct IntuitionIFace		*IIntuition = NULL;
 
 struct Library			*GraphicsBase = NULL;
-struct GraphicsIFace		*IGraphics = NULL;
+struct GraphicsIFace	*IGraphics = NULL;
 
 struct Library			*LayersBase = NULL;
 struct LayersIFace		*ILayers = NULL;
 
 struct Library			*IFFParseBase = NULL;
-struct IFFParseIFace *IIFFParse = NULL;
+struct IFFParseIFace		*IIFFParse = NULL;
 
 
 struct Library			*StringBase = NULL;
@@ -142,7 +141,6 @@ BOOL openlibs()
 	int i;
 
 	main_task = (struct Process *) FindTask(NULL);
-
 
 	IDebug = (DebugIFace*) GetInterface( SysBase,"debug",1,TAG_END);
 	if ( IDebug == NULL ) return FALSE;

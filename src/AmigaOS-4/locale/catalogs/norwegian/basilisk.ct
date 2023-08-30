@@ -706,6 +706,9 @@ Skriv & lese
 TXT_READ_ONLY
 kun lese
 ; Read Only
+TXT_READ_WRITE
+Skriv & lese
+; read/write
 ID_END
 End Of File
 ; --- EOF ---

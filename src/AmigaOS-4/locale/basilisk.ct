@@ -1,4 +1,4 @@
-## version $VER: XX.catalog XX.XX (07.04.2021)
+## version $VER: XX.catalog XX.XX (XX.XX.20XX)
 ## codeset 0
 ## language X
 ;
@@ -704,11 +704,15 @@ LIST_VOLUMES_SIZE_COLUMN
 ;
 LIST_VOLUMES_RW_COLUMN
 
-; RW
+; Mode
 ;
 TXT_READ_ONLY
 
-; Read Only
+; read only
+;
+TXT_READ_WRITE
+
+; read/write
 ;
 ID_END
 

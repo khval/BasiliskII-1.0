@@ -7,9 +7,10 @@ extern struct Process *main_task ;
 extern int main_task ;		// pid number +1
 #endif
 
-extern struct Library 		 *AslBase ;
-extern struct AslIFace 		 *IAsl ;
+extern struct Library		*AslBase ;
+extern struct AslIFace 	*IAsl ;
 
 extern BOOL init();
 extern void closedown();
+
 
