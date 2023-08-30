@@ -159,7 +159,7 @@ extern struct Catalog *catalog;
  * Open libraries
  */
 
-void print_sigs(const char *txt, uint32_t line)
+void print_sigs(const char *txt, uint32 line)
 {
 	struct Task *t = FindTask(NULL);
 	printf("%s:%d --- tc_SigAlloc: %08x\n", txt, line, t->tc_SigAlloc);
@@ -174,50 +174,6 @@ int MacAddressSpace = 0;
 
 extern BOOL openlibs();
 extern void closedown();
-
-
-void open_ahi()
-{
-	// Open AHI
-
-	ahi_io	= NULL;
-	IAHI		= NULL;
-	AHIBase	= NULL;
-
-	ahi_port = (MsgPort*) AllocSysObject(ASOT_PORT, TAG_END );
-	if (ahi_port) {
-
-		printf("AHI port %x\n", (unsigned int) ahi_port);
-
-		ahi_io = (struct AHIRequest *) CreateIORequest(ahi_port, sizeof(struct AHIRequest));
-		if (ahi_io) {
-
-			printf("AHI Request = %x\n", (unsigned int) ahi_io);
-
-			ahi_io->ahir_Version = 2;
-			if (OpenDevice( AHINAME, AHI_NO_UNIT, (struct IORequest *) ahi_io, 0) == 0) {
-
-				AHIBase = (struct Library *)ahi_io->ahir_Std.io_Device;
-				IAHI = (struct AHIIFace*) GetInterface(AHIBase,"main",1L,NULL) ;
-
-				printf("AHI Base = %x\n", (unsigned int) AHIBase);
-				printf("AHI Interface = %x\n", (unsigned int) IAHI);
-
-/*				AudioInit(); */
-			}
-		}
-	}
-}
-
-void close_ahi()
-{
-	printf("AHI: Close device\n");
-	if (AHIBase)	CloseDevice((struct IORequest *)ahi_io);
-	printf("AHI: Remove IO Request\n");
-	if (ahi_io)		DeleteIORequest((struct IORequest *)ahi_io);
-	printf("AHI: Delete MsgPort\n");
-	if (ahi_port)	FreeSysObject(ASOT_PORT,ahi_port);
-}
 
 #define only_prefs_filename "BasiliskII_prefs"
 #define only_xpram_filename "BasiliskII_XPRAM"
@@ -271,7 +227,7 @@ int main(int argc, char **argv)
 	{
 		if (argc>=2)
 		{
-			if ((strlen(argv[1])>3)&&(argv[1][0]!='-')&&(argv[1][1]!='-'))
+			if (strncmp(argv[1],"--",2) != 0)	// is not a parameter.
 			{
 				c = argv[1][strlen(argv[1])-1];
 
@@ -280,9 +236,13 @@ int main(int argc, char **argv)
 					MERGE_STR(PREFS_FILE_NAME,		argv[1],	only_prefs_filename);
 					MERGE_STR(XPRAM_FILE_NAME,		argv[1],	only_xpram_filename);
 				}
-			}
+				else
+				{
+					printf("Bad config path should end with / or :\n");
+				}
 
-			argc--; argv++;
+				argc--; argv++;
+			}
 		}
 	}
 
@@ -300,8 +260,6 @@ int main(int argc, char **argv)
 
 	// Read preferences
 	PrefsInit(NULL,argc, argv);
-
-//	open_ahi();
 
 	// Init system routines
 	SysInit();
@@ -499,9 +457,6 @@ void QuitEmulator(void)
 
 	// Exit system routines
 	SysExit();
-
-	printf("close ahi()\n");
-//	close_ahi();
 
 	printf("PrefsExit()\n");
 

@@ -59,7 +59,6 @@ extern int get_max_palette_colors( int vdepth );
 
 static void bitmap_comp_draw_internal( driver_base *drv );
 
-
 static int maxpalcolors = 0;
 
 driver_window_comp::driver_window_comp(Amiga_monitor_desc &m, const video_mode &mode)
@@ -442,8 +441,8 @@ void bitmap_comp_draw_internal( driver_base *drv )
 	char *to_mem ;
 	int to_bpr;  
 	APTR BMLock;
-	uint32_t iw,ih;
-	uint32_t dx,dy;
+	uint32 iw,ih;
+	uint32 dx,dy;
 
 	GetWindowAttr( drv->the_win, WA_InnerWidth, &iw, sizeof(int32));
 	GetWindowAttr( drv->the_win, WA_InnerHeight, &ih, sizeof(int32));
