@@ -780,7 +780,7 @@ Sólo lectura
 ; Read Only
 ;
 TXT_READ_WRITE
-?????
+Lectura y escritura
 ; Read and Write
 ID_END
 --- EOF ---
